@@ -13,38 +13,46 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Base web scraper defining shared fields and methods.
+ * @author Joakim Colloz
+ * @version 1.0
+ * @since 1.0 2023-07-26
+ */
 public abstract class BaseScraper {
     private  final List<StockInfo> stockInfoList;
     protected static WebDriver driver;
     private static Set<Cookie> cookieSet = null;
-//    private static FirefoxOptions firefoxOptions = null;
 
-    // TODO make driver static and store cookies in it so we don't have to send a get request each time?
     /**
-     * initializes members variables, init driver and store cookies for later use.
+     * Initializes members variables, and initializes the web driver.
      */
     protected BaseScraper() throws InterruptedException {
         initWebDriver();
         stockInfoList = new ArrayList<>();
     }
 
-    protected void initWebDriver() throws InterruptedException {
+    /**
+     * Initializes {@link #driver}, accepts GDPR by clicking button, and stores/adds cookies.
+     */
+    protected void initWebDriver() {
         // Set the path to the ChromeDriver executable
         System.setProperty(AvanzaConstants.FIRE_FOX_WEB_DRIVER, AvanzaConstants.FIRE_FOX_WEB_DRIVER_PATH);
         // Create a new instance of the Firefox driver
         driver = new FirefoxDriver();
 
-        // either get the cookies and save or load and add cookies to the driver
-        if (cookieSet == null) { // save the cookies
+        // save cookies and remove popup
+        if (cookieSet == null) {
             driver.get(AvanzaConstants.AVANZA_STOCK_LIST_URL);
-            // TODO try and get the cookies so we dont need to http get request for getting each stock list when window is reopened
-            // Find the cookie button/ consent button and click it to remove it
-            Thread.sleep(AvanzaConstants.LONG_TIMEOUT);
+            try {
+                Thread.sleep(AvanzaConstants.LONG_TIMEOUT);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             WebElement cookieBtn = driver.findElement(By.xpath(AvanzaConstants.COOKIE_BTN_XPATH));
             cookieBtn.click();
             cookieSet = driver.manage().getCookies();
-        } else { // load previously saved cookies
-            // add cookies to the web driver
+        } else { // load cookies
             driver.get(AvanzaConstants.AVANZA_STOCK_LIST_URL);
             cookieSet.forEach( cookie -> {
                 driver.manage().addCookie(cookie);
@@ -52,7 +60,11 @@ public abstract class BaseScraper {
         }
     }
 
-    public abstract void scrapeStockInfo() throws InterruptedException, IOException;
+    /**
+     * Scrapes the stock names and their Avanza id's and then calls
+     * {@link #scrapeStockSymbol()} to retrieve the stock symbols.
+     */
+    public abstract void scrapeStockInfo();
 
     /**
      * used to get each stocks symbol/short name after the full name and id has been retrieved,
