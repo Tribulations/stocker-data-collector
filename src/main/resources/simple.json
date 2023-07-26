@@ -1,0 +1,5 @@
+{"chart":  "chartVAlue",
+  "chart2": "chartVal2",
+  "map":  {"mapKey1":  "mapKey1Value"},
+  "array": ["arrayVal1", "arrayVal2", {"arrayMapKey1": "arrayMapVal", "arrayMapKey2":  ["arrayVal1", "arrayVal2"]}]
+}

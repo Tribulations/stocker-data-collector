@@ -1,0 +1,168 @@
+AAK,26268,AAK
+ABB Ltd,5447,ABB
+AddLife B,643541,ALIF-B
+Addnode Group B,5442,ANOD-B
+Addtech B,5537,ADDT-B
+AFRY,5301,AFRY
+Alfa Laval,5580,ALFA
+Alleima,1455120,ALLEI
+Arion Banki SDB,861076,ARION-SDB
+Arjo B,810953,ARJO-B
+ASSA ABLOY B,5271,ASSA-B
+AstraZeneca,5431,AZN
+Atlas Copco A,5234,ATCO-A
+Atlas Copco B,5235,ATCO-B
+Atrium Ljungberg B,5374,ATRLJ-B
+Autoliv SDB,5236,ALIV-SDB
+Avanza Bank Holding,5361,AZA
+Axfood,5465,AXFO
+Beijer Ref B,5274,BEIJ-B
+Bilia A,5276,BILI-A
+Billerud,5556,BILL
+BioArctic B,791946,BIOA-B
+Biotage,5484,BIOT
+Boliden,5564,BOL
+Boozt,757760,BOOZT
+Bravida Holding,602637,BRAV
+Bufab,462932,BUFAB
+Bure Equity,5277,BURE
+Byggfakta Group Nordic HoldCo,1290782,BFG
+Castellum,5353,CAST
+Catena,41007,CATE
+Cint Group,1192970,CINT
+Corem Property Group A,181790,CORE-A
+Corem Property Group B,811076,CORE-B
+Corem Property Group D,1242472,CORE-D
+Corem Property Group Pref,216649,CORE-PREF
+Creades A,338588,CRED-A
+Diös Fastigheter,43267,DIOS
+Dometic Group,611718,DOM
+Electrolux A,5237,ELUX-A
+Electrolux B,5238,ELUX-B
+Electrolux Professional B,1072320,EPRO-B
+Elekta B,5280,EKTA-B
+Embracer Group B,707695,EMBRAC-B
+Epiroc A,861430,EPI-A
+Epiroc B,861431,EPI-B
+EQT,1001617,EQT
+Ericsson A,5239,ERIC-A
+Ericsson B,5240,ERIC-B
+Essity A,764223,ESSITY-A
+Essity B,764241,ESSITY-B
+Evolution,549768,EVO
+Fabege,5300,FABG
+Fast. Balder B,5459,BALD-B
+Fastpartner A,5357,FPAR-A
+Fastpartner D,1025156,FPAR-D
+Fenix Outdoor International B,488741,FOI-B
+Fortnox,79687,FNOX
+Getinge B,5282,GETI-B
+Handelsbanken A,5264,SHB-A
+Handelsbanken B,5265,SHB-B
+Hemnet Group,1220100,HEM
+Hennes & Mauritz B,5364,HM-B
+Hexagon B,5286,HEXA-B
+Hexatronic Group,299737,HTRO
+HEXPOL B,130828,HPOL-B
+HMS Networks,98412,HMS
+Holmen A,5250,HOLM-A
+Holmen B,5251,HOLM-B
+Hufvudstaden A,5287,HUFV-A
+Husqvarna A,45188,HUSQ-A
+Husqvarna B,45189,HUSQ-B
+Industrivärden A,5244,INDU-A
+Industrivärden C,5245,INDU-C
+Indutrade,26607,INDT
+Instalco,752039,INSTAL
+International Petroleum Corp.,746877,IPCO
+Intrum,5583,INTRUM
+Investor A,5246,INVE-A
+Investor B,5247,INVE-B
+JM,5501,JM
+Kindred Group,56267,KIND-SDB
+Kinnevik A,5368,KINV-A
+Kinnevik B,5369,KINV-B
+Lagercrantz Group B,5536,LAGR-B
+Latour B,5321,LATO-B
+Lifco B,520898,LIFCO-B
+Lindab International,59810,LIAB
+Loomis,154930,LOOMIS
+Lundbergföretagen B,5375,LUND-B
+Lundin Gold,528238,LUG
+Lundin Mining Corp,7010,LUMI
+Medicover B,756355,MCOV-B
+Millicom Int. Cellular SDB,6048,TIGO-SDB
+Mips,740416,MIPS
+Modern Times Group A,5437,MTG-A
+Modern Times Group B,5438,MTG-B
+Munters Group,755803,MTRS
+Mycronic,5466,MYCR
+NCAB Group,856458,NCAB
+NCC A,5293,NCC-A
+NCC B,5294,NCC-B
+New Wave B,5324,NEWA-B
+NIBE Industrier B,5325,NIBE-B
+Nolato B,5327,NOLA-B
+Nordea Bank Abp,5249,NDA-SE
+Nordnet,1162349,SAVE
+NP3 Fastigheter,522855,NP3
+NP3 Fastigheter Pref,832753,NP3-PREF
+Nyfosa,907825,NYF
+Orrön Energy,5698,ORRON
+OX2,1243431,OX2
+Pandox B,572898,PNDX-B
+Peab B,5330,PEAB-B
+Platzer Fastigheter Holding B,445784,PLAZ-B
+Ratos A,5396,RATO-A
+Ratos B,5397,RATO-B
+SAAB B,5401,SAAB-B
+Sagax A,96768,SAGA-A
+Sagax B,405815,SAGA-B
+Sagax D,703653,SAGA-D
+Samhällsbyggnadsbo. i Norden B,517316,SBB-B
+Samhällsbyggnadsbo. i Norden D,913957,SBB-D
+Sampo Oyj SDB,1501882,SAMPO-SDB
+Sandvik,5471,SAND
+SCA A,5262,SCA-A
+SCA B,5263,SCA-B
+Sdiptech B,752256,SDIP-B
+Sdiptech Pref,544199,SDIP-PREF
+SEB A,5255,SEB-A
+SEB C,5256,SEB-C
+SECTRA B,5426,SECT-B
+Securitas B,5270,SECU-B
+Sinch,599956,SINCH
+Skanska B,5257,SKA-B
+SKF A,5258,SKF-A
+SKF B,5259,SKF-B
+SSAB A,5260,SSAB-A
+SSAB B,5261,SSAB-B
+Stillfront Group,614237,SF
+Stora Enso A,5421,STE-A
+Stora Enso R,5422,STE-R
+Storskogen Group B,1284767,STOR-B
+SWECO A,5408,SWEC-A
+SWECO B,5409,SWEC-B
+Swedbank A,5241,SWED-A
+Swedish Orphan Biovitrum,51308,SOBI
+Systemair,97407,SYSR
+Tele2 A,5385,TEL2-A
+Tele2 B,5386,TEL2-B
+Telia Company,5479,TELIA
+Thule Group,521491,THULE
+Tietoevry,5455,TIETOS
+TRATON,972553,8TRA
+Trelleborg B,5267,TREL-B
+Troax Group,551073,TROAX
+Truecaller B,1286052,TRUE-B
+Viaplay Group A,945461,VPLAY-A
+Viaplay Group B,945460,VPLAY-B
+Vitec Software Group B,5526,VIT-B
+Vitrolife,5508,VITR
+Volati,709195,VOLO
+Volati Pref,568098,VOLO-PREF
+Volvo A,5268,VOLV-A
+Volvo B,5269,VOLV-B
+Volvo Car B,1296604,VOLCAR-B
+Wallenstam B,5344,WALL-B
+Wihlborgs Fastigheter,18813,WIHL

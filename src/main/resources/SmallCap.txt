@@ -1,0 +1,96 @@
+Abliva,144172,ABLI
+Acrinova A,1024589,ACRI-A
+Acrinova B,1205828,ACRI-B
+Actic Group,742358,ATIC
+Active Biotech,5304,ACTI
+Alligator Bioscience,707779,ATORX
+Anoto Group,5480,ANOT
+Arla Plast,1232120,ARPL
+Ascelia Pharma,941919,ACE
+B3 Consulting Group,665185,B3
+BE Group,59050,BEGR
+Bergs Timber B,5306,BRG-B
+Björn Borg,78529,BORG
+Bong,5307,BONG
+Boule Diagnostics,299736,BOUL
+C-RAD B,88447,CRAD-B
+Cantargia,549022,CANTA
+Christian Berner Tech Trade B,513577,CBTT-B
+CoinShares International,1200240,CS
+Concejo B,5279,CNCJO-B
+Concordia Maritime B,5356,CCOR-B
+Dedicare B,286778,DEDI
+DORO,5310,DORO
+Duroc B,5454,DURC-B
+Egetis Therapeutics,283294,EGTX
+Elon,178908,ELON
+Empir Group B,5382,EMPIR-B
+Eniro Group,5491,ENRO
+Episurf B,255388,EPIS-B
+Ferronordic,795795,FNM
+Formpipe Software,210208,FPIP
+HANZA,488235,HANZA
+Havsfrun Investment B,5362,HAV-B
+Image Systems,5436,IS
+Immunovia,612775,IMMNOV
+Infant Bacterial TherapeuticsB,645576,IBT-B
+Infrea,844356,INFREA
+IRRAS,803399,IRRAS
+Isofol Medical,741998,ISOFOL
+Karolinska Development B,285632,KDEV
+Lammhults Design Group B,5399,LAMM-B
+Maha Energy,678596,MAHA-A
+Malmbergs Elektriska B,5429,MEAB-B
+Medivir,5380,MVIR
+Mendus,409455,IMMU
+Micro Systemation B,330177,MSAB-B
+Midsona A,5443,MSON-A
+Midsona B,5444,MSON-B
+Midway A,5291,MIDW-A
+Midway B,5292,MIDW-B
+Moberg Pharma,262018,MOB
+Moment Group,33127,MOMENT
+Nanologica,605176,NICA
+NAXS,79667,NAXS
+Nelly Group,262988,NELLY
+NGS Group,659798,NGS
+Nilörngruppen B,569438,NIL-B
+NOVOTEK B,5452,NTEK-B
+Oncopeptides,730897,ONCO
+Orexo,28567,ORX
+Ortivus A,5389,ORTI-A
+Ortivus B,5390,ORTI-B
+Oscar Properties Holding,460955,OP
+Oscar Properties Holding PREF,563251,OP-PREF
+Oscar Properties Holding PREFB,656979,OP-PREFB
+Pierce Group,1207123,PIERCE
+PION Group B,5450,PION-B
+Precise Biometrics,5490,PREC
+Prevas B,5394,PREV-B
+Profilgruppen B,5331,PROF-B
+Projektengagemang Sweden B,861575,PENG-B
+Q-Linea,910455,QLINEA
+Qliro,1142999,QLIRO
+Railcare Group,839314,RAIL
+Readly International,1139016,READ
+Rizzo Group B,5345,RIZZO-B
+Saniona,475457,SANION
+Seafire,980416,SEAF
+Sensys Gatso Group,5497,SGG
+Senzime,132471,SEZI
+SinterCast,5406,SINT
+Sleep Cycle,1236426,SLEEP
+Softronic B,5418,SOF-B
+Solid Försäkringsaktiebolag,1310582,SFAB
+Starbreeze A,569319,STAR-A
+Starbreeze B,5528,STAR-B
+Stockwik Förvaltning,5373,STWK
+Strax,5481,STRAX
+Studsvik,5500,SVIK
+Svedbergs B,5335,SVED-B
+TradeDoubler,28527,TRAD
+Transtema Group,564938,TRANS
+Vicore Pharma Holding,614837,VICO
+Vivesto,237353,VIVE
+Wise Group,74787,WISE
+Xspray Pharma,789456,XSPRAY
