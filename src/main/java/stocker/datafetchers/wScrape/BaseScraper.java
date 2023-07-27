@@ -38,7 +38,7 @@ public abstract class BaseScraper {
     /**
      * Initializes {@link #driver}, accepts GDPR by clicking button, and stores/adds cookies.
      */
-    protected void initWebDriver() {
+    private void initWebDriver() {
         // path to the GeckoDriver executable
         System.setProperty(AvanzaConstants.FIRE_FOX_WEB_DRIVER, AvanzaConstants.FIRE_FOX_WEB_DRIVER_PATH);
         driver = new FirefoxDriver();
