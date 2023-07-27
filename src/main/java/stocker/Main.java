@@ -1,16 +1,28 @@
 package stocker;
 
-import stocker.datafetchers.wJson.Stock;
 import stocker.datafetchers.wJson.StockAppLogger;
-import stocker.datafetchers.wJson.StockDataFetcher;
-import stocker.datafetchers.wJson.StockDataParser;
+import stocker.datafetchers.wScrape.*;
+
+import java.io.IOException;
+import java.util.List;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
-
+    public static void main(String[] args) throws IOException {
         StockAppLogger.INSTANCE.turnOffDebugLogging();
+        scrapeAllInfo();
+    }
 
-        Stock abb = new Stock("FABG.ST", "1d", "15m");
-        abb.getTradingPeriod().printTradingPeriod();
+    public static void scrapeAllInfo() {
+        SmallCapScraper smallCapScraper = new SmallCapScraper();
+        List<StockInfo> list2 = smallCapScraper.getStockInfoList();
+
+        MidCapScraper midCapScraper = new MidCapScraper();
+        List<StockInfo> list3 = midCapScraper.getStockInfoList();
+
+        LargeCapScraper largeCapScraper = new LargeCapScraper();
+        List<StockInfo> list4 = largeCapScraper.getStockInfoList();
+
+        FirstNorthScraper firstNorthScraper = new FirstNorthScraper();
+        List<StockInfo> list = firstNorthScraper.getStockInfoList();
     }
 }
