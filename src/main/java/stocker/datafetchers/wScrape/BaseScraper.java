@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Base web scraper defining shared fields and methods.
+ * Base web scraper defining shared fields and methods. The subclasses are used to scrape the names, id's, and short names/symbols for the stocks on the different lists which exist on the Swedish Nasdaq OMX. The different lists which can be scraped for this data are Large, Mid and Small Cap as well as First North.
  * @author Joakim Colloz
  * @version 1.0
  * @since 1.0 2023-07-26
@@ -64,17 +64,17 @@ public abstract class BaseScraper {
     }
 
     /**
-     * Scrapes the stock names, their Avanza id's, and then calls
+     * The method used to scrape the stock names and their Avanza id's, and then calls
      * {@link #scrapeStockSymbol()} to retrieve the stock symbols.
      */
     public abstract void scrapeStockInfo();
 
     /**
-     * Used internally to get each stocks symbol/short name after the full name and id has been retrieved,
-     * Only called from {@link #scrapeStockInfo()} defined in subclasses.
+     * Used internally to get each stocks symbol/short name after the full name and id has been retrieved.
+     * This method is only called from {@link #scrapeStockInfo()} which is defined in subclasses.
      */
     protected void scrapeStockSymbol() {
-        this.getStockInfoList().forEach(stockInfo -> {
+        this.getStockInfoList().forEach(stockInfo -> { // Todo use a for loop to get rid of the catch block in this forEach. this way we only need one try catch block
             try {
                 final String formattedStockName = stockInfo.getName().replace(" ", "-");
                 final String symbolStockUrl = String.format("%s%s/%s",AvanzaConstants.AVANZA_ABOUT_STOCK_URL,  stockInfo.getId(), formattedStockName);
@@ -89,6 +89,9 @@ public abstract class BaseScraper {
         });
     }
 
+    /**
+    * Method used to interact with needed elements on Avanza.se in order to remove the Large Cap stocks from the stock list. This is necessary when we want to scrape other stock lists than Large cap because large cap is displayed by default.
+    */
     protected void removeLargeCapStockFromList(WebDriver driver) {
         WebElement largeCapListBtn = driver.findElement(By.xpath(AvanzaConstants.LARGE_CAP_BTN_XPATH));
         largeCapListBtn.click();
@@ -96,7 +99,7 @@ public abstract class BaseScraper {
 
     /**
      * Adds all the scraped stock names, id's but NOT the symbol to a StockInfo objects to a list.
-     * @param stockNameOffset the offset/difference between the stock name rows and stock avanza id rows
+     * @param stockNameOffset the offset/difference between the stock name rows and stock avanza id row elements on Avanza.se
      */
     protected void createStockInfo(final int stockNameOffset) {
         try {
@@ -120,6 +123,9 @@ public abstract class BaseScraper {
         }
     }
 
+    /**
+    * Writes the all info about all stocks from one of the stock lists to file.
+    */
     protected void writeStocksToFile() {
         try {
             String fileName = String.valueOf(this.getClass());
