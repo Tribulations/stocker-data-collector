@@ -137,7 +137,7 @@ public abstract class BaseScraper {
                 try {
                     bufferedWriter.write(String.format("%s,%s,%s%n", stockInfo.getName(), stockInfo.getId(), stockInfo.getSymbol()));
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new RuntimeException(e); // Todo don't throw this here. change!
                 }
             });
 
