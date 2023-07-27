@@ -25,7 +25,7 @@ public abstract class BaseScraper {
     private static Set<Cookie> cookieSet = null;
 
     /**
-     * Initializes members variables, and initializes the web driver.
+     * Initializes member variables, and calls {@link #initWebDriver()}.
      */
     protected BaseScraper() throws InterruptedException {
         initWebDriver();
@@ -36,9 +36,8 @@ public abstract class BaseScraper {
      * Initializes {@link #driver}, accepts GDPR by clicking button, and stores/adds cookies.
      */
     protected void initWebDriver() {
-        // Set the path to the ChromeDriver executable
+        // path to the GeckoDriver executable
         System.setProperty(AvanzaConstants.FIRE_FOX_WEB_DRIVER, AvanzaConstants.FIRE_FOX_WEB_DRIVER_PATH);
-        // Create a new instance of the Firefox driver
         driver = new FirefoxDriver();
 
         // save cookies and remove popup
@@ -61,13 +60,15 @@ public abstract class BaseScraper {
     }
 
     /**
-     * Scrapes the stock names and their Avanza id's and then calls
+     * Scrapes the stock names, their Avanza id's, and then calls
      * {@link #scrapeStockSymbol()} to retrieve the stock symbols.
      */
     public abstract void scrapeStockInfo();
 
     /**
-     * used to get each stocks symbol/short name after the full name and id has been retrieved,
+     * Used internally to get each stocks symbol/short name after the full name and id has been retrieved,
+     * Only called from {@link #scrapeStockInfo()} defined in subclasses.
+     *
      * @throws InterruptedException
      * @throws IOException
      */

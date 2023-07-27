@@ -38,8 +38,7 @@ public class FirstNorthScraper extends BaseScraper {
             for (int i = 0; i < fetchMoreBtnClickCount; ++i) {
                 fetchMoreBtn.click();
             }
-            // add to variables
-            // need to change to this becuase now we add the mid cap stock to the large cap key int the list todo
+            // add stock info to member field in base class
             createStockInfo(2);
             super.scrapeStockSymbol();
         } catch (InterruptedException | IOException e) {

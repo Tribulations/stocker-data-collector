@@ -23,7 +23,7 @@ public final class AvanzaConstants {
 
     /** web driver constants */
     public static String FIRE_FOX_WEB_DRIVER = "webdriver.gecko.driver";
-    public static String FIRE_FOX_WEB_DRIVER_PATH = "src/main/geckodriver";
+    public static String FIRE_FOX_WEB_DRIVER_PATH = "src/main/resources/geckodriver";
 
     /** Timeout constants */
     public static final int LONG_TIMEOUT = 2000;
