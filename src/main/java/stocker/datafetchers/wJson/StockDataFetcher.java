@@ -11,6 +11,7 @@ import java.net.http.HttpResponse;
 
 /**
  * Class used to fetch json stock data from the Yahoo financial data API.
+ * TODO add api host stuff to constants class. make this class a bass class and derive concrete data fetches for different apps e.g. YahooFinance/TwelveDataFetcher. these classes can share the fetch() because they all can use the same HttpRequest client etc.
  *
  */
 public final class StockDataFetcher {
