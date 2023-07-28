@@ -1,5 +1,5 @@
 package stocker;
-
+// TODO add package.info files to all packages
 import stocker.stock.StockInfo;
 import stocker.support.StockAppLogger;
 import stocker.datafetchers.wScrape.*;
