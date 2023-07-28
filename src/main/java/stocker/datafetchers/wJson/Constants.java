@@ -1,7 +1,7 @@
 package stocker.datafetchers.wJson;
 
-public final class StockDataKeys {
-    private StockDataKeys() { throw new IllegalStateException("Utility class"); }
+public final class Constants {
+    private Constants() { throw new IllegalStateException("Utility class"); }
 
     public static final String CHART = "chart";
     public static final String RESULT = "result";

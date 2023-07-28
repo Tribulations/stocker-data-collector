@@ -1,5 +1,8 @@
 package stocker.datafetchers.wJson;
 
+import stocker.support.StockAppLogger;
+import stocker.support.Utils;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -38,7 +41,7 @@ public final class TwelveDataFetcher {
 
         StockAppLogger.INSTANCE.logInfo(
                 String.format("Fetched data: %s, interval: %s, output size: %s - %s::%s", stockName, interval, outputSize,
-                        getClass().getCanonicalName(), UtilityMethods.getMethodName()));
+                        getClass().getCanonicalName(), Utils.getMethodName()));
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(API_URL))

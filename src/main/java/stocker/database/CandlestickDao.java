@@ -1,6 +1,6 @@
 package stocker.database;
 
-import stocker.datafetchers.wJson.Candlestick;
+import stocker.stock.Candlestick;
 
 import java.sql.*;
 import java.util.ArrayList;

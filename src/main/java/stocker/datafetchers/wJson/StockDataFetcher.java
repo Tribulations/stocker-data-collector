@@ -1,5 +1,8 @@
 package stocker.datafetchers.wJson;
 
+import stocker.support.StockAppLogger;
+import stocker.support.Utils;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -36,7 +39,7 @@ public final class StockDataFetcher {
 
         StockAppLogger.INSTANCE.logInfo(
                 String.format("Fetched data: %s, range: %s, interval: %s - %s::%s", stockName, range,
-                        interval, getClass().getCanonicalName(), UtilityMethods.getMethodName()));
+                        interval, getClass().getCanonicalName(), Utils.getMethodName()));
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(API_URL))

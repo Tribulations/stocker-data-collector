@@ -6,7 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import stocker.datafetchers.wJson.StockAppLogger;
+import stocker.support.StockAppLogger;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -124,7 +124,7 @@ public abstract class BaseScraper {
     }
 
     /**
-    * Writes the all info about all stocks from one of the stock lists to file.
+    * Writes info about all stocks from a stock list to file.
     */
     protected void writeStocksToFile() {
         try {
@@ -137,7 +137,8 @@ public abstract class BaseScraper {
                 try {
                     bufferedWriter.write(String.format("%s,%s,%s%n", stockInfo.getName(), stockInfo.getId(), stockInfo.getSymbol()));
                 } catch (IOException e) {
-                    throw new RuntimeException(e); // Todo don't throw this here. change!
+                    StockAppLogger.INSTANCE.logInfo(e.getMessage());
+                    e.printStackTrace();
                 }
             });
 

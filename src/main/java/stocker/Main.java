@@ -1,13 +1,12 @@
 package stocker;
 
-import stocker.datafetchers.wJson.StockAppLogger;
+import stocker.support.StockAppLogger;
 import stocker.datafetchers.wScrape.*;
 
-import java.io.IOException;
 import java.util.List;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         StockAppLogger.INSTANCE.turnOffDebugLogging();
         scrapeAllInfo();
     }

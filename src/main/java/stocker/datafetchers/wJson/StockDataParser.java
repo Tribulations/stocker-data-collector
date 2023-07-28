@@ -2,6 +2,11 @@ package stocker.datafetchers.wJson;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
+import stocker.stock.Candlestick;
+import stocker.stock.Stock;
+import stocker.stock.TradingPeriod;
+import stocker.support.StockAppLogger;
+import stocker.support.Utils;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -102,11 +107,11 @@ public final class StockDataParser {
 
         // info log
         StockAppLogger.INSTANCE.logInfo(String.format("Number of timestamps: %s - %s::%s",
-                timestampList.size(), getClass().getCanonicalName(), UtilityMethods.getMethodName()));
+                timestampList.size(), getClass().getCanonicalName(), Utils.getMethodName()));
         StockAppLogger.INSTANCE.logInfo(String.format("Number of volumes: %s - %s::%s",
-                volumeList.size(), getClass().getCanonicalName(), UtilityMethods.getMethodName()));
+                volumeList.size(), getClass().getCanonicalName(), Utils.getMethodName()));
         StockAppLogger.INSTANCE.logInfo(String.format("Number of close: %s - %s::%s",
-                closeList.size(), getClass().getCanonicalName(), UtilityMethods.getMethodName()));
+                closeList.size(), getClass().getCanonicalName(), Utils.getMethodName()));
 
         return createStock();
     }
@@ -210,13 +215,13 @@ public final class StockDataParser {
                 StockAppLogger.INSTANCE.logDebug(name);
 
                 switch (name) {
-                    case StockDataKeys.INDICATORS -> {
+                    case Constants.INDICATORS -> {
                         StockAppLogger.INSTANCE.logInfo(
                                 "Inside indicators in switch statement - "
                                         + getClass().getCanonicalName() + "::"
-                                        + UtilityMethods.getMethodName());
+                                        + Utils.getMethodName());
                     }
-                    case StockDataKeys.SYMBOL -> this.symbol = name;
+                    case Constants.SYMBOL -> this.symbol = name;
                 }
             }
             case STRING -> {
@@ -224,16 +229,16 @@ public final class StockDataParser {
             }
             case NUMBER -> {
                 switch (currentKey) { // which is the current json object todo improve
-                    case StockDataKeys.TIMESTAMP -> timestampList.add(jsonReader.nextLong());
-                    case StockDataKeys.OPEN -> openList.add(
+                    case Constants.TIMESTAMP -> timestampList.add(jsonReader.nextLong());
+                    case Constants.OPEN -> openList.add(
                             Double.valueOf(decimalFormat.format(jsonReader.nextDouble())));
-                    case StockDataKeys.CLOSE -> closeList.add(
+                    case Constants.CLOSE -> closeList.add(
                             Double.valueOf(decimalFormat.format(jsonReader.nextDouble())));
-                    case StockDataKeys.LOW -> lowList.add(
+                    case Constants.LOW -> lowList.add(
                             Double.valueOf(decimalFormat.format(jsonReader.nextDouble())));
-                    case StockDataKeys.HIGH -> highList.add(
+                    case Constants.HIGH -> highList.add(
                             Double.valueOf(decimalFormat.format(jsonReader.nextDouble())));
-                    case StockDataKeys.VOLUME -> volumeList.add(jsonReader.nextLong());
+                    case Constants.VOLUME -> volumeList.add(jsonReader.nextLong());
                     default -> StockAppLogger.INSTANCE.logDebug(jsonReader.nextString());
                 }
             }
