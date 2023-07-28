@@ -1,4 +1,4 @@
-package stocker.datafetchers.wJson;
+package stocker.support;
 
 import java.io.IOException;
 import java.util.logging.*;
