@@ -1,5 +1,6 @@
 package stocker;
 
+import stocker.stock.StockInfo;
 import stocker.support.StockAppLogger;
 import stocker.datafetchers.wScrape.*;
 
@@ -12,16 +13,9 @@ public class Main {
     }
 
     public static void scrapeAllInfo() {
-        SmallCapScraper smallCapScraper = new SmallCapScraper();
-        List<StockInfo> list2 = smallCapScraper.getStockInfoList();
-
-        MidCapScraper midCapScraper = new MidCapScraper();
-        List<StockInfo> list3 = midCapScraper.getStockInfoList();
-
         LargeCapScraper largeCapScraper = new LargeCapScraper();
-        List<StockInfo> list4 = largeCapScraper.getStockInfoList();
-
+        MidCapScraper midCapScraper = new MidCapScraper();
         FirstNorthScraper firstNorthScraper = new FirstNorthScraper();
-        List<StockInfo> list = firstNorthScraper.getStockInfoList();
+        SmallCapScraper smallCapScraper = new SmallCapScraper();
     }
 }

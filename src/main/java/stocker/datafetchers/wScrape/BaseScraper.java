@@ -5,7 +5,9 @@ import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import stocker.stock.StockInfo;
 import stocker.support.StockAppLogger;
 
 import java.io.BufferedWriter;
@@ -32,7 +34,8 @@ public abstract class BaseScraper {
      */
     protected BaseScraper() {
         initWebDriver();
-        stockInfoList = new ArrayList<>();
+        this.stockInfoList = new ArrayList<>();
+        initStockInfoList();
     }
 
     /**
@@ -44,7 +47,7 @@ public abstract class BaseScraper {
         driver = new FirefoxDriver();
         explicitWait = new WebDriverWait(driver, 4);
 
-        // save cookies and remove popup
+        // save cookies and remove pop-up
         if (cookieSet == null) {
             driver.get(Constants.AVANZA_STOCK_LIST_URL);
             try {
@@ -57,24 +60,31 @@ public abstract class BaseScraper {
             cookieSet = driver.manage().getCookies();
         } else { // load cookies
             driver.get(Constants.AVANZA_STOCK_LIST_URL);
-            cookieSet.forEach( cookie -> {
-                driver.manage().addCookie(cookie);
-            });
+            cookieSet.forEach( cookie -> driver.manage().addCookie(cookie));
         }
     }
 
     /**
-     * The method used to scrape the stock names and their Avanza id's, and then calls
-     * {@link #scrapeStockSymbol()} to retrieve the stock symbols.
+     * Initializes the list containing stock info by calling the necessary internal methods.
      */
-    public abstract void scrapeStockInfo();
+    private void initStockInfoList() {
+        scrapeStockInfo();
+        writeStocksToFile();
+        driver.quit();
+    }
+
+    /**
+     * The method used to scrape the stock names and their Avanza id's, and then calls
+     * {@link #scrapeStockSymbols()} to retrieve the stock symbols.
+     */
+    protected abstract void scrapeStockInfo();
 
     /**
      * Used internally to get each stocks symbol/short name after the full name and id has been retrieved.
      * This method is only called from {@link #scrapeStockInfo()} which is defined in subclasses.
      */
-    protected void scrapeStockSymbol() {
-        this.getStockInfoList().forEach(stockInfo -> { // Todo use a for loop to get rid of the catch block in this forEach. this way we only need one try catch block
+    protected void scrapeStockSymbols() {
+        stockInfoList.forEach(stockInfo -> {
             try {
                 final String formattedStockName = stockInfo.getName().replace(" ", "-");
                 final String symbolStockUrl = String.format("%s%s/%s", Constants.AVANZA_ABOUT_STOCK_URL,  stockInfo.getId(), formattedStockName);
@@ -98,6 +108,16 @@ public abstract class BaseScraper {
     }
 
     /**
+     * Called from the subclass defined method {@link #scrapeStockInfo()} in order to display the element
+     * used when changing which stock lists to show.
+     */
+    protected void showStockListChanger() {
+        WebElement showStockListsBtn = driver.findElement(By.xpath(Constants.SHOW_STOCK_LISTS_BTN_XPATH));
+        explicitWait.until(ExpectedConditions.elementToBeClickable(showStockListsBtn));
+        showStockListsBtn.click();
+    }
+
+    /**
      * Adds all the scraped stock names, id's but NOT the symbol to a StockInfo objects to a list.
      * @param stockNameOffset the offset/difference between the stock name rows and stock avanza id row elements on Avanza.se
      */
@@ -108,15 +128,13 @@ public abstract class BaseScraper {
             e.printStackTrace();
             StockAppLogger.INSTANCE.logInfo(e.getMessage());
         }
-        // get the rows containing stock names and id rows and add to variables
+        // get the row elements containing the stock names and id's and then add to member list
         List<WebElement> stockNameContainers = driver.findElements(By.className(
-                Constants.STOCK_ROWS_CLASS_NAME_ELEMENTS));
+                Constants.STOCK_ROW_ELEMENTS_CLASS_NAME));
         List<WebElement> stockIdContainers = driver.findElements(By.cssSelector(
-                Constants.STOCK_ROWS_ID_ELEMENTS));
+                Constants.STOCK_ROW_ELEMENTS_ID));
         for (int i = 0; i < stockIdContainers.size(); ++i) {
-            // get the name
             final String stockName = stockNameContainers.get(i + stockNameOffset).getText();
-            // get the id
             final List<String> idHrefs = List.of(stockIdContainers.get(i).getAttribute("href").split("/"));
             final String stockId = idHrefs.get(idHrefs.size() - 1);
             stockInfoList.add(new StockInfo(stockName, stockId));
@@ -151,15 +169,10 @@ public abstract class BaseScraper {
     }
 
     /**
-     * Returns the list containing objects with stock info, creating the list if necessary.
-     * @return the list of StockInfo objects
+     * Public accessor.
+     * @return the list containing stock info
      */
     public List<StockInfo> getStockInfoList() {
-        if (stockInfoList.isEmpty()) {
-            this.scrapeStockInfo();
-            writeStocksToFile();
-            driver.quit();
-        }
         return stockInfoList;
     }
 }

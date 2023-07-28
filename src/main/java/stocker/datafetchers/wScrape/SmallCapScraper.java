@@ -3,25 +3,38 @@ package stocker.datafetchers.wScrape;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
+/**
+ * Concrete scrape class used to scrape the names, id's, and short names/symbols for the stocks on Small cap.
+ * @author Joakim Colloz
+ * @version 1.0
+ * @since 1.0 2023-07-28
+ */
 public class SmallCapScraper extends BaseScraper {
+    /**
+     * Public construction simply calling super.
+     */
     public SmallCapScraper() {
         super();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void scrapeStockInfo() {
-        WebElement showStockListsBtn = driver.findElement(By.xpath(Constants.SHOW_STOCK_LISTS_BTN_XPATH));
-        explicitWait.until(ExpectedConditions.elementToBeClickable(showStockListsBtn));
-        showStockListsBtn.click();
+    protected void scrapeStockInfo() {
+        showStockListChanger();
         removeLargeCapStockFromList(driver);
         clickShowSmallCap(driver);
         createStockInfo(1);
-        scrapeStockSymbol();
+        scrapeStockSymbols();
     }
 
-    protected void clickShowSmallCap(WebDriver driver) {
+    /**
+     * Method used internally to make the stock list visible.
+     * @param driver the web driver
+     */
+    private void clickShowSmallCap(WebDriver driver) {
         WebElement smallCapListBtn = driver.findElement(By.xpath(Constants.SMALL_CAP_BTN_XPATH));
         smallCapListBtn.click();
     }

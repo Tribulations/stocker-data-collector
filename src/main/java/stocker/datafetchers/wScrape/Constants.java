@@ -30,8 +30,8 @@ public final class Constants {
     public static final int SHORT_TIMEOUT = 500;
 
     /** Container rows holding stock names and id's */
-    public static final String STOCK_ROWS_CLASS_NAME_ELEMENTS ="orderbookName";
-    public static final String STOCK_ROWS_ID_ELEMENTS = "td ul li a";
+    public static final String STOCK_ROW_ELEMENTS_CLASS_NAME ="orderbookName";
+    public static final String STOCK_ROW_ELEMENTS_ID = "td ul li a";
 
     /** Map keys for different stock lists */
     public static final String LARGE_CAP = "LARGE_CAP";
