@@ -1,9 +1,9 @@
-package stocker.datafetchers.wJson;
+package stocker.support;
 
 /**
  * CLass containing methods used for debugging etc.
  */
-public final class UtilityMethods {
+public final class Utils {
 
 
     // todo this method can add performance issues etc. only use for debugging
