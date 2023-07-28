@@ -13,11 +13,11 @@ public class LargeCapScraper extends BaseScraper {
     @Override
     public void scrapeStockInfo() {
         try {
-            Thread.sleep(AvanzaConstants.LONG_TIMEOUT);
+            Thread.sleep(Constants.LONG_TIMEOUT);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        WebElement fetchMoreBtn = driver.findElement(By.className(AvanzaConstants.FETCH_MORE_BTN));
+        WebElement fetchMoreBtn = driver.findElement(By.className(Constants.FETCH_MORE_BTN));
         explicitWait.until(ExpectedConditions.elementToBeClickable(fetchMoreBtn)); // TODO necessary?
         fetchMoreBtn.click();
         createStockInfo(2);

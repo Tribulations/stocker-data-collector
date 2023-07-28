@@ -40,23 +40,23 @@ public abstract class BaseScraper {
      */
     private void initWebDriver() {
         // path to the GeckoDriver executable
-        System.setProperty(AvanzaConstants.FIRE_FOX_WEB_DRIVER, AvanzaConstants.FIRE_FOX_WEB_DRIVER_PATH);
+        System.setProperty(Constants.FIRE_FOX_WEB_DRIVER, Constants.FIRE_FOX_WEB_DRIVER_PATH);
         driver = new FirefoxDriver();
         explicitWait = new WebDriverWait(driver, 4);
 
         // save cookies and remove popup
         if (cookieSet == null) {
-            driver.get(AvanzaConstants.AVANZA_STOCK_LIST_URL);
+            driver.get(Constants.AVANZA_STOCK_LIST_URL);
             try {
-                Thread.sleep(AvanzaConstants.LONG_TIMEOUT);
+                Thread.sleep(Constants.LONG_TIMEOUT);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            WebElement cookieBtn = driver.findElement(By.xpath(AvanzaConstants.COOKIE_BTN_XPATH));
+            WebElement cookieBtn = driver.findElement(By.xpath(Constants.COOKIE_BTN_XPATH));
             cookieBtn.click();
             cookieSet = driver.manage().getCookies();
         } else { // load cookies
-            driver.get(AvanzaConstants.AVANZA_STOCK_LIST_URL);
+            driver.get(Constants.AVANZA_STOCK_LIST_URL);
             cookieSet.forEach( cookie -> {
                 driver.manage().addCookie(cookie);
             });
@@ -77,10 +77,10 @@ public abstract class BaseScraper {
         this.getStockInfoList().forEach(stockInfo -> { // Todo use a for loop to get rid of the catch block in this forEach. this way we only need one try catch block
             try {
                 final String formattedStockName = stockInfo.getName().replace(" ", "-");
-                final String symbolStockUrl = String.format("%s%s/%s",AvanzaConstants.AVANZA_ABOUT_STOCK_URL,  stockInfo.getId(), formattedStockName);
+                final String symbolStockUrl = String.format("%s%s/%s", Constants.AVANZA_ABOUT_STOCK_URL,  stockInfo.getId(), formattedStockName);
                 driver.get(symbolStockUrl);
                 Thread.sleep(6500);
-                WebElement symbolNameElement = driver.findElement(By.xpath(AvanzaConstants.SYMBOL_NAME_XPATH));
+                WebElement symbolNameElement = driver.findElement(By.xpath(Constants.SYMBOL_NAME_XPATH));
                 stockInfo.setSymbol(symbolNameElement.getText().replace(" ", "-"));
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
@@ -93,7 +93,7 @@ public abstract class BaseScraper {
     * Method used to interact with needed elements on Avanza.se in order to remove the Large Cap stocks from the stock list. This is necessary when we want to scrape other stock lists than Large cap because large cap is displayed by default.
     */
     protected void removeLargeCapStockFromList(WebDriver driver) {
-        WebElement largeCapListBtn = driver.findElement(By.xpath(AvanzaConstants.LARGE_CAP_BTN_XPATH));
+        WebElement largeCapListBtn = driver.findElement(By.xpath(Constants.LARGE_CAP_BTN_XPATH));
         largeCapListBtn.click();
     }
 
@@ -103,16 +103,16 @@ public abstract class BaseScraper {
      */
     protected void createStockInfo(final int stockNameOffset) {
         try {
-            Thread.sleep(AvanzaConstants.LONG_TIMEOUT);
+            Thread.sleep(Constants.LONG_TIMEOUT);
         } catch (InterruptedException e) {
             e.printStackTrace();
             StockAppLogger.INSTANCE.logInfo(e.getMessage());
         }
         // get the rows containing stock names and id rows and add to variables
         List<WebElement> stockNameContainers = driver.findElements(By.className(
-                AvanzaConstants.STOCK_ROWS_CLASS_NAME_ELEMENTS));
+                Constants.STOCK_ROWS_CLASS_NAME_ELEMENTS));
         List<WebElement> stockIdContainers = driver.findElements(By.cssSelector(
-                AvanzaConstants.STOCK_ROWS_ID_ELEMENTS));
+                Constants.STOCK_ROWS_ID_ELEMENTS));
         for (int i = 0; i < stockIdContainers.size(); ++i) {
             // get the name
             final String stockName = stockNameContainers.get(i + stockNameOffset).getText();

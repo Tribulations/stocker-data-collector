@@ -12,7 +12,7 @@ public class SmallCapScraper extends BaseScraper {
 
     @Override
     public void scrapeStockInfo() {
-        WebElement showStockListsBtn = driver.findElement(By.xpath(AvanzaConstants.SHOW_STOCK_LISTS_BTN_XPATH));
+        WebElement showStockListsBtn = driver.findElement(By.xpath(Constants.SHOW_STOCK_LISTS_BTN_XPATH));
         explicitWait.until(ExpectedConditions.elementToBeClickable(showStockListsBtn));
         showStockListsBtn.click();
         removeLargeCapStockFromList(driver);
@@ -22,7 +22,7 @@ public class SmallCapScraper extends BaseScraper {
     }
 
     protected void clickShowSmallCap(WebDriver driver) {
-        WebElement smallCapListBtn = driver.findElement(By.xpath(AvanzaConstants.SMALL_CAP_BTN_XPATH));
+        WebElement smallCapListBtn = driver.findElement(By.xpath(Constants.SMALL_CAP_BTN_XPATH));
         smallCapListBtn.click();
     }
 }
