@@ -1,4 +1,4 @@
-package stocker.datafetchers.wJson;
+package stocker.stock;
 
 import java.util.List;
 

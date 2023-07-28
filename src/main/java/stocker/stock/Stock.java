@@ -1,4 +1,7 @@
-package stocker.datafetchers.wJson;
+package stocker.stock;
+
+import stocker.datafetchers.wJson.StockDataFetcher;
+import stocker.datafetchers.wJson.StockDataParser;
 
 /**
  * class representing a stock and provides different functionalities to get info about a stock.
