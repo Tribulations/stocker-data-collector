@@ -1,4 +1,4 @@
-package stocker.support;
+package stocker.security;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
@@ -11,7 +11,7 @@ public class FileEncryptor {
 
     private SecretKey secretKey;
 
-    public void generateSecretKey(String algorithm, int keySize) throws NoSuchAlgorithmException {
+    private void generateSecretKey(String algorithm, int keySize) throws NoSuchAlgorithmException {
         KeyGenerator keyGen = KeyGenerator.getInstance(algorithm);
         keyGen.init(keySize);
         secretKey = keyGen.generateKey();
@@ -32,7 +32,7 @@ public class FileEncryptor {
         return new String(decryptedBytes, StandardCharsets.UTF_8);
     }
 
-    public void writeSecretKeyToFile(String filePath) throws IOException {
+    private void writeSecretKeyToFile(String filePath) throws IOException {
         try (FileWriter keyWriter = new FileWriter(filePath)) {
             byte[] encodedKey = secretKey.getEncoded();
             String base64EncodedKey = Base64.getEncoder().encodeToString(encodedKey);
@@ -40,13 +40,13 @@ public class FileEncryptor {
         }
     }
 
-    public void writeEncryptedMessageToFile(String filePath, String encryptedMessage) throws IOException {
+    private void writeEncryptedMessageToFile(String filePath, String encryptedMessage) throws IOException {
         try (FileWriter encryptedWriter = new FileWriter(filePath)) {
             encryptedWriter.write(encryptedMessage);
         }
     }
 
-    public void readSecretKeyFromFile(String filePath) throws IOException {
+    private void readSecretKeyFromFile(String filePath) throws IOException {
         try (BufferedReader keyReader = new BufferedReader(new FileReader(filePath))) {
             String base64EncodedKey = keyReader.readLine();
             byte[] decodedKey = Base64.getDecoder().decode(base64EncodedKey);
@@ -54,7 +54,7 @@ public class FileEncryptor {
         }
     }
 
-    public String readEncryptedMessageFromFile(String filePath) throws IOException {
+    private String readEncryptedMessageFromFile(String filePath) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         try (BufferedReader encryptedReader = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -73,7 +73,7 @@ public class FileEncryptor {
             encryptor.generateSecretKey("AES", 256);
 
             // Step 2: Encrypt the message
-            String message = "This is the message to be encrypted.";
+            String message = "jocka123";
             String encryptedMessage = encryptor.encryptMessage(message);
 
             // Step 3: Write the secret key and encrypted message to files

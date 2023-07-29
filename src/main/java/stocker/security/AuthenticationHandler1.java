@@ -1,4 +1,6 @@
-package stocker.support;
+package stocker.security;
+
+import stocker.support.StockAppLogger;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
