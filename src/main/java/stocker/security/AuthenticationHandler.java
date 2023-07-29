@@ -15,7 +15,7 @@ public class AuthenticationHandler {
             throw new RuntimeException(e);
         }
 
-        final String answer = password.equals("jocka123") ? "Authentication successful" : "Authentication failed";
+        final String answer = password.equals("") ? "Authentication successful" : "Authentication failed";
 
         System.out.println(answer);
     }

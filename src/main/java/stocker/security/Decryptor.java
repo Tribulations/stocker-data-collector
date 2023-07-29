@@ -14,6 +14,11 @@ public class Decryptor {
     private final SecretKey SECRET_KEY;
     private final String ENCRYPTED_MESSAGE;
 
+    final String FOLDER_PATH = "src/main/resources/";
+    final String USERNAME_SECRET_KEY_PATH = FOLDER_PATH + "secret_key.txt";
+    final String ENCRYPTED_USERNAME_PATH = FOLDER_PATH + "encrypted_message.txt";
+    final String ENCRYPTED_PASSWORD_PATH = FOLDER_PATH + "encrypted_message.txt";
+
     public Decryptor(final String secretKeyFilePath, final String encryptedMessageFilePath) {
         try {
             this.SECRET_KEY = readSecretKeyFromFile(secretKeyFilePath);

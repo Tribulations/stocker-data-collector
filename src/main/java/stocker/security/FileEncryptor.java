@@ -73,17 +73,17 @@ public class FileEncryptor {
             encryptor.generateSecretKey("AES", 256);
 
             // Step 2: Encrypt the message
-            String message = "jocka123";
+            String message = "j";
             String encryptedMessage = encryptor.encryptMessage(message);
 
             // Step 3: Write the secret key and encrypted message to files
             final String folderPath = "src/main/resources/";
-            encryptor.writeSecretKeyToFile(folderPath + "secret_key.txt");
-            encryptor.writeEncryptedMessageToFile(folderPath + "encrypted_message.txt", encryptedMessage);
+            encryptor.writeSecretKeyToFile(folderPath + "username_secret_key.log");
+            encryptor.writeEncryptedMessageToFile(folderPath + "encrypted_username.log", encryptedMessage);
 
             // Step 4: Read the secret key and encrypted message from files
-            encryptor.readSecretKeyFromFile(folderPath + "secret_key.txt");
-            String encryptedMessageFromFile = encryptor.readEncryptedMessageFromFile(folderPath + "encrypted_message.txt");
+            encryptor.readSecretKeyFromFile(folderPath + "username_secret_key.log");
+            String encryptedMessageFromFile = encryptor.readEncryptedMessageFromFile(folderPath + "encrypted_username.log");
 
             // Step 5: Decrypt the message
             String decryptedMessage = encryptor.decryptMessage(encryptedMessageFromFile);
