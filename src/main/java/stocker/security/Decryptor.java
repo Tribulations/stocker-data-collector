@@ -1,23 +1,21 @@
 package stocker.security;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
+import stocker.support.StockAppLogger;
+
+import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 public class Decryptor {
 
     private final SecretKey SECRET_KEY;
     private final String ENCRYPTED_MESSAGE;
-
-    final String FOLDER_PATH = "src/main/resources/";
-    final String USERNAME_SECRET_KEY_PATH = FOLDER_PATH + "secret_key.txt";
-    final String ENCRYPTED_USERNAME_PATH = FOLDER_PATH + "encrypted_message.txt";
-    final String ENCRYPTED_PASSWORD_PATH = FOLDER_PATH + "encrypted_message.txt";
 
     public Decryptor(final String secretKeyFilePath, final String encryptedMessageFilePath) {
         try {
@@ -28,11 +26,24 @@ public class Decryptor {
         }
     }
 
-    public String decryptMessage() throws Exception {
-        Cipher cipher = Cipher.getInstance(SECRET_KEY.getAlgorithm());
-        cipher.init(Cipher.DECRYPT_MODE, SECRET_KEY);
-        byte[] decodedBytes = Base64.getDecoder().decode(ENCRYPTED_MESSAGE);
-        byte[] decryptedBytes = cipher.doFinal(decodedBytes);
+    public String decrypt() {
+        Cipher cipher = null;
+        byte[] decryptedBytes = new byte[0];
+        try {
+            cipher = Cipher.getInstance(SECRET_KEY.getAlgorithm());
+
+            cipher.init(Cipher.DECRYPT_MODE, SECRET_KEY);
+
+            byte[] decodedBytes = Base64.getDecoder().decode(ENCRYPTED_MESSAGE);
+            decryptedBytes = new byte[0];
+
+            decryptedBytes = cipher.doFinal(decodedBytes);
+
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException
+                 | IllegalBlockSizeException | BadPaddingException e) {
+            StockAppLogger.INSTANCE.logInfo(e.getMessage());
+            e.printStackTrace();
+        }
         return new String(decryptedBytes, StandardCharsets.UTF_8);
     }
 

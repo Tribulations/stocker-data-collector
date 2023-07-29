@@ -1,0 +1,40 @@
+package stocker.security;
+
+/**
+ * Class used to handle authentication to the database and more.
+ * @author tribulations
+ * @version 1.0
+ * @since 1.0
+ */
+public class Authenticator {
+    public static final Authenticator INSTANCE = new Authenticator();
+    final String FOLDER_PATH = "src/main/resources/";
+    final String USERNAME_SECRET_KEY_PATH = FOLDER_PATH + "username_secret_key.log";
+    final String PASSWORD_SECRET_KEY_PATH = FOLDER_PATH + "password_secret_key.log";
+    final String USERNAME_ENCRYPTED_PATH = FOLDER_PATH + "encrypted_username.log";
+    final String PASSWORD_ENCRYPTED_PATH = FOLDER_PATH + "encrypted_password.log";
+
+    private final Decryptor username;
+    private final Decryptor password;
+
+    private Authenticator() {
+        this.username = new Decryptor(USERNAME_SECRET_KEY_PATH, USERNAME_ENCRYPTED_PATH);
+        this.password = new Decryptor(PASSWORD_SECRET_KEY_PATH, PASSWORD_ENCRYPTED_PATH);
+    }
+
+    /**
+     * Accessor to the database password.
+     * @return the database password
+     */
+    public String getDbPassword() {
+        return password.decrypt();
+    }
+
+    /**
+     * Accessor to the database username.
+     * @return the database username
+     */
+    public String getDbUsername() {
+        return username.decrypt();
+    }
+}

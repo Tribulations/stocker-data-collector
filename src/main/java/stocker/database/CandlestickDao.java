@@ -1,33 +1,42 @@
 package stocker.database;
 
 import stocker.stock.Candlestick;
+import stocker.support.StockAppLogger;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static stocker.database.DbConstants.CANDLESTICK_TABLE;
+import static stocker.database.DbConstants.DB_URL;
+import static stocker.database.DbConstants.DB_USERNAME;
+import static stocker.database.DbConstants.DB_PASSWORD;
+import static stocker.database.DbConstants.TIME_STAMP_COLUMN;
+import static stocker.database.DbConstants.OPEN_COLUMN;
+import static stocker.database.DbConstants.CLOSE_COLUMN;
+import static stocker.database.DbConstants.LOW_COLUMN;
+import static stocker.database.DbConstants.HIGH_COLUMN;
+import static stocker.database.DbConstants.VOLUME_COLUMN;
+
+/**
+ * Database access object class. Used to interact with the database.
+ * @author tribulations
+ * @version 1.0
+ * @since 1.0
+ */
 public class CandlestickDao extends Candlestick implements DAO<Candlestick>{
-    private static final String DB_URL = "jdbc:postgresql://155.4.55.36:5432/test_db";
-    private static final String DB_USERNAME = "jocka";
-    private static final String DB_PASSWORD = "jocka123";
-    private static final String TABLE = "test_schema.temp_price";
 
     @Override
     public List<Candlestick> getAllRows() {
         List<Candlestick> candlesticks = new ArrayList<>();
 
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
-             PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + TABLE);
+             PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + CANDLESTICK_TABLE);
              ResultSet resultSet = statement.executeQuery()) {
 
             while (resultSet.next()) {
                 Candlestick candlestick = new Candlestick();
-                candlestick.setTimestamp(resultSet.getLong("time_stamp"));
-                candlestick.setOpen(resultSet.getDouble("open"));
-                candlestick.setClose(resultSet.getDouble("close"));
-                candlestick.setLow(resultSet.getDouble("low"));
-                candlestick.setHigh(resultSet.getDouble("high"));
-                candlestick.setVolume(resultSet.getLong("volume"));
+                setCandleStick(resultSet, candlestick);
                 candlesticks.add(candlestick);
             }
         } catch (SQLException e) {
@@ -42,17 +51,12 @@ public class CandlestickDao extends Candlestick implements DAO<Candlestick>{
         List<Candlestick> candlesticks = new ArrayList<>();
 
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
-             PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + TABLE + " WHERE symbol = ?");
+             PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + CANDLESTICK_TABLE + " WHERE symbol = ?");
              ResultSet resultSet = statement.executeQuery()) {
 
             while (resultSet.next()) {
                 Candlestick candlestick = new Candlestick();
-                candlestick.setTimestamp(resultSet.getLong("time_stamp"));
-                candlestick.setOpen(resultSet.getDouble("open"));
-                candlestick.setClose(resultSet.getDouble("close"));
-                candlestick.setLow(resultSet.getDouble("low"));
-                candlestick.setHigh(resultSet.getDouble("high"));
-                candlestick.setVolume(resultSet.getLong("volume"));
+                setCandleStick(resultSet, candlestick);
                 candlesticks.add(candlestick);
             }
         } catch (SQLException e) {
@@ -60,6 +64,20 @@ public class CandlestickDao extends Candlestick implements DAO<Candlestick>{
         }
 
         return candlesticks;
+    }
+
+    private void setCandleStick(final ResultSet resultSet, final Candlestick candlestick) {
+        try {
+            candlestick.setTimestamp(resultSet.getLong(TIME_STAMP_COLUMN));
+            candlestick.setOpen(resultSet.getDouble(OPEN_COLUMN));
+            candlestick.setClose(resultSet.getDouble(CLOSE_COLUMN));
+            candlestick.setLow(resultSet.getDouble(LOW_COLUMN));
+            candlestick.setHigh(resultSet.getDouble(HIGH_COLUMN));
+            candlestick.setVolume(resultSet.getLong(VOLUME_COLUMN));
+        } catch (SQLException e) {
+            StockAppLogger.INSTANCE.logInfo(e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 //    @Override
@@ -90,7 +108,7 @@ public class CandlestickDao extends Candlestick implements DAO<Candlestick>{
     public void addRow(String symbol, Candlestick candlestick) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
              PreparedStatement statement = connection.prepareStatement(
-                     "INSERT INTO " + TABLE + " (time_stamp, open, close, low, high, volume, symbol) " +
+                     "INSERT INTO " + CANDLESTICK_TABLE + " (time_stamp, open, close, low, high, volume, symbol) " +
                              "VALUES (?, ?, ?, ?, ?, ?, ?)")
         ) {
             statement.setLong(1, candlestick.getTimestamp());
@@ -110,7 +128,7 @@ public class CandlestickDao extends Candlestick implements DAO<Candlestick>{
     public void addRowOverwrite(String symbol, Candlestick candlestick) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
              PreparedStatement statement = connection.prepareStatement(
-                     "INSERT INTO " + TABLE + " (time_stamp, open, close, low, high, volume, symbol) " +
+                     "INSERT INTO " + CANDLESTICK_TABLE + " (time_stamp, open, close, low, high, volume, symbol) " +
                              "VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (time_stamp, symbol) DO UPDATE SET "
                              + "(open, close, low, high, volume) = " +
                              "(excluded.open, excluded.close, excluded.low, excluded.high, excluded.volume)")
@@ -132,7 +150,7 @@ public class CandlestickDao extends Candlestick implements DAO<Candlestick>{
     public void addRowNoOverwrite(String symbol, Candlestick candlestick) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
              PreparedStatement statement = connection.prepareStatement(
-                     "INSERT INTO " + TABLE + " (time_stamp, open, close, low, high, volume, symbol) " +
+                     "INSERT INTO " + CANDLESTICK_TABLE + " (time_stamp, open, close, low, high, volume, symbol) " +
                              "VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING")
         ) {
             statement.setLong(1, candlestick.getTimestamp());
