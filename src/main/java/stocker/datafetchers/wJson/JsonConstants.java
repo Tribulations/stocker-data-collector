@@ -33,7 +33,12 @@ public final class JsonConstants {
     public static final String RANGE = "range";
     public static final String VALID_RANGES = "validRanges";
 
-    /** Valid ranges */
+    /** Valid ranges and intervals */
+    public static final String ONE_MIN = "1m";
+    public static final String FIVE_MIN = "5m";
+    public static final String FIFTEEN_MIN = "15m";
+    public static final String ONE_HOUR = "1h";
+    public static final String ONE_WEEK = "1wk";
     public static final String ONE_DAY = "1d";
     public static final String FIVE_DAY = "5d";
     public static final String ONE_MONTH = "1mo";
@@ -58,6 +63,7 @@ public final class JsonConstants {
     public static final String HIGH = "high";
     public static final String VOLUME = "volume";
 
+    /**  Keys used when we get an error */
     public static final String ERROR = "error";
     public static final String CODE = "code";
     public static final String DESCRIPTION = "description";
