@@ -1,7 +1,16 @@
 package stocker.stock;
 
+import stocker.stock.Candlestick;
+
 import java.util.List;
 
+/**
+ * TODO or this class is maybe usable someway?
+ * TODO this class is maybe unnecessary?
+ * TODO this class should maybe be refatored to an indicator class?
+ * Like a class that takes a list of candlesticks and then those some operation
+ * e.g. calculating the max values maxHigh maxLow etc.?
+ */
 public class TradingPeriod {
     private final List<Candlestick> tradingPeriod;
 

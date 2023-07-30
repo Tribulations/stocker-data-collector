@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static stocker.datafetchers.wJson.JsonConstants.*;
+
 
 /**
  * TODO add doc.
@@ -36,6 +38,7 @@ public final class StockDataParser {
     private List<Double> closeList;
     private List<Double> lowList;
     private List<Double> highList;
+    private String interval = null;
 
     public final static StockDataParser INSTANCE = new StockDataParser();
 
@@ -127,7 +130,7 @@ public final class StockDataParser {
         List<Candlestick> candlestickList = new ArrayList<>();
         IntStream.range(0, openList.size()).forEach(i -> {
             candlestickList.add(new Candlestick(openList.get(i),closeList.get(i), lowList.get(i),
-                    highList.get(i), volumeList.get(i), timestampList.get(i)));
+                    highList.get(i), volumeList.get(i), timestampList.get(i), interval));
         });
 
         return new TradingPeriod(candlestickList);
@@ -215,30 +218,34 @@ public final class StockDataParser {
                 StockAppLogger.INSTANCE.logDebug(name);
 
                 switch (name) {
-                    case JsonConstants.INDICATORS -> {
+                    case INDICATORS -> {
                         StockAppLogger.INSTANCE.logInfo(
                                 "Inside indicators in switch statement - "
                                         + getClass().getCanonicalName() + "::"
                                         + Utils.getMethodName());
                     }
-                    case JsonConstants.SYMBOL -> this.symbol = name;
+                    case SYMBOL -> this.symbol = name;
                 }
             }
             case STRING -> {
-                StockAppLogger.INSTANCE.logDebug(jsonReader.nextString());
+                final String theNextString = jsonReader.nextString();
+                StockAppLogger.INSTANCE.logDebug(theNextString);
+                if (DATA_GRANULARITY.equals(currentKey)) {
+                    interval = theNextString;
+                }
             }
             case NUMBER -> {
                 switch (currentKey) { // which is the current json object todo improve
-                    case JsonConstants.TIMESTAMP -> timestampList.add(jsonReader.nextLong());
-                    case JsonConstants.OPEN -> openList.add(
+                    case TIMESTAMP -> timestampList.add(jsonReader.nextLong());
+                    case OPEN -> openList.add(
                             Double.valueOf(decimalFormat.format(jsonReader.nextDouble())));
-                    case JsonConstants.CLOSE -> closeList.add(
+                    case CLOSE -> closeList.add(
                             Double.valueOf(decimalFormat.format(jsonReader.nextDouble())));
-                    case JsonConstants.LOW -> lowList.add(
+                    case LOW -> lowList.add(
                             Double.valueOf(decimalFormat.format(jsonReader.nextDouble())));
-                    case JsonConstants.HIGH -> highList.add(
+                    case HIGH -> highList.add(
                             Double.valueOf(decimalFormat.format(jsonReader.nextDouble())));
-                    case JsonConstants.VOLUME -> volumeList.add(jsonReader.nextLong());
+                    case VOLUME -> volumeList.add(jsonReader.nextLong());
                     default -> StockAppLogger.INSTANCE.logDebug(jsonReader.nextString());
                 }
             }

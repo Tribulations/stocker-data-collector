@@ -14,6 +14,9 @@ public class Candlestick {
     private double high;
     private long volume;
     private long timestamp;
+    // todo we have to keep track of the candlesticks interval e.g. 1 min, 15 min, 1 day etc. because we use it when
+    //  adding data to the database so we can set the timestamp/date correctly
+    private String interval;
 
     public Candlestick() {
         this.open = 0;
@@ -22,14 +25,27 @@ public class Candlestick {
         this.high = 0;
         this.volume = 0;
         this.timestamp = 0;
+        this.interval = "";
     }
-    public Candlestick(double open, double close, double low, double high, long volume, long timestamp) {
+//    public Candlestick(final double open, final double close, final double low, final double high,
+//                       final long volume, final long timestamp) {
+//        this.open = open;
+//        this.close = close;
+//        this.low = low;
+//        this.high = high;
+//        this.volume = volume;
+//        this.timestamp = timestamp;
+//    }
+
+    public Candlestick(final double open, final double close, final double low, final double high,
+                       final long volume, final long timestamp, final String interval) {
         this.open = open;
         this.close = close;
         this.low = low;
         this.high = high;
         this.volume = volume;
         this.timestamp = timestamp;
+        this.interval = interval;
     }
 
     public double getOpen() {
@@ -54,6 +70,10 @@ public class Candlestick {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public String getInterval() {
+        return interval;
     }
 
     public String getHumanReadableDate() {
@@ -91,6 +111,10 @@ public class Candlestick {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public void setInterval(String interval) {
+        this.interval = interval;
     }
 
     @Override
