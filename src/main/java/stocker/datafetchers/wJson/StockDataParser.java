@@ -215,13 +215,13 @@ public final class StockDataParser {
                 StockAppLogger.INSTANCE.logDebug(name);
 
                 switch (name) {
-                    case Constants.INDICATORS -> {
+                    case JsonConstants.INDICATORS -> {
                         StockAppLogger.INSTANCE.logInfo(
                                 "Inside indicators in switch statement - "
                                         + getClass().getCanonicalName() + "::"
                                         + Utils.getMethodName());
                     }
-                    case Constants.SYMBOL -> this.symbol = name;
+                    case JsonConstants.SYMBOL -> this.symbol = name;
                 }
             }
             case STRING -> {
@@ -229,16 +229,16 @@ public final class StockDataParser {
             }
             case NUMBER -> {
                 switch (currentKey) { // which is the current json object todo improve
-                    case Constants.TIMESTAMP -> timestampList.add(jsonReader.nextLong());
-                    case Constants.OPEN -> openList.add(
+                    case JsonConstants.TIMESTAMP -> timestampList.add(jsonReader.nextLong());
+                    case JsonConstants.OPEN -> openList.add(
                             Double.valueOf(decimalFormat.format(jsonReader.nextDouble())));
-                    case Constants.CLOSE -> closeList.add(
+                    case JsonConstants.CLOSE -> closeList.add(
                             Double.valueOf(decimalFormat.format(jsonReader.nextDouble())));
-                    case Constants.LOW -> lowList.add(
+                    case JsonConstants.LOW -> lowList.add(
                             Double.valueOf(decimalFormat.format(jsonReader.nextDouble())));
-                    case Constants.HIGH -> highList.add(
+                    case JsonConstants.HIGH -> highList.add(
                             Double.valueOf(decimalFormat.format(jsonReader.nextDouble())));
-                    case Constants.VOLUME -> volumeList.add(jsonReader.nextLong());
+                    case JsonConstants.VOLUME -> volumeList.add(jsonReader.nextLong());
                     default -> StockAppLogger.INSTANCE.logDebug(jsonReader.nextString());
                 }
             }

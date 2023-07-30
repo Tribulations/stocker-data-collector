@@ -27,7 +27,7 @@ public class FirstNorthScraper extends BaseScraper {
         showStockListChanger();
         removeLargeCapStockFromList(driver);
         clickShowFirstNorth(driver);
-        WebElement fetchMoreBtn = driver.findElement(By.className(Constants.FETCH_MORE_BTN));
+        WebElement fetchMoreBtn = driver.findElement(By.className(ScrapeConstants.FETCH_MORE_BTN));
         final int fetchMoreBtnClickCount = 4;
         for (int i = 0; i < fetchMoreBtnClickCount; ++i) {
             explicitWait.until(ExpectedConditions.elementToBeClickable(fetchMoreBtn));
@@ -42,7 +42,7 @@ public class FirstNorthScraper extends BaseScraper {
      * @param driver the web driver
      */
     private void clickShowFirstNorth(WebDriver driver) {
-        WebElement firstNorthListBtn = driver.findElement(By.xpath(Constants.FIRST_NORTH_BTN_XPATH));
+        WebElement firstNorthListBtn = driver.findElement(By.xpath(ScrapeConstants.FIRST_NORTH_BTN_XPATH));
         firstNorthListBtn.click();
     }
 }

@@ -3,8 +3,8 @@ package stocker.datafetchers.wScrape;
 /**
  * A class containing different constants that are used when running the web scrape on avanza.se.
  */
-public final class Constants {
-    private Constants() { throw new IllegalStateException("Utility class"); }
+public final class ScrapeConstants {
+    private ScrapeConstants() { throw new IllegalStateException("Utility class"); }
 
     /** The x-paths of different buttons that has to be clicked */
     public static final String SHOW_STOCK_LISTS_BTN_XPATH = "/html/body/main/section/div/main/div/div/div[5]/div/div[2]/div/div[6]/div[2]/div/div[2]/button/span[2]";

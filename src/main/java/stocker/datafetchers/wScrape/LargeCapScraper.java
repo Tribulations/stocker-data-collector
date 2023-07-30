@@ -24,11 +24,11 @@ public class LargeCapScraper extends BaseScraper {
     @Override
     protected void scrapeStockInfo() {
         try {
-            Thread.sleep(Constants.LONG_TIMEOUT);
+            Thread.sleep(ScrapeConstants.LONG_TIMEOUT);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        WebElement fetchMoreBtn = driver.findElement(By.className(Constants.FETCH_MORE_BTN));
+        WebElement fetchMoreBtn = driver.findElement(By.className(ScrapeConstants.FETCH_MORE_BTN));
         explicitWait.until(ExpectedConditions.elementToBeClickable(fetchMoreBtn));
         fetchMoreBtn.click();
         createStockInfo(2);

@@ -35,7 +35,7 @@ public class SmallCapScraper extends BaseScraper {
      * @param driver the web driver
      */
     private void clickShowSmallCap(WebDriver driver) {
-        WebElement smallCapListBtn = driver.findElement(By.xpath(Constants.SMALL_CAP_BTN_XPATH));
+        WebElement smallCapListBtn = driver.findElement(By.xpath(ScrapeConstants.SMALL_CAP_BTN_XPATH));
         smallCapListBtn.click();
     }
 }
