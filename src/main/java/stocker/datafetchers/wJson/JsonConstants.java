@@ -33,6 +33,19 @@ public final class JsonConstants {
     public static final String RANGE = "range";
     public static final String VALID_RANGES = "validRanges";
 
+    /** Valid ranges */
+    public static final String ONE_DAY = "1d";
+    public static final String FIVE_DAY = "5d";
+    public static final String ONE_MONTH = "1mo";
+    public static final String THREE_MONTHS = "3mo";
+    public static final String SIX_MONTHS = "6mo";
+    public static final String ONE_YEAR = "1y";
+    public static final String TWO_YEAR = "2y";
+    public static final String FIVE_YEARS = "5y";
+    public static final String TEN_YEARS = "10y";
+    public static final String YTD = "ytd";
+    public static final String MAX = "max";
+
     /** Timestamp key */
     public static final String TIMESTAMP = "timestamp";
 
@@ -46,4 +59,6 @@ public final class JsonConstants {
     public static final String VOLUME = "volume";
 
     public static final String ERROR = "error";
+    public static final String CODE = "code";
+    public static final String DESCRIPTION = "description";
 }
