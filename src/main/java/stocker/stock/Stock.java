@@ -32,7 +32,7 @@ public class Stock {
      * @param range the range of the TradingPeriod e.g. 1d, 1mo, 6mo 1y etc.
      * @param interval the interval of each candlestick e.g. 1m, 5m, 15m, 1h, 1d etc.
      */
-    public Stock(String symbol, final String range, final String interval) throws Exception {
+    public Stock(String symbol, final String range, final String interval) {
         this.symbol = symbol;
         this.tradingPeriod = StockDataParser.INSTANCE.parseStockData(StockDataFetcher.INSTANCE.fetchStockData(symbol,
                 range, interval)).getTradingPeriod();

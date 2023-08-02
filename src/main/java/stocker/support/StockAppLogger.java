@@ -50,7 +50,7 @@ public final class StockAppLogger {
             ConsoleHandler consoleDebugHandler = new ConsoleHandler();
 
             FileHandler fileInfoHandler = new FileHandler(
-                    "src/main/resources/info%g.log", 50000, 5, true);
+                    "src/main/resources/info%g.log", 500000, 5, true);
 
             // Set custom formatters
             consoleDebugHandler.setFormatter(debugFormatter);
