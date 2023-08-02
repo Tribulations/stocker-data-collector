@@ -90,7 +90,7 @@ public final class StockDataParser {
      * TODO add doc.
      * @throws Exception
      */
-    public Stock parseStockData(final String jsonString) throws Exception {
+    public Stock parseStockData(final String jsonString) {
         timestampList = new ArrayList<>();
         volumeList = new ArrayList<>();
         openList = new ArrayList<>();
@@ -141,32 +141,38 @@ public final class StockDataParser {
      * @param jsonReader
      * @throws IOException
      */
-    private void handleObject(JsonReader jsonReader) throws IOException {
+    private void handleObject(JsonReader jsonReader) {
         // improve this ? TODO why do we have eto check if it is an END_ARRAY token? shouldn't be here!!
-        if (jsonReader.peek().equals(JsonToken.END_ARRAY)) {
-            StockAppLogger.INSTANCE.logDebug("END_ARRAY");
-            jsonReader.endArray();
-        } else if (jsonReader.peek().equals(JsonToken.BEGIN_OBJECT)) {
-            StockAppLogger.INSTANCE.logDebug("BEGIN_OBJECT");
-            beginObjectCounter++;
-            jsonReader.beginObject();
+        try {
+            if (jsonReader.peek().equals(JsonToken.END_ARRAY)) {
+                StockAppLogger.INSTANCE.logDebug("END_ARRAY");
+                jsonReader.endArray();
+            } else if (jsonReader.peek().equals(JsonToken.BEGIN_OBJECT)) {
+                StockAppLogger.INSTANCE.logDebug("BEGIN_OBJECT");
+                beginObjectCounter++;
+                jsonReader.beginObject();
+            }
+
+            // iterate over the object?
+            while (jsonReader.hasNext() || !jsonReader.peek().equals(JsonToken.END_DOCUMENT)) {
+                JsonToken token = jsonReader.peek();
+                switch (token) {
+                    case BEGIN_ARRAY -> {
+                        handleArray(jsonReader);
+                    }
+                    case END_OBJECT -> {
+                        endObjectCounter++;
+                        StockAppLogger.INSTANCE.logDebug("END_OBJECT");
+                        jsonReader.endObject();
+                    }
+                    default -> handleNonArrayToken(jsonReader, token);
+                }
+            }
+        } catch (IOException e) {
+            StockAppLogger.INSTANCE.logInfo(e.getMessage());
+            e.printStackTrace();
         }
 
-        // iterate over the object?
-        while (jsonReader.hasNext() || !jsonReader.peek().equals(JsonToken.END_DOCUMENT)) {
-            JsonToken token = jsonReader.peek();
-            switch (token) {
-                case BEGIN_ARRAY -> {
-                    handleArray(jsonReader);
-                }
-                case END_OBJECT -> {
-                    endObjectCounter++;
-                    StockAppLogger.INSTANCE.logDebug("END_OBJECT");
-                    jsonReader.endObject();
-                }
-                default -> handleNonArrayToken(jsonReader, token);
-            }
-        }
     }
 
     /**
