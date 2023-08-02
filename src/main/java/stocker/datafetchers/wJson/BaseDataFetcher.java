@@ -35,7 +35,7 @@ public abstract class BaseDataFetcher {
      * @return the json string of stock data
      */
     public String fetchData(final String stockName, final String range, final String interval) {
-        String fetchUrl = API_URL + stockName + "?range=" + range + "&interval=" + interval;
+        String fetchUrl = API_URL + stockName + "?range=" + range + "&interval=" + interval; // todo change fetchUrl to apiUrl?
 
         StockAppLogger.INSTANCE.logInfo(
                 String.format("Fetched data: %s, range: %s, interval: %s - %s::%s", stockName, range,
@@ -53,7 +53,7 @@ public abstract class BaseDataFetcher {
             response = HttpClient.newHttpClient().send(
                     request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e); // todo catch this here and handle the exception? if we get an exception it is because we couldn't connect ovet http? so hanxle this exception jere!!
         }
         this.jsonResponseString = response.body(); // save response as member
         StockAppLogger.INSTANCE.logInfo(jsonResponseString);
