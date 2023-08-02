@@ -6,9 +6,9 @@ package stocker.security;
  * @version 1.0
  * @since 1.0
  */
-public class Authenticator {
+public class Authenticator { // todo improvenRefsctor !! security has to be refactoring
     public static final Authenticator INSTANCE = new Authenticator();
-    final String FOLDER_PATH = "src/main/resources/";
+    final String FOLDER_PATH = "src/main/resources/"; // todo use the Path class instead to create paths!!
     final String USERNAME_SECRET_KEY_PATH = FOLDER_PATH + "username_secret_key.log";
     final String PASSWORD_SECRET_KEY_PATH = FOLDER_PATH + "password_secret_key.log";
     final String USERNAME_ENCRYPTED_PATH = FOLDER_PATH + "encrypted_username.log";
