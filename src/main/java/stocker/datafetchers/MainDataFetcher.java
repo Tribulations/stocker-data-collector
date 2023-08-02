@@ -47,16 +47,16 @@ public class MainDataFetcher {
                 e.printStackTrace();
             }
         }
-        System.out.println(stockSymbols.size());
+        System.out.println(stockSymbols.size()); // debug
     }
 
     private void addNewPriceDataToDb() {
         List<Stock> stocks = new ArrayList<>();
         CandlestickDao candlestickDao = new CandlestickDao();
-
+// TODO give the ".ST" suffix ots own variable. this way  self descriptive code
         for (String symbol : stockSymbols) {
             Stock stock = new Stock(symbol + ".ST", ONE_MONTH, ONE_DAY);
-            stocks.add(stock);
+            stocks.add(stock); // todo maybe only use a Stock as parameter to addRow()/s
             candlestickDao.addRows(stock.getSymbol(), stock.getTradingPeriod().getCandlesticks());
         }
     }
