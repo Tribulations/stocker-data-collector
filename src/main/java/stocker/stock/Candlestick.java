@@ -78,7 +78,7 @@ public class Candlestick {
 
     public String getHumanReadableDate() {
         return DateTimeFormatter.ofPattern(
-                "yyyy-MM-dd HH:mm").format(
+                "yyyy-MM-dd HH:mm:ss").format(
                         Instant.ofEpochSecond(timestamp).atZone(ZoneId.systemDefault()));
     }
 

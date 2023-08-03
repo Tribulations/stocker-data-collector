@@ -2,16 +2,13 @@ package stocker;
 // TODO add package.info files to all packages
 import stocker.database.CandlestickDao;
 import stocker.datafetchers.wJson.JsonConstants;
-import stocker.datafetchers.wJson.StockDataFetcher;
 import stocker.stock.Candlestick;
 import stocker.stock.Stock;
-import stocker.stock.StockInfo;
-import stocker.support.StockAppLogger;
 import stocker.datafetchers.wScrape.*;
 
 import java.util.List;
 
-import static stocker.datafetchers.wJson.JsonConstants.ONE_DAY;
+import static stocker.datafetchers.wJson.JsonConstants.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -19,7 +16,7 @@ public class Main {
     }
 
     private static void testGetSingleCandleStick() throws Exception {
-        Stock aak = new Stock("AAK.ST", ONE_DAY, ONE_DAY);
+        Stock aak = new Stock("AAK.ST", ONE_DAY, ONE_HOUR);
         aak.getTradingPeriod().getCandlesticks().forEach(candlestick -> {
             System.out.println(candlestick.getTimestamp());
             System.out.println(candlestick);

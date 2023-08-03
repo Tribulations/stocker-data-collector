@@ -13,20 +13,25 @@ import java.util.List;
  */
 public class TradingPeriod {
     private final List<Candlestick> tradingPeriod;
+    private final String RANGE;
+    private final String INTERVAL;
 
     // store the max values. lazy init? reassign when these values is needed the first time.
+    // todo should these members even be here? What is the responsibility of this class?
     private final double maxOpen = 0.0;
     private final double maxClose = 0.0;
     private final double maxLow = 0.0;
     private final double maxHigh = 0.0;
     private final long maxVolume = 0;
 
-    /**
+    /** TODO OLD DOC!
      * init member field {@link #tradingPeriod}
      * @param candlesticks the candlesticks in the trading period
      */
-    public TradingPeriod(final List<Candlestick> candlesticks) {
+    public TradingPeriod(final List<Candlestick> candlesticks, final String range, final String interval) {
         this.tradingPeriod = candlesticks;
+        this.RANGE = range;
+        this.INTERVAL = interval;
     }
 
     public void printTradingPeriod() {
@@ -54,5 +59,13 @@ public class TradingPeriod {
 
     public List<Candlestick> getCandlesticks() {
         return tradingPeriod;
+    }
+
+    public String getRANGE() {
+        return RANGE;
+    }
+
+    public String getINTERVAL() {
+        return INTERVAL;
     }
 }

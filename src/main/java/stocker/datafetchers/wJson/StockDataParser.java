@@ -38,7 +38,8 @@ public final class StockDataParser {
     private List<Double> closeList;
     private List<Double> lowList;
     private List<Double> highList;
-    private String interval = null;
+    private String interval = "null";
+    private String range = "null";
 
     public final static StockDataParser INSTANCE = new StockDataParser();
 
@@ -133,7 +134,7 @@ public final class StockDataParser {
                     highList.get(i), volumeList.get(i), timestampList.get(i), interval));
         });
 
-        return new TradingPeriod(candlestickList);
+        return new TradingPeriod(candlestickList, range, interval);
     }
 
     /**
@@ -238,6 +239,8 @@ public final class StockDataParser {
                 StockAppLogger.INSTANCE.logDebug(theNextString);
                 if (DATA_GRANULARITY.equals(currentKey)) {
                     interval = theNextString;
+                } else if (RANGE.equals(currentKey)) {
+                    range = theNextString;
                 }
             }
             case NUMBER -> {

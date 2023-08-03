@@ -1,10 +1,13 @@
 package stocker.stock;
 
-import stocker.datafetchers.wJson.StockDataFetcher;
 import stocker.datafetchers.wJson.StockDataParser;
+import stocker.datafetchers.wJson.YahooFinanceFetcher;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * class representing a stock and provides different functionalities to get info about a stock.
+ * Class representing a stock and provides different functionalities to get info about a stock.
  *
  * @author Joakim Colloz
  * @version 1.0
@@ -13,15 +16,22 @@ import stocker.datafetchers.wJson.StockDataParser;
 public class Stock {
     private final String symbol;
     private final TradingPeriod tradingPeriod;
+    // TODO maybe have a map of trading periods? The interval can be the key?
+    private final Map<String, TradingPeriod> tradingPeriodMap = new HashMap<>();
 
     /**
-     * create a Stock by passing its name and a TradingPeriod object.
+     * Create a Stock by passing its name and a TradingPeriod object.
      * @param symbol the symbol/name of the stock
      * @param tradingPeriod the trading period this Stock should have
      */
     public Stock(String symbol, TradingPeriod tradingPeriod) {
         this.symbol = symbol;
-        this.tradingPeriod = tradingPeriod; // todo having a TradingPeriod class is weird?? Should just be candlesticks?
+        this.tradingPeriod = tradingPeriod; /* todo having a TradingPeriod class is weird??
+         Should just be candlesticks? Or maybe not beacuase a trading period can be of the same period
+         but with different intervals. So we might have two 6 month trading periods where one has a one
+         day iterval and the other one hour interval. This way maybe we should store the interval as a
+         member in TradingPeriod? */
+        this.tradingPeriodMap.put(tradingPeriod.getINTERVAL(), tradingPeriod);
     }
 
     /**
@@ -34,7 +44,7 @@ public class Stock {
      */
     public Stock(String symbol, final String range, final String interval) {
         this.symbol = symbol;
-        this.tradingPeriod = StockDataParser.INSTANCE.parseStockData(StockDataFetcher.INSTANCE.fetchStockData(symbol,
+        this.tradingPeriod = StockDataParser.INSTANCE.parseStockData(YahooFinanceFetcher.INSTANCE.fetchData(symbol,
                 range, interval)).getTradingPeriod();
     }
 

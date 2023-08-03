@@ -10,6 +10,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import static stocker.support.ErrorCodes.ERROR_4000;
+import static stocker.support.ErrorCodes.ERROR_4001;
+
 /**
  * Base data fetcher used as template for other concrete fetchers.
  */
@@ -53,12 +56,18 @@ public abstract class BaseDataFetcher {
             response = HttpClient.newHttpClient().send(
                     request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e); // todo catch this here and handle the exception? if we get an exception it is because we couldn't connect ovet http? so hanxle this exception jere!!
+            StockAppLogger.INSTANCE.logInfo(
+                    ERROR_4000 + e.getMessage());
+            e.printStackTrace();
         }
-        this.jsonResponseString = response.body(); // save response as member
-        StockAppLogger.INSTANCE.logInfo(jsonResponseString);
+        if (response != null) {
+            this.jsonResponseString = response.body(); // save response as member
+            StockAppLogger.INSTANCE.logInfo(jsonResponseString);
+        } else {
+            StockAppLogger.INSTANCE.logInfo(Utils.getMethodName() + ERROR_4001);
+        }
 
-        return response.body();
+        return response != null ? response.body() : null;
     }
 
     /**
