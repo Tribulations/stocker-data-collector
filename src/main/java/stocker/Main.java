@@ -1,26 +1,36 @@
 package stocker;
 // TODO add package.info files to all packages
 import stocker.database.CandlestickDao;
+import stocker.datafetchers.wJson.BaseParser;
 import stocker.datafetchers.wJson.JsonConstants;
+import stocker.datafetchers.wJson.YahooFinanceFetcher;
 import stocker.stock.Candlestick;
 import stocker.stock.Stock;
 import stocker.datafetchers.wScrape.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static stocker.datafetchers.wJson.JsonConstants.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        testGetSingleCandleStick();
+        testNewParser();
     }
 
     private static void testGetSingleCandleStick() throws Exception {
-        Stock aak = new Stock("AAK.ST", ONE_DAY, ONE_HOUR);
+        Stock aak = new Stock("AAK.ST", ONE_DAY, ONE_DAY);
         aak.getTradingPeriod().getCandlesticks().forEach(candlestick -> {
             System.out.println(candlestick.getTimestamp());
             System.out.println(candlestick);
         });
+    }
+
+    public static void testNewParser() {
+        final String jsonString = YahooFinanceFetcher.INSTANCE.fetchData("BOL.ST", ONE_MONTH, ONE_DAY);
+        BaseParser baseParser = new BaseParser();
+        baseParser.parse(jsonString);
     }
 
     private static void testStockDataFetcher() throws Exception {

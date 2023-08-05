@@ -71,7 +71,7 @@ public abstract class BaseDataFetcher {
     }
 
     /**
-     *
+     * Accessor returning the previosly fetched json as a string.
      * @return the previously fetched stock data
      */
     public String getJsonResponseString() {
