@@ -12,12 +12,16 @@ import java.io.StringReader;
  * @version 1.0
  * @since 1.0
  */
-public class BaseParser {
+public  abstract class BaseParser {
     private String currentKey = null;
     private String previousKey = null;
 
-    public BaseParser() {
+    protected final JsonReader jsonReader;
+    protected JsonToken jsonToken;
 
+    protected BaseParser(final String jsonString) {
+        StockAppLogger.INSTANCE.logDebug(jsonString);
+        this.jsonReader = new JsonReader(new StringReader(jsonString));
     }
 
     /**
@@ -25,7 +29,7 @@ public class BaseParser {
      *
      * @param key the current key name of the current object that is being traversed
      */
-    private void setKeys(String key) {
+    protected void setKeys(String key) {
         this.previousKey = currentKey;
         this.currentKey = key;
     }
@@ -34,23 +38,16 @@ public class BaseParser {
      * Loops over and prints all data contained in a Json string.
      * This method can be used initially to check a json formatte string and then modifying this method in
      * subclasses to fit the clients needs.
-     * @param jsonString the text string formatted as json
      */
-    public void parse(final String jsonString) {
-        StockAppLogger.INSTANCE.logDebug(jsonString);
+    public void parse() {
         // begin parsing
-        StringReader stringReader = new StringReader(jsonString);
-        JsonReader jsonReader = new JsonReader(stringReader);
-
-        handleObject(jsonReader);
-
+        handleObject();
     }
 
     /**
      * TODO add doc.
-     * @param jsonReader
      */
-    private void handleObject(JsonReader jsonReader) {
+    private void handleObject() {
         try {
             if (jsonReader.peek().equals(JsonToken.END_ARRAY)) {
                 jsonReader.endArray();
@@ -60,15 +57,11 @@ public class BaseParser {
 
             // iterate over the object?
             while (jsonReader.hasNext() || !jsonReader.peek().equals(JsonToken.END_DOCUMENT)) {
-                JsonToken token = jsonReader.peek();
-                switch (token) {
-                    case BEGIN_ARRAY -> {
-                        handleArray(jsonReader);
-                    }
-                    case END_OBJECT -> {
-                        jsonReader.endObject();
-                    }
-                    default -> handleNonArrayToken(jsonReader, token);
+                jsonToken = jsonReader.peek();
+                switch (jsonToken) {
+                    case BEGIN_ARRAY -> handleArray();
+                    case END_OBJECT -> jsonReader.endObject();
+                    default -> handleNonArrayToken();
                 }
             }
         } catch (IOException e) {
@@ -79,20 +72,19 @@ public class BaseParser {
 
     /**
      * TODO  add doc.
-     * @param jsonReader
      * @throws IOException
      */
-    private void handleArray(JsonReader jsonReader) throws IOException {
+    private void handleArray() throws IOException {
         jsonReader.beginArray();
         while (true) {
-            JsonToken token = jsonReader.peek();
-            switch (token) {
+            jsonToken = jsonReader.peek();
+            switch (jsonToken) {
                 case END_ARRAY -> {
                     jsonReader.endArray();
                     return;
                 }
                 case BEGIN_OBJECT -> {
-                    handleObject(jsonReader);
+                    handleObject();
                 }
                 case END_OBJECT -> {
                     jsonReader.endObject();
@@ -101,39 +93,39 @@ public class BaseParser {
                 case END_DOCUMENT -> {
                     return;
                 }
-                default -> handleNonArrayToken(jsonReader, token);
+                default -> handleNonArrayToken();
             }
         }
     }
 
     /**
      * todo add doc.
-     * @param jsonReader
-     * @param token
      * @throws IOException
      */
-    private void handleNonArrayToken(JsonReader jsonReader, JsonToken token) throws IOException {
-        switch (token) {
+    private void handleNonArrayToken() throws IOException {
+        switch (jsonToken) {
             case NAME -> {
-                final String currentName = jsonReader.nextName();
-                setKeys(currentName);
-                StockAppLogger.INSTANCE.logDebug(currentName);
+                handleNameToken();
             }
             case STRING -> {
-                final String currentString = jsonReader.nextString();
-                StockAppLogger.INSTANCE.logDebug(currentString);
+                handleStringToken();
             }
             case NUMBER -> {
-                final String currentNumber = jsonReader.nextString(); // change to correct number data type in subclass
-                StockAppLogger.INSTANCE.logDebug(currentNumber);
-                }
-
-            case NULL -> {
-                jsonReader.nextNull();
-                StockAppLogger.INSTANCE.logDebug("null");
+                handleNumberToken();
             }
-            default -> handleObject(jsonReader);
+            case NULL -> {
+                handleNullToken();
+            }
+            default -> handleObject();
         }
     }
+
+    protected abstract void handleNumberToken() throws IOException;
+
+    protected abstract void handleStringToken() throws IOException;
+
+    protected abstract void handleNameToken() throws IOException;
+
+    protected abstract void handleNullToken() throws IOException;
 }
 
