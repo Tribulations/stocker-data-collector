@@ -1,4 +1,4 @@
-package stocker.datafetchers.wJson;
+package stocker.data.parsers;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
@@ -13,8 +13,8 @@ import java.io.StringReader;
  * @since 1.0
  */
 public  abstract class BaseParser {
-    private String currentKey = null;
-    private String previousKey = null;
+    protected String currentKey = null;
+    protected String previousKey = null;
 
     protected final JsonReader jsonReader;
     protected JsonToken jsonToken;
@@ -42,7 +42,10 @@ public  abstract class BaseParser {
     public void parse() {
         // begin parsing
         handleObject();
+        initParsedObject();
     }
+
+    protected abstract void initParsedObject();
 
     /**
      * TODO add doc.
@@ -83,9 +86,7 @@ public  abstract class BaseParser {
                     jsonReader.endArray();
                     return;
                 }
-                case BEGIN_OBJECT -> {
-                    handleObject();
-                }
+                case BEGIN_OBJECT -> handleObject();
                 case END_OBJECT -> {
                     jsonReader.endObject();
                     return;
@@ -104,18 +105,10 @@ public  abstract class BaseParser {
      */
     private void handleNonArrayToken() throws IOException {
         switch (jsonToken) {
-            case NAME -> {
-                handleNameToken();
-            }
-            case STRING -> {
-                handleStringToken();
-            }
-            case NUMBER -> {
-                handleNumberToken();
-            }
-            case NULL -> {
-                handleNullToken();
-            }
+            case NAME -> handleNameToken();
+            case STRING -> handleStringToken();
+            case NUMBER -> handleNumberToken();
+            case NULL -> handleNullToken();
             default -> handleObject();
         }
     }

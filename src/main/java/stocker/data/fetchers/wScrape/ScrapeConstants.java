@@ -1,4 +1,4 @@
-package stocker.datafetchers.wScrape;
+package stocker.data.fetchers.wScrape;
 
 /**
  * A class containing different constants that are used when running the web scrape on avanza.se.

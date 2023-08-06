@@ -1,4 +1,4 @@
-package stocker.datafetchers.wJson;
+package stocker.data.fetchers.wJson;
 
 
 import stocker.support.StockAppLogger;
@@ -63,8 +63,10 @@ public abstract class BaseDataFetcher {
         if (response != null) {
             this.jsonResponseString = response.body(); // save response as member
             StockAppLogger.INSTANCE.logInfo(jsonResponseString);
+            StockAppLogger.INSTANCE.logDebug(jsonResponseString);
         } else {
             StockAppLogger.INSTANCE.logInfo(Utils.getMethodName() + ERROR_4001);
+            StockAppLogger.INSTANCE.logDebug(Utils.getMethodName() + ERROR_4001);
         }
 
         return response != null ? response.body() : null;

@@ -1,4 +1,4 @@
-package stocker.datafetchers.wJson;
+package stocker.data.fetchers.wJson;
 
 /**
  *

@@ -1,7 +1,7 @@
 package stocker.stock;
 
-import stocker.datafetchers.wJson.StockDataParser;
-import stocker.datafetchers.wJson.YahooFinanceFetcher;
+import stocker.data.fetchers.wJson.YahooFinanceFetcher;
+import stocker.data.parsers.YahooFinanceParser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,8 +44,12 @@ public class Stock {
      */
     public Stock(String symbol, final String range, final String interval) {
         this.symbol = symbol;
-        this.tradingPeriod = StockDataParser.INSTANCE.parseStockData(YahooFinanceFetcher.INSTANCE.fetchData(symbol,
-                range, interval)).getTradingPeriod();
+//        this.tradingPeriod = StockDataParser.INSTANCE.parseStockData(YahooFinanceFetcher.INSTANCE.fetchData(symbol,
+//                range, interval)).getTradingPeriod();
+        final YahooFinanceParser yahooFinanceParser = new YahooFinanceParser(
+                YahooFinanceFetcher.INSTANCE.fetchData(symbol, range, interval));
+        yahooFinanceParser.parse();
+        this.tradingPeriod = yahooFinanceParser.getTradingPeriod();
     }
 
     public String getSymbol() {

@@ -1,4 +1,4 @@
-package stocker.datafetchers.wJson;
+package stocker.data.fetchers.wJson;
 
 public final class JsonConstants {
     private JsonConstants() { throw new IllegalStateException("Utility class"); }

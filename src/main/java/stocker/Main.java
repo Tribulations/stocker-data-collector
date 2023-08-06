@@ -1,28 +1,33 @@
 package stocker;
 // TODO add package.info files to all packages
+import stocker.data.fetchers.wScrape.FirstNorthScraper;
+import stocker.data.fetchers.wScrape.LargeCapScraper;
+import stocker.data.fetchers.wScrape.MidCapScraper;
+import stocker.data.fetchers.wScrape.SmallCapScraper;
 import stocker.database.CandlestickDao;
-import stocker.datafetchers.wJson.BaseParser;
-import stocker.datafetchers.wJson.JsonConstants;
-import stocker.datafetchers.wJson.TestParser;
+import stocker.data.parsers.BaseParser;
+import stocker.data.fetchers.wJson.JsonConstants;
+import stocker.data.parsers.TestParser;
 import stocker.stock.Candlestick;
 import stocker.stock.Stock;
-import stocker.datafetchers.wScrape.*;
 
 import java.util.List;
 
-import static stocker.datafetchers.wJson.JsonConstants.*;
+import static stocker.data.fetchers.wJson.JsonConstants.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        testNewParser();
+//        testNewParser();
+        testGetSingleCandleStick();
     }
 
-    private static void testGetSingleCandleStick() throws Exception {
-        Stock aak = new Stock("AAK.ST", ONE_DAY, ONE_DAY);
+    private static void testGetSingleCandleStick() {
+        Stock aak = new Stock("BOL.ST", ONE_MONTH, ONE_DAY);
         aak.getTradingPeriod().getCandlesticks().forEach(candlestick -> {
             System.out.println(candlestick.getTimestamp());
             System.out.println(candlestick);
         });
+        System.out.println(aak.getSymbol());
     }
 
     public static void testNewParser() {

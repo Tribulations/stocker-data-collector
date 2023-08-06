@@ -1,4 +1,4 @@
-package stocker.datafetchers.wJson;
+package stocker.data.parsers;
 
 import stocker.support.StockAppLogger;
 
@@ -8,6 +8,11 @@ public class TestParser extends BaseParser {
 
     public TestParser(final String jsonString) {
         super(jsonString);
+    }
+
+    @Override
+    protected void initParsedObject() {
+
     }
 
     @Override

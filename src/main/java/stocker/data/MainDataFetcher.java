@@ -1,18 +1,17 @@
-package stocker.datafetchers;
+package stocker.data;
 
 import stocker.database.CandlestickDao;
 import stocker.stock.Stock;
 import stocker.support.StockAppLogger;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static stocker.datafetchers.wJson.JsonConstants.*;
+import static stocker.data.fetchers.wJson.JsonConstants.*;
 
 /**
  * Class used to fetch data for many days for all stocks and add to db.
