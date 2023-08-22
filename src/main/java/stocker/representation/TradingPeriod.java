@@ -1,6 +1,4 @@
-package stocker.stock;
-
-import stocker.stock.Candlestick;
+package stocker.representation;
 
 import java.util.List;
 

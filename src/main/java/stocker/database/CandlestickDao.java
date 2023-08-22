@@ -1,6 +1,6 @@
 package stocker.database;
 
-import stocker.stock.Candlestick;
+import stocker.representation.Candlestick;
 import stocker.support.StockAppLogger;
 
 import java.sql.*;
@@ -135,6 +135,11 @@ public class CandlestickDao implements DAO<Candlestick>{
         return null;
     }
 
+    /**
+     * used to add a single price data row to the database. TODO should add functiolaity to check if the data being added is in the same day when we fetch 1 day interval and update so the database only contains the latest candlestick timestampdata? Or only fetch 1d data once each day? Have one method for each type of interval when adding to db?
+     * @param symbol
+     * @param candlesticks
+     */
     @Override
     public void addRows(String symbol, List<Candlestick> candlesticks) {
         try {
@@ -148,7 +153,7 @@ public class CandlestickDao implements DAO<Candlestick>{
                                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                     // when fetching multiple 1d candles the timestamp is set to 9:00 am so we increase it to be 17:39
                     if (candlestick.getInterval().equals("1d")) {
-                        statement.setLong(1, candlestick.getTimestamp() + 30540);
+                        statement.setLong(1, candlestick.getTimestamp());
                     } else {
                         statement.setLong(1, candlestick.getTimestamp());
                     }

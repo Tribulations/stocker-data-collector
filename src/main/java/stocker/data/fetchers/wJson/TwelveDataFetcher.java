@@ -18,14 +18,14 @@
 //public final class TwelveDataFetcher {
 //    private final String API_KEY_HEADER = "X-RapidAPI-Key";
 //    private final String API_HOST_HEADER = "X-RapidAPI-Host";
-//    private final String API_KEY = "3a491bbe0amshadc3d607a3d7e2dp1c9ee5jsnb82d483841a2"; // This is not secure? TODO
+//    private final String API_KEY = "3a491bbe0amshadc3d607a3d7e2dp1c9ee5jsnb82d483841a2"; // This is not secure?
 //    private final String API_HOST = "twelve-data1.p.rapidapi.com";
 //    public static final TwelveDataFetcher INSTANCE = new TwelveDataFetcher();
 //
 //    private String jsonResponseString; // Stores the previous fetched stock data
 //
 //    /**
-//     * Default private construction TODO
+//     * Default private construction
 //     */
 //    private TwelveDataFetcher()  {
 //    }

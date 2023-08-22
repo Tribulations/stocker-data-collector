@@ -1,4 +1,4 @@
-package stocker.stock;
+package stocker.representation;
 
 import stocker.data.fetchers.wJson.YahooFinanceFetcher;
 import stocker.data.parsers.YahooFinanceParser;

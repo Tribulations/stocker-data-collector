@@ -1,8 +1,8 @@
 package stocker.data.parsers;
 
-import stocker.stock.Candlestick;
-import stocker.stock.Stock;
-import stocker.stock.TradingPeriod;
+import stocker.representation.Candlestick;
+import stocker.representation.Stock;
+import stocker.representation.TradingPeriod;
 import stocker.support.StockAppLogger;
 import stocker.support.Utils;
 

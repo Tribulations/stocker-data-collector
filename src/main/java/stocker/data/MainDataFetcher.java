@@ -1,7 +1,7 @@
 package stocker.data;
 
 import stocker.database.CandlestickDao;
-import stocker.stock.Stock;
+import stocker.representation.Stock;
 import stocker.support.StockAppLogger;
 
 import java.io.BufferedReader;
@@ -49,20 +49,23 @@ public class MainDataFetcher {
         System.out.println(stockSymbols.size()); // debug
     }
 
-    private void addNewPriceDataToDb() {
+    /**
+     *
+     */
+    private void addLatest1dPriceDataToDb() {
         List<Stock> stocks = new ArrayList<>();
         CandlestickDao candlestickDao = new CandlestickDao();
-// TODO give the ".ST" suffix ots own variable. this way  self descriptive code
+        final String marketSuffix = ".ST";
+
         for (String symbol : stockSymbols) {
-            Stock stock = new Stock(symbol + ".ST", ONE_MONTH, ONE_DAY);
+            Stock stock = new Stock(symbol + marketSuffix, ONE_DAY, ONE_DAY);
             stocks.add(stock); // todo maybe only use a Stock as parameter to addRow()/s
             candlestickDao.addRows(stock.getSymbol(), stock.getTradingPeriod().getCandlesticks());
         }
     }
 
     public static void main(String... args) {
-
         MainDataFetcher mainDataFetcher = new MainDataFetcher();
-        mainDataFetcher.addNewPriceDataToDb();
+        mainDataFetcher.addLatest1dPriceDataToDb();
     }
 }

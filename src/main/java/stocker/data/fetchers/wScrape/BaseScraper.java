@@ -7,7 +7,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import stocker.stock.StockInfo;
+import stocker.representation.StockInfo;
 import stocker.support.StockAppLogger;
 
 import java.io.BufferedWriter;

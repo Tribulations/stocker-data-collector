@@ -1,7 +1,7 @@
 package stocker.security;
 
 /**
- * Class used to handle authentication to the database and more.
+ * Class used to handle authentication to the database etc.
  * @author tribulations
  * @version 1.0
  * @since 1.0
@@ -36,5 +36,14 @@ public class Authenticator { // todo improvenRefsctor !! security has to be refa
      */
     public String getDbUsername() {
         return username.decrypt();
+    }
+
+    /**
+     * used for testing.
+     * @param args not used here
+     */
+    public static void main(String... args) {
+        System.out.println(Authenticator.INSTANCE.getDbPassword());
+        System.out.println(Authenticator.INSTANCE.getDbUsername());
     }
 }

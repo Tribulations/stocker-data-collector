@@ -1,4 +1,4 @@
-package stocker.stock;
+package stocker.representation;
 
 import java.time.Instant;
 import java.time.ZoneId;

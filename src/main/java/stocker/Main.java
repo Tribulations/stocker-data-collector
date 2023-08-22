@@ -8,8 +8,8 @@ import stocker.database.CandlestickDao;
 import stocker.data.parsers.BaseParser;
 import stocker.data.fetchers.wJson.JsonConstants;
 import stocker.data.parsers.TestParser;
-import stocker.stock.Candlestick;
-import stocker.stock.Stock;
+import stocker.representation.Candlestick;
+import stocker.representation.Stock;
 
 import java.util.List;
 

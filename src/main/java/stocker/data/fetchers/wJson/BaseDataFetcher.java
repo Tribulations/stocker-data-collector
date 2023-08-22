@@ -38,14 +38,14 @@ public abstract class BaseDataFetcher {
      * @return the json string of stock data
      */
     public String fetchData(final String stockName, final String range, final String interval) {
-        String fetchUrl = API_URL + stockName + "?range=" + range + "&interval=" + interval; // todo change fetchUrl to apiUrl?
+        String apiUrl = API_URL + stockName + "?range=" + range + "&interval=" + interval;
 
         StockAppLogger.INSTANCE.logInfo(
                 String.format("Fetched data: %s, range: %s, interval: %s - %s::%s", stockName, range,
                         interval, getClass().getCanonicalName(), Utils.getMethodName()));
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(fetchUrl))
+                .uri(URI.create(apiUrl))
                 .header(API_KEY_HEADER, API_KEY)
                 .header(API_HOST_HEADER, API_HOST)
                 .method("GET", HttpRequest.BodyPublishers.noBody())
@@ -73,7 +73,7 @@ public abstract class BaseDataFetcher {
     }
 
     /**
-     * Accessor returning the previosly fetched json as a string.
+     * Accessor returning the previously fetched json as a string.
      * @return the previously fetched stock data
      */
     public String getJsonResponseString() {
