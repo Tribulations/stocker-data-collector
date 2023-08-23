@@ -15,7 +15,7 @@ public final class DbConstants {
     public static final String DB_URL = "jdbc:postgresql://155.4.55.36:5432/test_db";
     public static final String DB_USERNAME = Authenticator.INSTANCE.getDbUsername();
     public static final String DB_PASSWORD = Authenticator.INSTANCE.getDbPassword();
-    public static final String CANDLESTICK_TABLE = "test_schema.temp_price4";
+    public static final String CANDLESTICK_TABLE = "test_schema.temp_1d_price";
 
     /** Database table and attribute name constants */
     public static final String TIME_STAMP_COLUMN = "time_stamp";

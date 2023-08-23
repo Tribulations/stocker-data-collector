@@ -72,8 +72,19 @@ public class MainDataFetcher {
         }
     }
 
+    private void addMultipleOlder1dPriceDataToDb(final String range) {
+        CandlestickDao candlestickDao = new CandlestickDao();
+        final String marketSuffix = ".ST";
+
+        for (String symbol : stockSymbols) {
+            Stock stock = new Stock(symbol + marketSuffix, range, ONE_DAY);
+            candlestickDao.addMultipleOlderRows(stock.getSymbol(), stock.getTradingPeriod().getCandlesticks());
+        }
+    }
+
     public static void main(String... args) {
         MainDataFetcher mainDataFetcher = new MainDataFetcher();
-        mainDataFetcher.addLatest1dPriceDataToDb();
+//        mainDataFetcher.addLatest1dPriceDataToDb();
+        mainDataFetcher.addMultipleOlder1dPriceDataToDb(ONE_MONTH);
     }
 }
