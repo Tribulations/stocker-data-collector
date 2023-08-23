@@ -21,10 +21,18 @@ public class MainDataFetcher {
     private final List<String> fileNames = Arrays.asList("src/main/resources/LargeCap.txt",
             "src/main/resources/MidCap.txt", "src/main/resources/SmallCap.txt");
 
+    /**
+     * Public constructor calling internal method {@link #initStockSymbolNames()} to initialize member field
+     * {@link #stockSymbols} storing the names/symbols of the stocks for which price data should be retrieved.
+     */
     public MainDataFetcher() {
         initStockSymbolNames();
     }
 
+    /**
+     * TODO maybe we should remove the -PREF, -A stocks etc. directly when we scrape these names and just save the needed symbol names?
+     * TODO As for now we have to remove the unneeded stock names everytime in this method which is unnecessary!
+     */
     private void initStockSymbolNames() {
         // read file/s containing stock symbols
         // add only the wanted ones i.e. we don't want pref, a or c stock etc. to list.
