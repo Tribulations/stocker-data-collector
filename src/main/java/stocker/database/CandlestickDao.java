@@ -178,6 +178,13 @@ public class CandlestickDao implements DAO<Candlestick>{
         }
     }
 
+    /**
+     * Adds one row to the database overwriting the open, close, low, high and volume if the timestamp
+     * already exists for the current symbol, i.e. if the symbol AAB with datetime 2023-08-01 17:30 already exists
+     * the open, close, low, high and volume will be updated for this symbol and datetime/timestamp.
+     * @param symbol the stock name/symbol
+     * @param candlestick the candlestick containing the price data for the symbol which should be added to th database
+     */
     @Override
     public void addRowOverwrite(String symbol, Candlestick candlestick) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
@@ -201,6 +208,11 @@ public class CandlestickDao implements DAO<Candlestick>{
         }
     }
 
+    /**
+     * Adds one row to the database if the timestamp for the current symbol do ot already exist in the database.
+     * @param symbol the stock name/symbol
+     * @param candlestick the candlestick containing the price data for the symbol which should be added to th database
+     */
     @Override
     public void addRowNoOverwrite(String symbol, Candlestick candlestick) {
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
