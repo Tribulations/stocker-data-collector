@@ -38,7 +38,7 @@ public class MainDataFetcher {
         // add only the wanted ones i.e. we don't want pref, a or c stock etc. to list.
         for (String fileName : fileNames) {
             try {
-                FileReader fileReader = new FileReader(fileName);
+                FileReader fileReader = new FileReader(fileName); // todo close file readers!
                 BufferedReader bufferedReader = new BufferedReader(fileReader);
 
                 while (bufferedReader.ready()) {
