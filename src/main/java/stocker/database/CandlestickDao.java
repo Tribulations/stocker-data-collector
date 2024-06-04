@@ -66,7 +66,7 @@ public class CandlestickDao implements DAO<Candlestick>{
      */
     private void setCandleStick(final ResultSet resultSet, final Candlestick candlestick) {
         try {
-            candlestick.setTimestamp(resultSet.getLong(TIME_STAMP_COLUMN));
+            candlestick.setTimestamp(resultSet.getLong(TIMESTAMP_COLUMN));
             candlestick.setOpen(resultSet.getDouble(OPEN_COLUMN));
             candlestick.setClose(resultSet.getDouble(CLOSE_COLUMN));
             candlestick.setLow(resultSet.getDouble(LOW_COLUMN));
@@ -190,9 +190,7 @@ public class CandlestickDao implements DAO<Candlestick>{
             for (Candlestick candlestick : candlesticks) {
                 if (connection != null) {
                     PreparedStatement statement = connection.prepareStatement(
-                            "INSERT INTO " + CANDLESTICK_TABLE
-                                    + " (time_stamp, open, close, low, high, volume, symbol, interval) "
-                                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                            INSERT_CANDLESTICK_QUERY);
                     // when fetching multiple 1d candles the timestamp is set to 9:00 am so we increase it to be 17:39
                     if (candlestick.getInterval().equals("1d")) {
                         statement.setLong(1, candlestick.getTimestamp());
@@ -205,7 +203,6 @@ public class CandlestickDao implements DAO<Candlestick>{
                     statement.setDouble(5, candlestick.getHigh());
                     statement.setDouble(6, candlestick.getVolume());
                     statement.setString(7, symbol);
-                    statement.setString(8, candlestick.getInterval());
                     statement.executeUpdate();
                 } else {
                     StockAppLogger.INSTANCE.logInfo("no db connection: connection is null");
