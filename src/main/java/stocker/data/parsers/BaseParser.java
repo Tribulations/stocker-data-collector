@@ -37,7 +37,7 @@ public  abstract class BaseParser {
      *
      * @param key the current key name of the current object being traversed
      */
-    protected void setKeys(String key) {
+    protected void updateCurrentAndPreviousKeys(String key) {
         this.previousKey = currentKey;
         this.currentKey = key;
     }
@@ -80,7 +80,7 @@ public  abstract class BaseParser {
     /**
      * Handles JSON name tokens.
      * Subclasses should implement this method to define the handling process,
-     * including the management of key names using the {@link #setKeys(String)} method.
+     * including the management of key names using the {@link #updateCurrentAndPreviousKeys(String)} method.
      *
      * @throws IOException if an I/O error occurs
      */
@@ -161,7 +161,7 @@ public  abstract class BaseParser {
      * Handles non-array JSON tokens such as strings, numbers, booleans, and nulls.
      *
      * <p>The NAME token is used to manage key names in JSON objects, and the handling of this token
-     * involves updating the current and previous key names using the {@link #setKeys(String)} method.
+     * involves updating the current and previous key names using the {@link #updateCurrentAndPreviousKeys(String)} method.
      *
      * @throws IOException if an I/O error occurs
      */

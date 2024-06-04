@@ -42,7 +42,7 @@ public class TestParser extends BaseParser {
     @Override
     protected void handleNameToken() throws IOException {
         final String currentName = jsonReader.nextName();
-        setKeys(currentName);
+        updateCurrentAndPreviousKeys(currentName);
         StockAppLogger.INSTANCE.logDebug(currentName);
     }
 }

@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static stocker.data.fetchers.wJson.JsonConstants.HAS_PRE_POST_MARKET_DATA;
 import static stocker.data.fetchers.wJson.JsonConstants.TIMESTAMP;
 import static stocker.data.fetchers.wJson.JsonConstants.OPEN;
 import static stocker.data.fetchers.wJson.JsonConstants.CLOSE;
@@ -118,7 +117,7 @@ public class YahooFinanceParser extends BaseParser {
     @Override
     protected void handleNameToken() throws IOException {
         final String currentName = jsonReader.nextName();
-        setKeys(currentName);
+        updateCurrentAndPreviousKeys(currentName);
         StockAppLogger.INSTANCE.logDebug(currentName);
 
         switch (currentName) {
