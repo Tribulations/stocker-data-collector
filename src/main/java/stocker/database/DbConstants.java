@@ -12,17 +12,23 @@ public final class DbConstants {
     }
 
     /** Database connection constants */
-    public static final String DB_URL = "jdbc:postgresql://155.4.55.36:5432/test_db";
+    public static final String DB_IP_ADDRESS = "213.164.214.9";
+    public static final String DB_PORT = ":5432";
+    public static final String DB_NAME = "test_db";
+    public static final String DB_URL = "jdbc:postgresql://" + DB_IP_ADDRESS + DB_PORT + "/" + DB_NAME;
     public static final String DB_USERNAME = Authenticator.INSTANCE.getDbUsername();
     public static final String DB_PASSWORD = Authenticator.INSTANCE.getDbPassword();
-    public static final String CANDLESTICK_TABLE = "test_schema.temp_1d_price";
+    public static final String CANDLESTICK_TABLE = "test_schema.stock_prices1";
 
     /** Database table and attribute name constants */
-    public static final String TIME_STAMP_COLUMN = "time_stamp";
+    public static final String TIMESTAMP_COLUMN = "timestamp";
     public static final String OPEN_COLUMN = "open";
     public static final String CLOSE_COLUMN = "close";
     public static final String LOW_COLUMN = "low";
     public static final String HIGH_COLUMN = "high";
     public static final String VOLUME_COLUMN = "volume";
     public static final String INTERVAL_COLUMN = "interval";
+    public static final String INSERT_CANDLESTICK_QUERY = "INSERT INTO " + CANDLESTICK_TABLE
+            + " (timestamp, open, close, low, high, volume, symbol) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?)";
 }
