@@ -8,26 +8,34 @@ import java.io.IOException;
 import java.io.StringReader;
 
 /**
- * @author tribulations
+ * Abstract base class for parsing JSON strings.
+ * This class provides basic functionalities for traversing and handling JSON data.
+ * Subclasses should implement the abstract methods to handle specific JSON token types.
+ *
+ *  * @author Tribulations / Joakim Colloz
  * @version 1.0
  * @since 1.0
  */
 public  abstract class BaseParser {
     protected String currentKey = null;
     protected String previousKey = null;
-
     protected final JsonReader jsonReader;
     protected JsonToken jsonToken;
 
+    /**
+     * Constructor that initializes the JsonReader with the provided JSON string.
+     *
+     * @param jsonString the JSON string to be parsed
+     */
     protected BaseParser(final String jsonString) {
         StockAppLogger.INSTANCE.logDebug(jsonString);
         this.jsonReader = new JsonReader(new StringReader(jsonString));
     }
 
     /**
-     * take care of updating the keys used to keep track of the current objects that are being parsed
+     * Updates the keys used to keep track of the current and previous objects being parsed.
      *
-     * @param key the current key name of the current object that is being traversed
+     * @param key the current key name of the current object being traversed
      */
     protected void setKeys(String key) {
         this.previousKey = currentKey;
@@ -35,9 +43,11 @@ public  abstract class BaseParser {
     }
 
     /**
-     * Loops over and prints all data contained in a Json string.
-     * This method can be used initially to check a json formatte string and then modifying this method in
-     * subclasses to fit the clients needs.
+     * Parses the JSON string.
+     * This method initiates the parsing process by calling the {@link #handleObject()} method
+     * and then invokes {@link #initParsedObject()} which should be implemented by subclasses.
+     *
+     * If {@link #initParsedObject()} is not implemented, this method traverses and prints all data in the Json string.
      */
     public void parse() {
         // begin parsing
@@ -45,10 +55,56 @@ public  abstract class BaseParser {
         initParsedObject();
     }
 
+    /**
+     * Initializes the parsed object.
+     * Subclasses should implement this method to define the initialization process.
+     */
     protected abstract void initParsedObject();
 
     /**
-     * TODO add doc.
+     * Handles JSON number tokens.
+     * Subclasses should implement this method to define the handling process.
+     *
+     * @throws IOException if an I/O error occurs
+     */
+    protected abstract void handleNumberToken() throws IOException;
+
+    /**
+     * Handles JSON string tokens.
+     * Subclasses should implement this method to define the handling process.
+     *
+     * @throws IOException if an I/O error occurs
+     */
+    protected abstract void handleStringToken() throws IOException;
+
+    /**
+     * Handles JSON name tokens.
+     * Subclasses should implement this method to define the handling process,
+     * including the management of key names using the {@link #setKeys(String)} method.
+     *
+     * @throws IOException if an I/O error occurs
+     */
+    protected abstract void handleNameToken() throws IOException;
+
+    /**
+     * Handles JSON null tokens.
+     * Subclasses should implement this method to define the handling process.
+     *
+     * @throws IOException if an I/O error occurs
+     */
+    protected abstract void handleNullToken() throws IOException;
+
+    /**
+     * Handles JSON boolean tokens.
+     * Subclasses should implement this method to define the handling process.
+     *
+     * @throws IOException if an I/O error occurs
+     */
+    protected abstract void handleBooleanToken() throws IOException;
+
+    /**
+     * Handles JSON objects by iterating over their keys and values.
+     * This method processes JSON objects and delegates to {@link #handleArray()} for arrays.
      */
     private void handleObject() {
         try {
@@ -58,7 +114,7 @@ public  abstract class BaseParser {
                 jsonReader.beginObject();
             }
 
-            // iterate over the object?
+            // iterate over the object
             while (jsonReader.hasNext() || !jsonReader.peek().equals(JsonToken.END_DOCUMENT)) {
                 jsonToken = jsonReader.peek();
                 switch (jsonToken) {
@@ -74,8 +130,10 @@ public  abstract class BaseParser {
     }
 
     /**
-     * TODO  add doc.
-     * @throws IOException
+     * Handles JSON arrays by iterating over their elements.
+     * This method processes nested arrays and delegates to `handleObject` for objects within arrays.
+     *
+     * @throws IOException if an I/O error occurs
      */
     private void handleArray() throws IOException {
         jsonReader.beginArray();
@@ -100,8 +158,12 @@ public  abstract class BaseParser {
     }
 
     /**
-     * todo add doc.
-     * @throws IOException
+     * Handles non-array JSON tokens such as strings, numbers, booleans, and nulls.
+     *
+     * <p>The NAME token is used to manage key names in JSON objects, and the handling of this token
+     * involves updating the current and previous key names using the {@link #setKeys(String)} method.
+     *
+     * @throws IOException if an I/O error occurs
      */
     private void handleNonArrayToken() throws IOException {
         switch (jsonToken) {
@@ -113,15 +175,5 @@ public  abstract class BaseParser {
             default -> handleObject();
         }
     }
-
-    protected abstract void handleNumberToken() throws IOException;
-
-    protected abstract void handleStringToken() throws IOException;
-
-    protected abstract void handleNameToken() throws IOException;
-
-    protected abstract void handleNullToken() throws IOException;
-
-    protected abstract void handleBooleanToken() throws IOException;
 }
 
