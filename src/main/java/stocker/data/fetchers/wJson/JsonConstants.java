@@ -18,6 +18,7 @@ public final class JsonConstants {
     public static final String TIMEZONE = "timezone";
     public static final String EXCHANGE_TIMEZONE_NAME = "exchangeTimezoneName";
     public static final String REGULAR_MARKET_PRICE = "regularMarketPrice";
+    public static final String HAS_PRE_POST_MARKET_DATA = "hasPrePostMarketData";
     public static final String CHART_PREVIOUS_CLOSE = "chartPreviousClose";
     public static final String PREVIOUS_CLOSE = "previousClose";
     public static final String SCALE = "scale";
