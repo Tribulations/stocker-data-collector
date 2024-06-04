@@ -10,6 +10,7 @@ import stocker.data.fetchers.wJson.JsonConstants;
 import stocker.data.parsers.TestParser;
 import stocker.representation.Candlestick;
 import stocker.representation.Stock;
+import stocker.security.Authenticator;
 
 import java.util.List;
 
@@ -18,7 +19,8 @@ import static stocker.data.fetchers.wJson.JsonConstants.*;
 public class Main {
     public static void main(String[] args) throws Exception {
 //        testNewParser();
-        testGetSingleCandleStick();
+//        testGetSingleCandleStick();
+        testAddCandlestickToDb();
     }
 
     private static void testGetSingleCandleStick() {
@@ -49,9 +51,9 @@ public class Main {
     }
 
     public static void testAddCandlestickToDb() throws Exception {
-        Stock aak = new Stock("HM-B.ST", JsonConstants.ONE_YEAR, ONE_DAY);
+        Stock hm_b = new Stock("HM-B.ST", ONE_DAY, ONE_DAY);
         CandlestickDao candlestickDao = new CandlestickDao();
-        candlestickDao.addRows(aak.getSymbol(), aak.getTradingPeriod().getCandlesticks());
+        candlestickDao.addRows(hm_b.getSymbol(), hm_b.getTradingPeriod().getCandlesticks());
     }
     public static void scrapeAllInfo() {
         LargeCapScraper largeCapScraper = new LargeCapScraper();
