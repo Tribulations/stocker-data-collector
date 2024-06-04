@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static stocker.data.fetchers.wJson.JsonConstants.HAS_PRE_POST_MARKET_DATA;
 import static stocker.data.fetchers.wJson.JsonConstants.TIMESTAMP;
 import static stocker.data.fetchers.wJson.JsonConstants.OPEN;
 import static stocker.data.fetchers.wJson.JsonConstants.CLOSE;
@@ -106,6 +107,12 @@ public class YahooFinanceParser extends BaseParser {
         } else if (RANGE.equals(currentKey)) {
             range = currentKey;
         }
+    }
+
+    @Override
+    protected void handleBooleanToken() throws IOException {
+        final Boolean currentBoolean = jsonReader.nextBoolean();
+        StockAppLogger.INSTANCE.logDebug(currentBoolean.toString());
     }
 
     @Override

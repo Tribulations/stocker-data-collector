@@ -34,6 +34,12 @@ public class TestParser extends BaseParser {
     }
 
     @Override
+    protected void handleBooleanToken() throws IOException {
+        final String currentBoolean = jsonReader.nextString();
+        StockAppLogger.INSTANCE.logDebug(currentBoolean);
+    }
+
+    @Override
     protected void handleNameToken() throws IOException {
         final String currentName = jsonReader.nextName();
         setKeys(currentName);

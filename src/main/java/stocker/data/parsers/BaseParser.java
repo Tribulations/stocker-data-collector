@@ -109,6 +109,7 @@ public  abstract class BaseParser {
             case STRING -> handleStringToken();
             case NUMBER -> handleNumberToken();
             case NULL -> handleNullToken();
+            case BOOLEAN -> handleBooleanToken();
             default -> handleObject();
         }
     }
@@ -120,5 +121,7 @@ public  abstract class BaseParser {
     protected abstract void handleNameToken() throws IOException;
 
     protected abstract void handleNullToken() throws IOException;
+
+    protected abstract void handleBooleanToken() throws IOException;
 }
 
