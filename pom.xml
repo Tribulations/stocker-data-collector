@@ -1,38 +1,251 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.example</groupId>
+    <groupId>stocker</groupId>
+
+    <!-- Project artifact ID -->
     <artifactId>Stocker</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <!-- Project packaging type -->
+    <packaging>jar</packaging>
+    <!-- Project name -->
+    <name>Stocker</name>
+    <!-- Project URL -->
+    <url>${project.artifactId}</url>
+    <!-- Project description -->
+    <description>
+        Stocker: An application providing different functionality to facilitate finding stock trading opportunities.
+    </description>
+
+    <!-- Stating path to JavaDoc output, so that pages link correctly -->
+    <distributionManagement>
+        <site>
+            <id>${project.artifactId}-site</id>
+            <url>file://${project.artifactId}/target/site/</url>
+        </site>
+    </distributionManagement>
+
+    <!-- Project properties -->
     <properties>
-        <maven.compiler.source>20</maven.compiler.source>
-        <maven.compiler.target>20</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
+    <!-- Reporting plugins for generating documentation and reports -->
+    <reporting>
+        <plugins>
+            <!-- Site generation plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>4.0.0-M5</version>
+            </plugin>
+            <!-- Project information reports plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.4.1</version>
+            </plugin>
+            <!-- JavaDoc generation plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <show>protected</show>
+                    <quiet>true</quiet>
+                    <links>
+                        <link>https://docs.oracle.com/en/java/javase/17/docs/api/</link>
+                    </links>
+                    <!-- custom javadoc tags -->
+                    <tags>
+                        <tag>
+                            <name>todo</name>
+                            <placement>a</placement>
+                            <head>Todo:</head>
+                        </tag>
+                        <tag>
+                            <name>test</name>
+                            <placement>a</placement>
+                            <head>Test:</head>
+                        </tag>
+                        <tag>
+                            <name>bug</name>
+                            <placement>a</placement>
+                            <head>Bug:</head>
+                        </tag>
+                    </tags>
+                </configuration>
+                <reportSets>
+                    <reportSet>
+                        <id>default</id>
+                        <reports>
+                            <report>javadoc</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+
+            <!-- Surefire report generation plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <title>Surefire Report</title>
+                    <description>Overview of test outcomes.</description>
+                    <outputDirectory>${project.reporting.outputDirectory}/surefire-report</outputDirectory>
+                    <showSuccess>true</showSuccess>
+                    <linkXRef>true</linkXRef>
+                    <aggregate>true</aggregate>
+                </configuration>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>report</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+
+            <!-- Checkstyle plugin for checking code style -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.2.1</version>
+                <configuration>
+                    <configLocation>_RepoResources/checkstyle.xml</configLocation>
+                    <consoleOutput>false</consoleOutput>
+                    <linkXRef>false</linkXRef>
+                    <goal>site</goal>
+                </configuration>
+                <reportSets>
+                    <reportSet>
+                        <inherited>true</inherited>
+                        <reports>
+                            <report>checkstyle</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
+
+    <!-- Build configuration -->
+    <build>
+        <plugins>
+            <!-- Surefire plugin for running tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>default-test1</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>default-test2</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>default-test3</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Site generation plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>4.0.0-M5</version>
+            </plugin>
+
+            <!-- Compiler plugin for compiling the project -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
+                <configuration>
+                    <release>17</release>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- Build an executable JAR -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <!-- Add classpath to the manifest -->
+                            <addClasspath>true</addClasspath>
+                            <!-- Set classpath prefix -->
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <!-- Set main class for the executable JAR -->
+                            <mainClass>stocker.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- Project dependencies -->
     <dependencies>
+        <!-- JUnit Jupiter API dependency for tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.9.2</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- JUnit Jupiter Engine dependency for running tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.9.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.0.0</version>
+            <type>maven-plugin</type>
+        </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>3.141.59</version> <!-- Use the latest stable version -->
+            <version>3.141.59</version>
+            <scope>compile</scope>
         </dependency>
         <!-- handle json -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.10.1</version>
+            <scope>compile</scope>
         </dependency>
         <!-- use postgresql database -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.5.4</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
-
-
 </project>
