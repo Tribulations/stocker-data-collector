@@ -92,7 +92,8 @@ public class YahooFinanceParser extends BaseParser {
             case HIGH -> highList.add(
                     Double.valueOf(decimalFormat.format(jsonReader.nextDouble())));
             case VOLUME -> volumeList.add(jsonReader.nextLong());
-            default -> StockAppLogger.INSTANCE.logDebug(jsonReader.nextString());
+            default -> StockAppLogger.INSTANCE.logDebug(
+                    "default case in YahooFinanceParser::handleNumberToken() " + jsonReader.nextString());
         }
     }
 
