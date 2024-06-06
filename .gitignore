@@ -37,3 +37,6 @@ google-services.json
 
 # Draw.io backup files
 *.drawio.bkp
+
+# Maven
+dependency-reduced-pom.xml
