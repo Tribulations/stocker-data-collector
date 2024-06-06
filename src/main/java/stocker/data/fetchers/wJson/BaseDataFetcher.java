@@ -16,7 +16,7 @@ import static stocker.support.ErrorCodes.ERROR_4001;
 /**
  * Base data fetcher used as template for other concrete fetchers.
  */
-public abstract class BaseDataFetcher {
+public abstract class BaseDataFetcher { // TODO rename package wJson to json
     private final String API_KEY_HEADER;
     private final String API_HOST_HEADER;
     private final String API_KEY;

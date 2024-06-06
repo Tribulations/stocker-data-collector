@@ -18,7 +18,7 @@ import static stocker.data.fetchers.wJson.JsonConstants.*;
  */
 public class MainDataFetcher {
     private final List<String> stockSymbols = new ArrayList<>();
-    private final List<String> fileNames = Arrays.asList("src/main/resources/LargeCap.txt",
+    private final List<String> fileNames = Arrays.asList("src/main/resources/LargeCap.txt", // TODO use constants
             "src/main/resources/MidCap.txt", "src/main/resources/SmallCap.txt");
 
     /**
@@ -63,7 +63,7 @@ public class MainDataFetcher {
     private void addLatest1dPriceDataToDb() {
         List<Stock> stocks = new ArrayList<>();
         CandlestickDao candlestickDao = new CandlestickDao();
-        final String marketSuffix = ".ST";
+        final String marketSuffix = ".ST";// TODO use constant
 
         for (String symbol : stockSymbols) {
             Stock stock = new Stock(symbol + marketSuffix, ONE_DAY, ONE_DAY);
@@ -74,7 +74,7 @@ public class MainDataFetcher {
 
     private void addMultipleOlder1dPriceDataToDb(final String range) {
         CandlestickDao candlestickDao = new CandlestickDao();
-        final String marketSuffix = ".ST";
+        final String marketSuffix = ".ST";// TODO use constant
 
         for (String symbol : stockSymbols) {
             Stock stock = new Stock(symbol + marketSuffix, range, ONE_DAY);

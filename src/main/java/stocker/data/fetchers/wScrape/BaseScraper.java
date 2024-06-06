@@ -23,7 +23,7 @@ import java.util.Set;
  * @version 1.0
  * @since 1.0 2023-07-26
  */
-public abstract class BaseScraper {
+public abstract class BaseScraper { // TODO rename package wScrape to scrape
     private  final List<StockInfo> stockInfoList;
     protected static WebDriver driver;
     protected static WebDriverWait explicitWait;

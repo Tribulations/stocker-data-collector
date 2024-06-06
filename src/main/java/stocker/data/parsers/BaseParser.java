@@ -27,7 +27,7 @@ public  abstract class BaseParser {
      *
      * @param jsonString the JSON string to be parsed
      */
-    protected BaseParser(final String jsonString) {
+    protected BaseParser(final String jsonString) { // TODO have to close the jsonReader somewhere
         StockAppLogger.INSTANCE.logDebug(jsonString);
         this.jsonReader = new JsonReader(new StringReader(jsonString));
     }
@@ -49,7 +49,7 @@ public  abstract class BaseParser {
      *
      * If {@link #initParsedObject()} is not implemented, this method traverses and prints all data in the Json string.
      */
-    public void parse() {
+    public void parse() {// TODO where close jsonReader? Maybe instantiate it here and not in the constructor? Use auto-closable
         // begin parsing
         handleObject();
         initParsedObject();

@@ -23,7 +23,7 @@ import static stocker.data.fetchers.wJson.JsonConstants.SYMBOL;
 import static stocker.data.fetchers.wJson.JsonConstants.INDICATORS;
 import static stocker.data.fetchers.wJson.JsonConstants.RANGE;
 
-public class YahooFinanceParser extends BaseParser {
+public class YahooFinanceParser extends BaseParser {// TODO divide this class? It does two things now? SAngle responsibility!! Now it parses and creates a TradingPeriod?
     private final DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
     private String symbol;
@@ -46,7 +46,7 @@ public class YahooFinanceParser extends BaseParser {
         this.closeList = new ArrayList<>();
         this.lowList = new ArrayList<>();
         this.highList = new ArrayList<>();
-        this.interval = "null";
+        this.interval = "null"; // TODO use null instead of "null"
         this.range = "null";
     }
 
@@ -79,12 +79,15 @@ public class YahooFinanceParser extends BaseParser {
         return new TradingPeriod(candlestickList, range, interval);
     }
 
+    /** TODO
+     * @bug only windows? Sometimes a double in this method is intepreted/read as having a comma instead of a period, e.g. 156,6 instead of 156.6.
+     */
     @Override
     protected void handleNumberToken() throws IOException {
         switch (currentKey) { // which is the current json object todo improve
             case TIMESTAMP -> timestampList.add(jsonReader.nextLong());
             case OPEN -> openList.add(
-                    Double.valueOf(decimalFormat.format(jsonReader.nextDouble())));
+                    Double.valueOf(decimalFormat.format(jsonReader.nextDouble()))); // TODO why is decimalFormat necessary here? or is it?
             case CLOSE -> closeList.add(
                     Double.valueOf(decimalFormat.format(jsonReader.nextDouble())));
             case LOW -> lowList.add(
