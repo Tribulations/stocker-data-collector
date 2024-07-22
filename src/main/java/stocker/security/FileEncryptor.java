@@ -16,8 +16,9 @@ import java.util.Base64;
 /**
  * Class used to encrypt a password or username etc.
  */
-public class FileEncryptor {
+public class FileEncryptor {;
     private SecretKey secretKey;
+
 
     /**
      * Initialized member field and creates two files where one contains the message and one the corresponding
@@ -26,18 +27,47 @@ public class FileEncryptor {
      * @param secretKeyFilepath the file path where the secret key corresponding to the encrypted message should be stored
      * @param encryptedMessageFilepath the file path to where the encrypted message should be stored
      */
-    private FileEncryptor(final String messageToEncryptAndAddToFile,
+    public FileEncryptor(final String messageToEncryptAndAddToFile,
                           final String secretKeyFilepath,
                           final String encryptedMessageFilepath) {
         try {
             this.secretKey = generateSecretKey();
             final String encryptedMessage = encryptMessage(messageToEncryptAndAddToFile);
-            final String folderPath = "src/main/resources/";
-            writeSecretKeyToFile(folderPath + secretKeyFilepath);
-            writeEncryptedMessageToFile(folderPath + encryptedMessageFilepath, encryptedMessage);
+            writeSecretKeyToFile(secretKeyFilepath);
+            writeEncryptedMessageToFile(encryptedMessageFilepath, encryptedMessage);
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Creates and writes an encrypted message and its corresponding secret key to specified files.
+     * <p>
+     * This method initializes an instance of the {@link FileEncryptor} class to perform the following tasks:
+     * <ul>
+     *     <li>Generates a new secret key for encryption.</li>
+     *     <li>Encrypts the provided message using the generated secret key.</li>
+     *     <li>Saves the encrypted message to the specified file.</li>
+     *     <li>Saves the base64-encoded secret key to the specified file.</li>
+     * </ul>
+     * The method encapsulates the entire process of encryption and file writing, ensuring that both the
+     * encrypted message and the secret key are properly stored and can be used for secure message decryption
+     * later.
+     *
+     * @param message                The message to be encrypted and stored. This can be any string that
+     *                              needs to be kept secure.
+     * @param encryptedMessageFilepath The path to the file where the encrypted message will be written.
+     *                                 The file will be created if it does not exist, or overwritten if it does.
+     * @param secretKeyFilepath       The path to the file where the base64-encoded secret key will be written.
+     *                                 The file will be created if it does not exist, or overwritten if it does.
+     *
+     * @throws IllegalArgumentException if any of the file paths are null or empty.
+     * @throws RuntimeException if an error occurs during encryption or file writing.
+     *
+     * @see FileEncryptor
+     */
+    public static void createEncryptedFiles(String message, String secretKeyFilepath, String encryptedMessageFilepath) {
+        new FileEncryptor(message, secretKeyFilepath, encryptedMessageFilepath);
     }
 
     private SecretKey generateSecretKey() throws NoSuchAlgorithmException {
@@ -46,7 +76,7 @@ public class FileEncryptor {
         return keyGen.generateKey();
     }
 
-    public String encryptMessage(String message) throws Exception {
+    private String encryptMessage(String message) throws Exception {
         Cipher cipher = Cipher.getInstance(secretKey.getAlgorithm());
         cipher.init(Cipher.ENCRYPT_MODE, secretKey);
         byte[] encryptedBytes = cipher.doFinal(message.getBytes(StandardCharsets.UTF_8));
@@ -82,8 +112,16 @@ public class FileEncryptor {
                                                     final String encryptedMessageFilepath) {
         FileEncryptor passwordEncryptor = new FileEncryptor(message, secretKeyFilepath, encryptedMessageFilepath);
     }
+
+    // TODO this class should be an enum? How should it be used? Who is the client? Redesign!
     public static void main(String... args) {
-//        createEncryptedPasswordFile();
-//        createEncryptedUsernameFile();
+        final String FOLDER_PATH = "src/main/resources/";
+        final String USERNAME_SECRET_KEY_PATH = FOLDER_PATH + "username_secret_key.log";
+        final String PASSWORD_SECRET_KEY_PATH = FOLDER_PATH + "password_secret_key.log";
+        final String USERNAME_ENCRYPTED_PATH = FOLDER_PATH + "encrypted_username.log";
+        final String PASSWORD_ENCRYPTED_PATH = FOLDER_PATH + "encrypted_password.log";
+
+        createEncryptedPasswordFile("jocka123", PASSWORD_SECRET_KEY_PATH, PASSWORD_ENCRYPTED_PATH);
+        createEncryptedUsernameFile("jocka", USERNAME_SECRET_KEY_PATH, USERNAME_ENCRYPTED_PATH);
     }
 }
