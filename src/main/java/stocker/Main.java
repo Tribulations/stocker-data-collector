@@ -1,5 +1,6 @@
 package stocker;
 // TODO add package.info files to all packages
+import stocker.data.MainDataFetcher;
 import stocker.data.fetchers.wScrape.FirstNorthScraper;
 import stocker.data.fetchers.wScrape.LargeCapScraper;
 import stocker.data.fetchers.wScrape.MidCapScraper;
@@ -11,20 +12,52 @@ import stocker.data.parsers.TestParser;
 import stocker.representation.Candlestick;
 import stocker.representation.Stock;
 import stocker.security.Authenticator;
+import stocker.support.StockAppLogger;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static stocker.data.fetchers.wJson.JsonConstants.*;
 
+/**
+ * At this point this class is used only when developing the first version of the program that will be used
+ * when fetching all price data from the Yahoo finance API and then adding it to the database.
+ *
+ * One program (this version of main) is used to fetch a single one-day price data candlestick and then add it
+ * to the database, This program shall be executed as a cron job.
+ *
+ * @author Joakim Colloz / Nineones
+ * @version 1.0
+ */
 public class Main {
-    public static void main(String[] args) throws Exception {
-//        testNewParser();
+//    public static void main(String[] args) throws Exception {
+////        testNewParser();
 //        testGetSingleCandleStick();
-        testAddCandlestickToDb();
+////        testAddCandlestickToDb();
+////        testStockDataFetcher();
+//    }
+
+    // TODO WORK IN PROGRESS!
+    // TODO this is the version of main that is used to fetch a single day price data! This is done for only two stocks! AAK and ABB.
+    public static void main(String... args) {
+        MainDataFetcher mainDataFetcher = new MainDataFetcher();
+        mainDataFetcher.init();
+//        mainDataFetcher.addHistoricalStockDataToDb(List.of("AAK", "ABB"));
+        mainDataFetcher.addCurrentDaysStockDataToDb(List.of("AAK", "ABB"));
+//        System.out.printf("Program executed automatically at: %s", DateT);
+        StockAppLogger.INSTANCE.logInfo(String.format(
+                "Program automatically executed at: %s", getFormattedCurrentDateTime()));
+    }
+
+    private static String getFormattedCurrentDateTime() {
+        ZonedDateTime zonedDateTime = ZonedDateTime.now();
+        DateTimeFormatter zonedFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
+        return zonedDateTime.format(zonedFormatter);
     }
 
     private static void testGetSingleCandleStick() {
-        Stock aak = new Stock("BOL.ST", ONE_MONTH, ONE_DAY);
+        Stock aak = new Stock("BOL.ST", ONE_DAY, ONE_DAY);
         aak.getTradingPeriod().getCandlesticks().forEach(candlestick -> {
             System.out.println(candlestick.getTimestamp());
             System.out.println(candlestick);
@@ -39,8 +72,13 @@ public class Main {
         parser.parse();
     }
 
+    // TODO test fetch all existing data for one stock
+    // TODO check if the candle timestamps are correct. (maybe last one has wrong date?
+
+    // TODO create method for fetching all data, one for adding it to db.
+    // TODO next, craete method for fetching the last/newest candle. Check its timestamp. correct if necessary.
     private static void testStockDataFetcher() throws Exception {
-        Stock boliden = new Stock("BOL.ST", JsonConstants.ONE_MONTH, JsonConstants.ONE_HOUR);
+        Stock boliden = new Stock("BOL.ST", ONE_MONTH, ONE_DAY);
         boliden.getTradingPeriod().printTradingPeriod();
     }
 
