@@ -178,6 +178,36 @@ public class CandlestickDao implements DAO<Candlestick>{
     // tODO this method is deprecated / not used??
     // TODO the documetntaiton below says that a single row is added but it seems like several is added ? a list of candlesticks is passed and a for loop is used?
     /**
+     * Adds one row to the database overwriting the open, close, low, high and volume if the timestamp
+     * already exists for the current symbol, i.e. if the symbol AAB with datetime 2023-08-01 17:30 already exists
+     * the open, close, low, high and volume will be updated for this symbol and datetime/timestamp.
+     * @param symbol the stock name/symbol
+     * @param candlestick the candlestick containing the price data for the symbol which should be added to th database
+     */
+    @Override
+    public void addRowOverwrite(String symbol, Candlestick candlestick) {
+        try {
+            Connection connection = getDbConnection();
+            PreparedStatement statement = connection.prepareStatement(
+                    "INSERT INTO " + CANDLESTICK_TABLE
+                            + " (time_stamp, open, close, low, high, volume, symbol) "
+                            + "VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (time_stamp, symbol) DO UPDATE SET "
+                            + "(open, close, low, high, volume) = "
+                            + "(excluded.open, excluded.close, excluded.low, excluded.high, excluded.volume)");
+            statement.setLong(1, candlestick.getTimestamp());
+            statement.setDouble(2, candlestick.getOpen());
+            statement.setDouble(3, candlestick.getClose());
+            statement.setDouble(4, candlestick.getLow());
+            statement.setDouble(5, candlestick.getHigh());
+            statement.setDouble(6, candlestick.getVolume());
+            statement.setString(7, symbol);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * used to add a single price data row to the database. TODO should add functiolaity to check if the data being added is in the same day when we fetch 1 day interval and update so the database only contains the latest candlestick timestampdata? Or only fetch 1d data once each day? Have one method for each type of interval when adding to db?
      * @param symbol
      * @param candlesticks
@@ -213,36 +243,6 @@ public class CandlestickDao implements DAO<Candlestick>{
             }
         } catch (SQLException e) {
             StockAppLogger.INSTANCE.logInfo(e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Adds one row to the database overwriting the open, close, low, high and volume if the timestamp
-     * already exists for the current symbol, i.e. if the symbol AAB with datetime 2023-08-01 17:30 already exists
-     * the open, close, low, high and volume will be updated for this symbol and datetime/timestamp.
-     * @param symbol the stock name/symbol
-     * @param candlestick the candlestick containing the price data for the symbol which should be added to th database
-     */
-    @Override
-    public void addRowOverwrite(String symbol, Candlestick candlestick) {
-        try {
-            Connection connection = getDbConnection();
-            PreparedStatement statement = connection.prepareStatement(
-                    "INSERT INTO " + CANDLESTICK_TABLE
-                            + " (time_stamp, open, close, low, high, volume, symbol) "
-                            + "VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (time_stamp, symbol) DO UPDATE SET "
-                            + "(open, close, low, high, volume) = "
-                            + "(excluded.open, excluded.close, excluded.low, excluded.high, excluded.volume)");
-            statement.setLong(1, candlestick.getTimestamp());
-            statement.setDouble(2, candlestick.getOpen());
-            statement.setDouble(3, candlestick.getClose());
-            statement.setDouble(4, candlestick.getLow());
-            statement.setDouble(5, candlestick.getHigh());
-            statement.setDouble(6, candlestick.getVolume());
-            statement.setString(7, symbol);
-            statement.executeUpdate();
-        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
