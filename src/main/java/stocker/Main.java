@@ -41,11 +41,29 @@ public class Main {
     // TODO WORK IN PROGRESS!
     // TODO this is the version of main that is used to fetch a single day price data! This is done for only two stocks! AAK and ABB.
     public static void main(String... args) {
+        addCurrentDayBolidenDataAToDb();
+    }
+
+    private static void addHistoricalDataForAAkAndABBToDb() {
         MainDataFetcher mainDataFetcher = new MainDataFetcher();
         mainDataFetcher.init();
-//        mainDataFetcher.addHistoricalStockDataToDb(List.of("AAK", "ABB"));
+        mainDataFetcher.addHistoricalStockDataToDb(List.of("AAK", "ABB"));
+                StockAppLogger.INSTANCE.logInfo(String.format(
+                "Program automatically executed at: %s", getFormattedCurrentDateTime()));
+    }
+
+    private static void addCurrentDayDataForAAkAndABBToDb() {
+        MainDataFetcher mainDataFetcher = new MainDataFetcher();
+        mainDataFetcher.init();
         mainDataFetcher.addCurrentDaysStockDataToDb(List.of("AAK", "ABB"));
-//        System.out.printf("Program executed automatically at: %s", DateT);
+        StockAppLogger.INSTANCE.logInfo(String.format(
+                "Program automatically executed at: %s", getFormattedCurrentDateTime()));
+    }
+
+    private static void addCurrentDayBolidenDataAToDb() {
+        MainDataFetcher mainDataFetcher = new MainDataFetcher();
+        mainDataFetcher.init();
+        mainDataFetcher.addCurrentDaysStockDataToDb(List.of("BOL"));
         StockAppLogger.INSTANCE.logInfo(String.format(
                 "Program automatically executed at: %s", getFormattedCurrentDateTime()));
     }
