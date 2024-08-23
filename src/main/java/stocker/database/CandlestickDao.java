@@ -214,15 +214,13 @@ public class CandlestickDao implements DAO<Candlestick>{
      */
     @Override
     public void addRows(String symbol, List<Candlestick> candlesticks) {
-        try {
-            Connection connection = getDbConnection();
-
+        try (Connection connection = getDbConnection()){
             for (Candlestick candlestick : candlesticks) {
                 if (connection != null) {
                     PreparedStatement statement = connection.prepareStatement(
                             INSERT_CANDLESTICK_QUERY);
                     // when fetching multiple 1d candles the timestamp is set to 9:00 am so we increase it to be 17:39
-                    if (candlestick.getInterval().equals("1d")) {
+                    if (candlestick.getInterval().equals("1d")) { // TODO same code in if else here!
                         statement.setLong(1, candlestick.getTimestamp());
                     } else {
                         statement.setLong(1, candlestick.getTimestamp());
@@ -237,9 +235,6 @@ public class CandlestickDao implements DAO<Candlestick>{
                 } else {
                     StockAppLogger.INSTANCE.logInfo("no db connection: connection is null");
                 }
-            }
-            if (connection != null) { // TODO imporve
-                connection.close();
             }
         } catch (SQLException e) {
             StockAppLogger.INSTANCE.logInfo(e.getMessage());
