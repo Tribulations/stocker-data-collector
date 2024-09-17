@@ -157,6 +157,36 @@ public class MainDataFetcher {
         }
     }
 
+    /**
+     * Adds stock data to the database for the specified stocks, covering the range from the current trading day
+     * back to the specified historical period.
+     * <p>
+     * This method retrieves stock data for each stock symbol provided in the {@code stockSymbols} list. The data
+     * includes price information from the current trading day extending back to the historical range specified.
+     * The range defines the total number of price data points to fetch, such as data for a whole month or ten years,
+     * while the interval specifies the duration of each distinct candlestick or price data point (e.g., daily, hourly).
+     * </p>
+     * <p>
+     * Use {@link Stock.Range#ONE_DAY} or a similar predefined enum for specifying the range.
+     * Use {@link Stock.Interval#ONE_DAY} or a similar predefined enum for specifying the interval.
+     * This method utilizes the {@link CandlestickDao} to handle database operations.
+     * </p>
+     *
+     * @param stockSymbols a list of stock symbols for which to add the historical data to the database
+     * @param range the total historical range of data to fetch, represented by an enum value such as a whole month or ten years
+     * @param interval the duration of each distinct candlestick or price data point, represented by an enum value such as daily or hourly
+     * @param marketSuffix the market suffix for filtering stock symbols, e.g., ".ST" for the Swedish market
+     */
+    public void addStockDataToDb(List<String> stockSymbols, String range, String interval, String marketSuffix) {
+        CandlestickDao candlestickDao = new CandlestickDao();
+
+        for (String symbol : stockSymbols) {
+            Stock stock = new Stock(
+                    symbol + marketSuffix, range, interval);
+            candlestickDao.addRows(stock.getSymbol(), stock.getTradingPeriod().getCandlesticks());
+        }
+    }
+
     public static void main(String... args) {
         MainDataFetcher mainDataFetcher = new MainDataFetcher();
         mainDataFetcher.addHistoricalStockDataToDb(List.of("AAK", "ABB"));
