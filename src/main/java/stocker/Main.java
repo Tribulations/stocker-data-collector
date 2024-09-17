@@ -41,7 +41,7 @@ public class Main {
     // TODO WORK IN PROGRESS!
     // TODO this is the version of main that is used to fetch a single day price data! This is done for only two stocks! AAK and ABB.
     public static void main(String... args) {
-        addCurrentDayBolidenDataAToDb();
+        addMultiple1WeekDataToDb();
     }
 
     private static void addHistoricalDataForAAkAndABBToDb() {
@@ -64,6 +64,14 @@ public class Main {
         MainDataFetcher mainDataFetcher = new MainDataFetcher();
         mainDataFetcher.init();
         mainDataFetcher.addCurrentDaysStockDataToDb(List.of("BOL"));
+        StockAppLogger.INSTANCE.logInfo(String.format(
+                "Program automatically executed at: %s", getFormattedCurrentDateTime()));
+    }
+
+    private static void addMultiple1WeekDataToDb() {
+        MainDataFetcher mainDataFetcher = new MainDataFetcher();
+        mainDataFetcher.init();
+        mainDataFetcher.addStockDataToDb(List.of("AAK", "ABB", "BOL"), Stock.Range.ONE_WEEK, Stock.Interval.ONE_DAY, ".ST");
         StockAppLogger.INSTANCE.logInfo(String.format(
                 "Program automatically executed at: %s", getFormattedCurrentDateTime()));
     }
