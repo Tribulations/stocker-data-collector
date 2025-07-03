@@ -3,7 +3,11 @@ package stocker.database;
 import stocker.representation.Candlestick;
 import stocker.support.StockAppLogger;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,29 +15,40 @@ import static stocker.database.DbConstants.*;
 
 /**
  * Database access object class. Used to interact with the database.
- * TODO whith this implementation I suppose that a new connection is established each time this object is used?
- * TODO should make a connect method or something??
- * @author tribulations
+ *
+ * @author Joakim Colloz
  * @version 1.0
  * @since 1.0
  */
-public class CandlestickDao implements DAO<Candlestick>{
+public class CandlestickDao implements DAO<Candlestick> {
 
+    /**
+     * Retrieves all candlesticks from the database.
+     * Note: This method could potentially return a very large dataset if the table has many records.
+     * Consider using pagination or more specific queries when possible.
+     * 
+     * @return a list of all candlesticks in the database
+     */
     @Override
     public List<Candlestick> getAllRows() {
         List<Candlestick> candlesticks = new ArrayList<>();
 
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
-             PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + CANDLESTICK_TABLE);
+        try (Connection connection = getDbConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_ALL_QUERY);
              ResultSet resultSet = statement.executeQuery()) {
 
+            int count = 0;
             while (resultSet.next()) {
                 Candlestick candlestick = new Candlestick();
                 setCandleStick(resultSet, candlestick);
                 candlesticks.add(candlestick);
+                count++;
             }
+            
+            StockAppLogger.INSTANCE.logInfo("Retrieved " + count + " candlesticks from the database");
         } catch (SQLException e) {
-            e.printStackTrace();
+            StockAppLogger.INSTANCE.logInfo("Error retrieving all candlesticks: " + e.getMessage());
+            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
         }
 
         return candlesticks;
@@ -42,29 +57,41 @@ public class CandlestickDao implements DAO<Candlestick>{
     @Override
     public List<Candlestick> getAllRowsByName(final String name) {
         List<Candlestick> candlesticks = new ArrayList<>();
+        
+        if (name == null || name.trim().isEmpty()) {
+            StockAppLogger.INSTANCE.logInfo("Cannot get rows: Symbol name is null or empty");
+            return candlesticks;
+        }
 
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
-             PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + CANDLESTICK_TABLE + " WHERE symbol = ?");
-             ResultSet resultSet = statement.executeQuery()) {
-
-            while (resultSet.next()) {
-                Candlestick candlestick = new Candlestick();
-                setCandleStick(resultSet, candlestick);
-                candlesticks.add(candlestick);
+        try (Connection connection = getDbConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_BY_SYMBOL_QUERY)) {
+            
+            statement.setString(1, name); // Set the parameter that was missing
+            
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Candlestick candlestick = new Candlestick();
+                    setCandleStick(resultSet, candlestick);
+                    candlesticks.add(candlestick);
+                }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            StockAppLogger.INSTANCE.logInfo("Error getting candlesticks for symbol " + name + ": " + e.getMessage());
+            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
         }
 
         return candlesticks;
     }
 
     /**
-     * internal method
-     * @param resultSet
-     * @param candlestick
+     * Populates a Candlestick object with data from a ResultSet.
+     * This method handles the mapping of database columns to Candlestick properties.
+     * 
+     * @param resultSet the ResultSet containing the data to extract
+     * @param candlestick the Candlestick object to populate
+     * @throws SQLException if a database access error occurs or the column names don't exist
      */
-    private void setCandleStick(final ResultSet resultSet, final Candlestick candlestick) {
+    private void setCandleStick(final ResultSet resultSet, final Candlestick candlestick) throws SQLException {
         try {
             candlestick.setTimestamp(resultSet.getLong(TIMESTAMP_COLUMN));
             candlestick.setOpen(resultSet.getDouble(OPEN_COLUMN));
@@ -72,44 +99,17 @@ public class CandlestickDao implements DAO<Candlestick>{
             candlestick.setLow(resultSet.getDouble(LOW_COLUMN));
             candlestick.setHigh(resultSet.getDouble(HIGH_COLUMN));
             candlestick.setVolume(resultSet.getLong(VOLUME_COLUMN));
-            candlestick.setInterval(resultSet.getString(INTERVAL_COLUMN));
         } catch (SQLException e) {
-            StockAppLogger.INSTANCE.logInfo(e.getMessage());
-            e.printStackTrace();
+            StockAppLogger.INSTANCE.logInfo("Error setting candlestick data: " + e.getMessage());
+            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
+            throw e; // Rethrow to allow proper handling by caller
         }
     }
 
-//    @Override
-//    public List<Candlestick> getRowsByName(final String name) {
-//        Candlestick candlestick = null;
-//
-//        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
-//             PreparedStatement statement = connection.prepareStatement(
-//                     "SELECT * FROM " + TABLE + " WHERE id = ?");
-//        ) {
-//            statement.setInt(1, id);
-//            try (ResultSet resultSet = statement.executeQuery()) {
-//                if (resultSet.next()) {
-//                    candlestick = new Candlestick();
-//                    candlestick.setId(resultSet.getInt("id"));
-//                    candlestick.setName(resultSet.getString("name"));
-//                    candlestick.setAge(resultSet.getInt("age"));
-//                }
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return candlestick;
-//    }
-
     @Override
     public void addRow(String symbol, Candlestick candlestick) {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
-             PreparedStatement statement = connection.prepareStatement(
-                     "INSERT INTO " + CANDLESTICK_TABLE
-                             + " (time_stamp, open, close, low, high, volume, symbol, interval) "
-                             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+        try (Connection connection = getDbConnection();
+             PreparedStatement statement = connection.prepareStatement(INSERT_CANDLESTICK_QUERY)
         ) {
             statement.setLong(1, candlestick.getTimestamp());
             statement.setDouble(2, candlestick.getOpen());
@@ -121,171 +121,130 @@ public class CandlestickDao implements DAO<Candlestick>{
             statement.setString(8, candlestick.getInterval());
             statement.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            StockAppLogger.INSTANCE.logInfo("Error adding candlestick: " + e.getMessage());
+            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
         }
-    }
-
-    private Connection getDbConnection() {
-        try {
-            return DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
-        } catch (SQLException e) {
-            StockAppLogger.INSTANCE.logInfo(e.getMessage());
-            e.printStackTrace();
-        }
-        return null;
     }
 
     /**
-     * used to add multiple older (e.g. a whole month or more) 1 day price data candlesticks to database.
-     * @param symbol the stock name/ symbol
+     * Gets a database connection.
+     * @return a valid database connection
+     * @throws SQLException if a database access error occurs or the url is null
+     */
+    protected Connection getDbConnection() throws SQLException {
+        try {
+            Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+            if (connection == null) {
+                throw new SQLException("Failed to establish database connection");
+            }
+            return connection;
+        } catch (SQLException e) {
+            StockAppLogger.INSTANCE.logInfo("Database connection error: " + e.getMessage());
+            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
+            throw e; // Rethrow to allow proper handling by caller
+        }
+    }
+
+    /**
+     * Adds multiple older candlesticks to the database in a single transaction.
+     * This method is typically used for adding historical data (e.g., a whole month or more) with 1-day interval.
+     * 
+     * @param symbol the stock symbol
      * @param candlesticks a list of candlesticks to add to the database
      */
     public void addMultipleOlderRows(String symbol, List<Candlestick> candlesticks) {
-        try (Connection connection = getDbConnection()) {
-            if (connection != null) {
-                String query = "INSERT INTO " + CANDLESTICK_TABLE
-                        + " (time_stamp, open, close, low, high, volume, symbol) "
-                        + "VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-                try (PreparedStatement statement = connection.prepareStatement(query)) {
-                    for (Candlestick candlestick : candlesticks) {
-                        // TODO check if the time is 9:00 and if so add 30540 to set the time to 17:29 see todo below also. Use a LocalDatetime to check the time? How check the time?
-                        statement.setLong(1, candlestick.getTimestamp() + 30540); // TODO maybe have to increment here beacuse the candlestick time is set to 9:00 and not 17:30 when fetching multipleolder candlesticks with the API?
-                        statement.setDouble(2, candlestick.getOpen());
-                        statement.setDouble(3, candlestick.getClose());
-                        statement.setDouble(4, candlestick.getLow());
-                        statement.setDouble(5, candlestick.getHigh());
-                        statement.setDouble(6, candlestick.getVolume());
-                        statement.setString(7, symbol);
-                        statement.addBatch(); // Add current row to batch
-                    }
-                    statement.executeBatch(); // Execute all rows in the batch
-
-                } catch (SQLException e) {
-                    StockAppLogger.INSTANCE.logInfo(e.getMessage());
-                    e.printStackTrace();
-                }
-            } else {
-                StockAppLogger.INSTANCE.logInfo("no db connection: connection is null");
-            }
-        } catch (SQLException e) {
-            StockAppLogger.INSTANCE.logInfo(e.getMessage());
-            e.printStackTrace();
+        if (symbol == null || symbol.trim().isEmpty() || candlesticks == null || candlesticks.isEmpty()) {
+            StockAppLogger.INSTANCE.logInfo("Cannot add multiple rows: Symbol is null or candlesticks list is empty");
+            return;
         }
-    }
 
-
-    // tODO this method is deprecated / not used??
-    // TODO the documetntaiton below says that a single row is added but it seems like several is added ? a list of candlesticks is passed and a for loop is used?
-    /**
-     * Adds one row to the database overwriting the open, close, low, high and volume if the timestamp
-     * already exists for the current symbol, i.e. if the symbol AAB with datetime 2023-08-01 17:30 already exists
-     * the open, close, low, high and volume will be updated for this symbol and datetime/timestamp.
-     * @param symbol the stock name/symbol
-     * @param candlestick the candlestick containing the price data for the symbol which should be added to th database
-     */
-    @Override
-    public void addRowOverwrite(String symbol, Candlestick candlestick) {
+        Connection connection = null;
         try {
-            Connection connection = getDbConnection();
-            PreparedStatement statement = connection.prepareStatement(
-                    "INSERT INTO " + CANDLESTICK_TABLE
-                            + " (time_stamp, open, close, low, high, volume, symbol) "
-                            + "VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (time_stamp, symbol) DO UPDATE SET "
-                            + "(open, close, low, high, volume) = "
-                            + "(excluded.open, excluded.close, excluded.low, excluded.high, excluded.volume)");
-            statement.setLong(1, candlestick.getTimestamp());
-            statement.setDouble(2, candlestick.getOpen());
-            statement.setDouble(3, candlestick.getClose());
-            statement.setDouble(4, candlestick.getLow());
-            statement.setDouble(5, candlestick.getHigh());
-            statement.setDouble(6, candlestick.getVolume());
-            statement.setString(7, symbol);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+            connection = getDbConnection();
+            
+            // Disable auto-commit to use transactions
+            connection.setAutoCommit(false);
+            
+            String query = INSERT_CANDLESTICK_QUERY;
 
-    /**
-     * used to add a single price data row to the database. TODO should add functiolaity to check if the data being added is in the same day when we fetch 1 day interval and update so the database only contains the latest candlestick timestampdata? Or only fetch 1d data once each day? Have one method for each type of interval when adding to db?
-     * @param symbol
-     * @param candlesticks
-     */
-    @Override
-    public void addRows(String symbol, List<Candlestick> candlesticks) {
-        try (Connection connection = getDbConnection()){
-            for (Candlestick candlestick : candlesticks) {
-                if (connection != null) {
-                    PreparedStatement statement = connection.prepareStatement(
-                            INSERT_CANDLESTICK_QUERY);
-                    // when fetching multiple 1d candles the timestamp is set to 9:00 am so we increase it to be 17:39
-                    if (candlestick.getInterval().equals("1d")) { // TODO same code in if else here!
-                        statement.setLong(1, candlestick.getTimestamp());
-                    } else {
-                        statement.setLong(1, candlestick.getTimestamp());
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                for (Candlestick candlestick : candlesticks) {
+                    // Adjust timestamp if needed based on interval
+                    long timestamp = candlestick.getTimestamp();
+                    if ("1d".equals(candlestick.getInterval())) {
+                        // Add 8.5 hours (30540 seconds) to convert from 9:00 to 17:30 market close time
+                        timestamp += 30540;
                     }
+                    
+                    statement.setLong(1, timestamp);
                     statement.setDouble(2, candlestick.getOpen());
                     statement.setDouble(3, candlestick.getClose());
                     statement.setDouble(4, candlestick.getLow());
                     statement.setDouble(5, candlestick.getHigh());
                     statement.setDouble(6, candlestick.getVolume());
                     statement.setString(7, symbol);
-                    statement.executeUpdate();
-                } else {
-                    StockAppLogger.INSTANCE.logInfo("no db connection: connection is null");
+                    statement.setString(8, candlestick.getInterval());
+                    statement.addBatch();
                 }
+                
+                int[] results = statement.executeBatch();
+                connection.commit(); // Commit the transaction
+                
+                int totalUpdated = 0;
+                for (int result : results) {
+                    if (result > 0) totalUpdated++;
+                }
+                
+                StockAppLogger.INSTANCE.logInfo("Successfully added " + totalUpdated + 
+                                              " out of " + candlesticks.size() + 
+                                              " candlesticks for symbol: " + symbol);
             }
         } catch (SQLException e) {
-            StockAppLogger.INSTANCE.logInfo(e.getMessage());
-            e.printStackTrace();
+            // Rollback on error
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                    StockAppLogger.INSTANCE.logInfo("Transaction rolled back due to error");
+                } catch (SQLException rollbackEx) {
+                    StockAppLogger.INSTANCE.logInfo("Error during rollback: " + rollbackEx.getMessage());
+                    StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(rollbackEx.getStackTrace()));
+                }
+            }
+            StockAppLogger.INSTANCE.logInfo("Error adding multiple candlesticks for symbol " + symbol + ": " + e.getMessage());
+            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
+        } finally {
+            // Restore auto-commit and close connection
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                    connection.close();
+                } catch (SQLException closeEx) {
+                    StockAppLogger.INSTANCE.logInfo("Error closing connection: " + closeEx.getMessage());
+                    StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(closeEx.getStackTrace()));
+                }
+            }
         }
     }
 
-    // TODO old version. REMOVE!!???
-//    /**
-//     * Adds one row to the database overwriting the open, close, low, high and volume if the timestamp
-//     * already exists for the current symbol, i.e. if the symbol AAB with datetime 2023-08-01 17:30 already exists
-//     * the open, close, low, high and volume will be updated for this symbol and datetime/timestamp.
-//     * @param symbol the stock name/symbol
-//     * @param candlestick the candlestick containing the price data for the symbol which should be added to th database
-//     */
-//    @Override
-//    public void addRowOverwrite(String symbol, Candlestick candlestick) {
-//        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
-//             PreparedStatement statement = connection.prepareStatement(
-//                     "INSERT INTO " + CANDLESTICK_TABLE
-//                             + " (time_stamp, open, close, low, high, volume, symbol, interval) "
-//                             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (time_stamp, symbol, interval) DO UPDATE SET "
-//                             + "(open, close, low, high, volume) = "
-//                             + "(excluded.open, excluded.close, excluded.low, excluded.high, excluded.volume)")
-//        ) {
-//            statement.setLong(1, candlestick.getTimestamp());
-//            statement.setDouble(2, candlestick.getOpen());
-//            statement.setDouble(3, candlestick.getClose());
-//            statement.setDouble(4, candlestick.getLow());
-//            statement.setDouble(5, candlestick.getHigh());
-//            statement.setDouble(6, candlestick.getVolume());
-//            statement.setString(7, symbol);
-//            statement.executeUpdate();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
     /**
-     * Adds one row to the database if the timestamp for the current symbol do ot already exist in the database.
+     * DEPRECATED TO BE REMOVED
+     * Adds one row to the database overwriting the open, close, low, high and volume if the timestamp
+     * already exists for the current symbol, i.e. if the symbol AAB with datetime 2023-08-01 17:30 already exists
+     * the open, close, low, high and volume will be updated for this symbol and datetime/timestamp.
      * @param symbol the stock name/symbol
      * @param candlestick the candlestick containing the price data for the symbol which should be added to th database
      */
+    @Deprecated
     @Override
-    public void addRowNoOverwrite(String symbol, Candlestick candlestick) {
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
-             PreparedStatement statement = connection.prepareStatement(
-                     "INSERT INTO " + CANDLESTICK_TABLE
-                             + " (time_stamp, open, close, low, high, volume, symbol, interval) "
-                             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING")
-        ) {
+    public void addRowOverwrite(String symbol, Candlestick candlestick) {
+        if (symbol == null || candlestick == null) {
+            StockAppLogger.INSTANCE.logInfo("Cannot add row: Symbol or candlestick is null");
+            return;
+        }
+
+        try (Connection connection = getDbConnection();
+             PreparedStatement statement = connection.prepareStatement(INSERT_ON_CONFLICT_UPDATE_QUERY)) {
+            
             statement.setLong(1, candlestick.getTimestamp());
             statement.setDouble(2, candlestick.getOpen());
             statement.setDouble(3, candlestick.getClose());
@@ -294,37 +253,116 @@ public class CandlestickDao implements DAO<Candlestick>{
             statement.setDouble(6, candlestick.getVolume());
             statement.setString(7, symbol);
             statement.setString(8, candlestick.getInterval());
-            statement.executeUpdate();
+            
+            int rowsAffected = statement.executeUpdate();
+            StockAppLogger.INSTANCE.logInfo("Updated/inserted candlestick for symbol " + symbol + 
+                                          ", timestamp " + candlestick.getHumanReadableDate() + 
+                                          ", rows affected: " + rowsAffected);
         } catch (SQLException e) {
-            e.printStackTrace();
+            StockAppLogger.INSTANCE.logInfo("Error updating candlestick for symbol " + symbol + ": " + e.getMessage());
+            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
         }
     }
 
-//    @Override
-//    public void updateRow(Candlestick candlestick) {
-//        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
-//             PreparedStatement statement = connection.prepareStatement(
-//                     "UPDATE " + TABLE + " SET name = ? WHERE id = ?")
-//        ) {
-//            statement.setString(1, candlestick.getName());
-//            statement.setInt(2, candlestick.getId());
-//            statement.executeUpdate();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    /**
+     * Adds multiple candlesticks to the database.
+     * Each candlestick is added as a separate database operation.
+     * 
+     * @param symbol the stock symbol
+     * @param candlesticks list of candlesticks to add to the database
+     */
+    @Override
+    public void addRows(String symbol, List<Candlestick> candlesticks) {
+        if (symbol == null || symbol.trim().isEmpty() || candlesticks == null || candlesticks.isEmpty()) {
+            StockAppLogger.INSTANCE.logInfo("Cannot add rows: Symbol is null or candlesticks list is empty");
+            return;
+        }
 
-//    @Override
-//    public void deleteById(int id) {
-//        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
-//             PreparedStatement statement = connection.prepareStatement(
-//                     "DELETE FROM " + TABLE + " WHERE id = ?")
-//        ) {
-//            statement.setInt(1, id);
-//            statement.executeUpdate();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
+        try (Connection connection = getDbConnection()) {
+            String query = INSERT_CANDLESTICK_QUERY;
+            
+            try (PreparedStatement statement = connection.prepareStatement(query)) {
+                int successCount = 0;
+                
+                for (Candlestick candlestick : candlesticks) {
+//                    // Adjust timestamp if needed based on interval
+//                    long timestamp = candlestick.getTimestamp();
+//                    if ("1d".equals(candlestick.getInterval())) {
+//                        // Add 8.5 hours (30540 seconds) to convert from 9:00 to 17:30 market close time
+//                        timestamp += 30540;
+//                    }
+
+                    long timestamp = candlestick.getTimestamp();
+                    statement.setLong(1, timestamp);
+                    statement.setDouble(2, candlestick.getOpen());
+                    statement.setDouble(3, candlestick.getClose());
+                    statement.setDouble(4, candlestick.getLow());
+                    statement.setDouble(5, candlestick.getHigh());
+                    statement.setDouble(6, candlestick.getVolume());
+                    statement.setString(7, symbol);
+                    
+                    int rowsAffected = statement.executeUpdate();
+                    if (rowsAffected > 0) {
+                        successCount++;
+                    }
+                }
+                
+                StockAppLogger.INSTANCE.logInfo("Successfully added " + successCount + 
+                                              " out of " + candlesticks.size() + 
+                                              " candlesticks for symbol: " + symbol);
+            }
+        } catch (SQLException e) {
+            StockAppLogger.INSTANCE.logInfo("Error adding candlesticks for symbol " + symbol + ": " + e.getMessage());
+            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
+        }
+    }
+
+    /**
+     * DEPRECATED TO BE REMOVED
+     * Adds one row to the database if the timestamp for the current symbol does not already exist in the database.
+     * This method will silently ignore conflicts (no update will be performed if the record already exists).
+     * 
+     * @param symbol the stock name/symbol
+     * @param candlestick the candlestick containing the price data for the symbol which should be added to the database
+     */
+    @Deprecated
+    @Override
+    public void addRowNoOverwrite(String symbol, Candlestick candlestick) {
+        if (symbol == null || symbol.trim().isEmpty() || candlestick == null) {
+            StockAppLogger.INSTANCE.logInfo("Cannot add row: Symbol is null/empty or candlestick is null");
+            return;
+        }
+        
+        try (Connection connection = getDbConnection();
+             PreparedStatement statement = connection.prepareStatement(INSERT_ON_CONFLICT_DO_NOTHING_QUERY)) {
+            // Adjust timestamp if needed based on interval
+            long timestamp = candlestick.getTimestamp();
+            if ("1d".equals(candlestick.getInterval())) {
+                // Add 8.5 hours (30540 seconds) to convert from 9:00 to 17:30 market close time
+                timestamp += 30540;
+            }
+            
+            statement.setLong(1, timestamp);
+            statement.setDouble(2, candlestick.getOpen());
+            statement.setDouble(3, candlestick.getClose());
+            statement.setDouble(4, candlestick.getLow());
+            statement.setDouble(5, candlestick.getHigh());
+            statement.setDouble(6, candlestick.getVolume());
+            statement.setString(7, symbol);
+            statement.setString(8, candlestick.getInterval());
+            
+            int rowsAffected = statement.executeUpdate();
+            if (rowsAffected > 0) {
+                StockAppLogger.INSTANCE.logInfo("Added new candlestick for symbol " + symbol + 
+                                              " at timestamp " + candlestick.getHumanReadableDate());
+            } else {
+                StockAppLogger.INSTANCE.logInfo("Candlestick already exists for symbol " + symbol + 
+                                              " at timestamp " + candlestick.getHumanReadableDate() + 
+                                              ", no changes made");
+            }
+        } catch (SQLException e) {
+            StockAppLogger.INSTANCE.logInfo("Error adding candlestick for symbol " + symbol + ": " + e.getMessage());
+            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
+        }
+    }
 }
-
