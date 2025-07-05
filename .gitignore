@@ -46,3 +46,6 @@ dependency-reduced-pom.xml
 
 # Environment variables
 .env
+
+# Misc
+README_local.md
