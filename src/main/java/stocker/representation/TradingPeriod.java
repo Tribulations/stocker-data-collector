@@ -1,5 +1,7 @@
 package stocker.representation;
 
+import stocker.support.StockAppLogger;
+
 import java.util.List;
 
 /**
@@ -65,5 +67,16 @@ public class TradingPeriod {
 
     public String getINTERVAL() {
         return INTERVAL;
+    }
+
+    public void removeLast() {
+        Candlestick currentDayCandlestick = tradingPeriod.get(tradingPeriod.size() - 1);
+
+        StockAppLogger.INSTANCE.logInfo("Inside Stock constructor");
+        StockAppLogger.INSTANCE.logInfo("skipCurrentDayPriceData is set to true");
+        StockAppLogger.INSTANCE.logInfo(String.format("Removing current day price data for trading session: %s",
+                currentDayCandlestick.getHumanReadableDate()));
+
+        tradingPeriod.remove(currentDayCandlestick);
     }
 }
