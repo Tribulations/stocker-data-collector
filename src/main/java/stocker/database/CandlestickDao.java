@@ -126,6 +126,18 @@ public class CandlestickDao implements DAO<Candlestick> {
         }
     }
 
+    @Override
+    public void resetTable() {
+        try (Connection connection = getDbConnection();
+             PreparedStatement statement = connection.prepareStatement(RESET_TABLE_QUERY)
+        ) {
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            StockAppLogger.INSTANCE.logInfo("Error resetting table: " + e.getMessage());
+            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
+        }
+    }
+
     /**
      * Gets a database connection.
      * @return a valid database connection

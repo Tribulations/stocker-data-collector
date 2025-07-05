@@ -11,4 +11,5 @@ public interface DAO<T> {
     void addRowNoOverwrite(String symbol, T row);
 //    void updateRow(T rowObject);
 //    void deleteById(int id);
+    void resetTable();
 }
