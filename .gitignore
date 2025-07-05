@@ -43,3 +43,6 @@ dependency-reduced-pom.xml
 
 # VSCode
 .vscode/
+
+# Environment variables
+.env
