@@ -96,7 +96,7 @@ public class YahooFinanceParser extends BaseParser {// TODO divide this class? I
                     Double.valueOf(decimalFormat.format(jsonReader.nextDouble())));
             case VOLUME -> volumeList.add(jsonReader.nextLong());
             default -> StockAppLogger.INSTANCE.logDebug(
-                    "default case in YahooFinanceParser::handleNumberToken() " + jsonReader.nextString());
+                    "default case in YahooFinanceParser::handleNumberToken() " + "Key: " + currentKey + " Value: "+ jsonReader.nextString());
         }
     }
 
