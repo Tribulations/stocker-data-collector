@@ -85,7 +85,7 @@ public class Stock {
         StockAppLogger.INSTANCE.logInfo("Inside Stock constructor");
         StockAppLogger.INSTANCE.logInfo("skipCurrentDayPriceData is set to true");
         StockAppLogger.INSTANCE.logInfo(String.format(
-                "About to remove price data/candletick for trading session: %s",
+                "Removing current day price data for trading session: %s",
                 currentDayCandlestick.getHumanReadableDate()));
         candlesticks.remove(currentDayCandlestick);
     }
