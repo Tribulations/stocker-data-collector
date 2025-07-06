@@ -12,16 +12,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static stocker.data.fetchers.wJson.JsonConstants.TIMESTAMP;
-import static stocker.data.fetchers.wJson.JsonConstants.OPEN;
-import static stocker.data.fetchers.wJson.JsonConstants.CLOSE;
-import static stocker.data.fetchers.wJson.JsonConstants.LOW;
-import static stocker.data.fetchers.wJson.JsonConstants.HIGH;
-import static stocker.data.fetchers.wJson.JsonConstants.VOLUME;
-import static stocker.data.fetchers.wJson.JsonConstants.DATA_GRANULARITY;
-import static stocker.data.fetchers.wJson.JsonConstants.SYMBOL;
-import static stocker.data.fetchers.wJson.JsonConstants.INDICATORS;
-import static stocker.data.fetchers.wJson.JsonConstants.RANGE;
+import static stocker.data.fetchers.JsonConstants.TIMESTAMP;
+import static stocker.data.fetchers.JsonConstants.OPEN;
+import static stocker.data.fetchers.JsonConstants.CLOSE;
+import static stocker.data.fetchers.JsonConstants.LOW;
+import static stocker.data.fetchers.JsonConstants.HIGH;
+import static stocker.data.fetchers.JsonConstants.VOLUME;
+import static stocker.data.fetchers.JsonConstants.DATA_GRANULARITY;
+import static stocker.data.fetchers.JsonConstants.SYMBOL;
+import static stocker.data.fetchers.JsonConstants.INDICATORS;
+import static stocker.data.fetchers.JsonConstants.RANGE;
 
 public class YahooFinanceParser extends BaseParser {// TODO divide this class? It does two things now? SAngle responsibility!! Now it parses and creates a TradingPeriod?
     private final DecimalFormat decimalFormat = new DecimalFormat("#.##");

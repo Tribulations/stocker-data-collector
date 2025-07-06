@@ -1,6 +1,6 @@
 package stocker.representation;
 
-import stocker.data.fetchers.wJson.YahooFinanceFetcher;
+import stocker.data.fetchers.YahooFinanceFetcher;
 import stocker.data.parsers.YahooFinanceParser;
 import stocker.support.StockAppLogger;
 
