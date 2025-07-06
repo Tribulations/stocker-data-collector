@@ -1,4 +1,4 @@
-package stocker.data.fetchers.wJson;
+package stocker.data.fetchers;
 
 import io.github.cdimascio.dotenv.Dotenv;
 

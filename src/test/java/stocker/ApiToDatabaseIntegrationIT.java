@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import stocker.data.MainDataFetcher;
+import stocker.data.fetchers.YahooFinanceFetcher;
 import stocker.database.CandlestickDao;
 import stocker.representation.Candlestick;
 
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Joakim Colloz
  * @version 1.0
  * @see stocker.data.MainDataFetcher
- * @see stocker.data.fetchers.wJson.YahooFinanceFetcher
+ * @see YahooFinanceFetcher
  * @see stocker.data.parsers.YahooFinanceParser
  * @see stocker.database.CandlestickDao
  */
@@ -31,7 +32,6 @@ public class ApiToDatabaseIntegrationIT {
     @BeforeEach
     void setUp() {
         mainDataFetcher = new MainDataFetcher();
-        mainDataFetcher.init();
 
         candlestickDao = new CandlestickDao();
         candlestickDao.resetTable();
