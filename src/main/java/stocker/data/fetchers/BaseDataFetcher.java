@@ -1,8 +1,7 @@
 package stocker.data.fetchers;
 
-
-import stocker.support.StockAppLogger;
-import stocker.support.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -10,13 +9,11 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-import static stocker.support.ErrorCodes.ERROR_4000;
-import static stocker.support.ErrorCodes.ERROR_4001;
-
 /**
  * Base data fetcher used as template for other concrete fetchers.
  */
 public abstract class BaseDataFetcher { // TODO rename package wJson to json
+    private static final Logger logger = LoggerFactory.getLogger(BaseDataFetcher.class);
     private final String API_KEY_HEADER;
     private final String API_HOST_HEADER;
     private final String API_KEY;
@@ -40,9 +37,7 @@ public abstract class BaseDataFetcher { // TODO rename package wJson to json
     public String fetchData(final String stockName, final String range, final String interval) {
         String apiUrl = API_URL + stockName + "?range=" + range + "&interval=" + interval;
 
-        StockAppLogger.INSTANCE.logInfo(
-                String.format("Fetched data: %s, range: %s, interval: %s - %s::%s", stockName, range,
-                        interval, getClass().getCanonicalName(), Utils.getMethodName()));
+        logger.info("Fetching data for stock: {}, range: {}, interval: {}", stockName, range, interval);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(apiUrl))
@@ -59,16 +54,15 @@ public abstract class BaseDataFetcher { // TODO rename package wJson to json
             response = HttpClient.newHttpClient().send(
                     request, HttpResponse.BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
-            StockAppLogger.INSTANCE.logInfo(
-                    ERROR_4000 + e.getMessage());
+            logger.error("Couldn't get an http response: Check the connection to the API. {}", e.getMessage(), e);
         }
         if (response != null) {
             this.jsonResponseString = response.body(); // save response as member
-            StockAppLogger.INSTANCE.logInfo(jsonResponseString);
-            StockAppLogger.INSTANCE.logDebug(jsonResponseString);
+            logger.info(jsonResponseString);
+            logger.debug(jsonResponseString);
         } else {
-            StockAppLogger.INSTANCE.logInfo(Utils.getMethodName() + ERROR_4001);
-            StockAppLogger.INSTANCE.logDebug(Utils.getMethodName() + ERROR_4001);
+            logger.error("HTTP request failed: Response was null");
+            logger.debug("HTTP request failed: Response was null");
         }
 
         return response != null ? response.body() : null;

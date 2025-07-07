@@ -1,10 +1,12 @@
 package stocker.data.parsers;
 
-import stocker.support.StockAppLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class TestParser extends BaseParser {
+    private static final Logger logger = LoggerFactory.getLogger(TestParser.class);
 
     public TestParser(final String jsonString) {
         super(jsonString);
@@ -18,31 +20,31 @@ public class TestParser extends BaseParser {
     @Override
     protected void handleNullToken() throws IOException {
         jsonReader.nextNull();
-        StockAppLogger.INSTANCE.logDebug("null");
+        logger.debug("null");
     }
 
     @Override
     protected void handleNumberToken() throws IOException {
         final String currentNumber = jsonReader.nextString(); // change to correct number data type in subclass
-        StockAppLogger.INSTANCE.logDebug(currentNumber);
+        logger.debug(currentNumber);
     }
 
     @Override
     protected void handleStringToken() throws IOException {
         final String currentString = jsonReader.nextString();
-        StockAppLogger.INSTANCE.logDebug(currentString);
+        logger.debug(currentString);
     }
 
     @Override
     protected void handleBooleanToken() throws IOException {
         final String currentBoolean = jsonReader.nextString();
-        StockAppLogger.INSTANCE.logDebug(currentBoolean);
+        logger.debug(currentBoolean);
     }
 
     @Override
     protected void handleNameToken() throws IOException {
         final String currentName = jsonReader.nextName();
         updateCurrentAndPreviousKeys(currentName);
-        StockAppLogger.INSTANCE.logDebug(currentName);
+        logger.debug(currentName);
     }
 }

@@ -2,7 +2,9 @@ package stocker.data.parsers;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
-import stocker.support.StockAppLogger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -16,7 +18,8 @@ import java.io.StringReader;
  * @version 1.0
  * @since 1.0
  */
-public  abstract class BaseParser {
+public abstract class BaseParser {
+    private static final Logger logger = LoggerFactory.getLogger(BaseParser.class);
     protected String currentKey = null;
     protected String previousKey = null;
     protected final JsonReader jsonReader;
@@ -28,7 +31,7 @@ public  abstract class BaseParser {
      * @param jsonString the JSON string to be parsed
      */
     protected BaseParser(final String jsonString) { // TODO have to close the jsonReader somewhere
-        StockAppLogger.INSTANCE.logDebug(jsonString);
+        logger.debug(jsonString);
         this.jsonReader = new JsonReader(new StringReader(jsonString));
     }
 
@@ -124,8 +127,7 @@ public  abstract class BaseParser {
                 }
             }
         } catch (IOException e) {
-            StockAppLogger.INSTANCE.logInfo(e.getMessage());
-            e.printStackTrace();
+            logger.error("Error handling JSON object: {}", e.getMessage(), e);
         }
     }
 
