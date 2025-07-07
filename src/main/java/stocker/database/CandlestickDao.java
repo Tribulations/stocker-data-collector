@@ -1,13 +1,16 @@
 package stocker.database;
 
 import stocker.representation.Candlestick;
-import stocker.support.StockAppLogger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +24,7 @@ import static stocker.database.DbConstants.*;
  * @since 1.0
  */
 public class CandlestickDao implements DAO<Candlestick> {
+    private static final Logger logger = LoggerFactory.getLogger(CandlestickDao.class);
 
     /**
      * Retrieves all candlesticks from the database.
@@ -45,10 +49,9 @@ public class CandlestickDao implements DAO<Candlestick> {
                 count++;
             }
             
-            StockAppLogger.INSTANCE.logInfo("Retrieved " + count + " candlesticks from the database");
+            logger.info("Retrieved {} candlesticks from the database", count);
         } catch (SQLException e) {
-            StockAppLogger.INSTANCE.logInfo("Error retrieving all candlesticks: " + e.getMessage());
-            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
+            logger.error("Error retrieving all candlesticks: {}", e.getMessage(), e);
         }
 
         return candlesticks;
@@ -59,7 +62,7 @@ public class CandlestickDao implements DAO<Candlestick> {
         List<Candlestick> candlesticks = new ArrayList<>();
         
         if (name == null || name.trim().isEmpty()) {
-            StockAppLogger.INSTANCE.logInfo("Cannot get rows: Symbol name is null or empty");
+            logger.warn("Cannot get rows: Symbol name is null or empty");
             return candlesticks;
         }
 
@@ -76,8 +79,7 @@ public class CandlestickDao implements DAO<Candlestick> {
                 }
             }
         } catch (SQLException e) {
-            StockAppLogger.INSTANCE.logInfo("Error getting candlesticks for symbol " + name + ": " + e.getMessage());
-            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
+            logger.error("Error getting candlesticks for symbol {}: {}", name, e.getMessage(), e);
         }
 
         return candlesticks;
@@ -100,8 +102,7 @@ public class CandlestickDao implements DAO<Candlestick> {
             candlestick.setHigh(resultSet.getDouble(HIGH_COLUMN));
             candlestick.setVolume(resultSet.getLong(VOLUME_COLUMN));
         } catch (SQLException e) {
-            StockAppLogger.INSTANCE.logInfo("Error setting candlestick data: " + e.getMessage());
-            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
+            logger.error("Error setting candlestick properties: {}", e.getMessage(), e);
             throw e; // Rethrow to allow proper handling by caller
         }
     }
@@ -121,20 +122,17 @@ public class CandlestickDao implements DAO<Candlestick> {
             statement.setString(8, candlestick.getInterval());
             statement.executeUpdate();
         } catch (SQLException e) {
-            StockAppLogger.INSTANCE.logInfo("Error adding candlestick: " + e.getMessage());
-            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
+            logger.error("Error adding candlestick: {}", e.getMessage(), e);
         }
     }
 
     @Override
     public void resetTable() {
-        try (Connection connection = getDbConnection();
-             PreparedStatement statement = connection.prepareStatement(RESET_TABLE_QUERY)
-        ) {
-            statement.executeUpdate();
+        try (Connection cn = getDbConnection(); PreparedStatement st = cn.prepareStatement(RESET_TABLE_QUERY)) {
+            st.executeUpdate();
+            logger.info("Table truncated successfully");
         } catch (SQLException e) {
-            StockAppLogger.INSTANCE.logInfo("Error resetting table: " + e.getMessage());
-            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
+            logger.error("Error truncating table: {}", e.getMessage(), e);
         }
     }
 
@@ -151,8 +149,7 @@ public class CandlestickDao implements DAO<Candlestick> {
             }
             return connection;
         } catch (SQLException e) {
-            StockAppLogger.INSTANCE.logInfo("Database connection error: " + e.getMessage());
-            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
+            logger.error("Database connection error: {}", e.getMessage(), e);
             throw e; // Rethrow to allow proper handling by caller
         }
     }
@@ -166,7 +163,7 @@ public class CandlestickDao implements DAO<Candlestick> {
      */
     public void addMultipleOlderRows(String symbol, List<Candlestick> candlesticks) {
         if (symbol == null || symbol.trim().isEmpty() || candlesticks == null || candlesticks.isEmpty()) {
-            StockAppLogger.INSTANCE.logInfo("Cannot add multiple rows: Symbol is null or candlesticks list is empty");
+            logger.warn("Cannot add multiple rows: Symbol is null/empty or candlesticks list is null/empty");
             return;
         }
 
@@ -207,7 +204,7 @@ public class CandlestickDao implements DAO<Candlestick> {
                     if (result > 0) totalUpdated++;
                 }
                 
-                StockAppLogger.INSTANCE.logInfo("Successfully added " + totalUpdated + 
+                logger.info("Successfully added " + totalUpdated + 
                                               " out of " + candlesticks.size() + 
                                               " candlesticks for symbol: " + symbol);
             }
@@ -216,14 +213,12 @@ public class CandlestickDao implements DAO<Candlestick> {
             if (connection != null) {
                 try {
                     connection.rollback();
-                    StockAppLogger.INSTANCE.logInfo("Transaction rolled back due to error");
+                    logger.info("Transaction rolled back due to error");
                 } catch (SQLException rollbackEx) {
-                    StockAppLogger.INSTANCE.logInfo("Error during rollback: " + rollbackEx.getMessage());
-                    StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(rollbackEx.getStackTrace()));
+                    logger.error("Error during rollback: {}", rollbackEx.getMessage(), rollbackEx);
                 }
             }
-            StockAppLogger.INSTANCE.logInfo("Error adding multiple candlesticks for symbol " + symbol + ": " + e.getMessage());
-            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
+            logger.error("Error adding multiple candlesticks for symbol " + symbol + ": {}", e.getMessage(), e);
         } finally {
             // Restore auto-commit and close connection
             if (connection != null) {
@@ -231,15 +226,13 @@ public class CandlestickDao implements DAO<Candlestick> {
                     connection.setAutoCommit(true);
                     connection.close();
                 } catch (SQLException closeEx) {
-                    StockAppLogger.INSTANCE.logInfo("Error closing connection: " + closeEx.getMessage());
-                    StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(closeEx.getStackTrace()));
+                    logger.error("Error closing connection: {}", closeEx.getMessage(), closeEx);
                 }
             }
         }
     }
 
     /**
-     * DEPRECATED TO BE REMOVED
      * Adds one row to the database overwriting the open, close, low, high and volume if the timestamp
      * already exists for the current symbol, i.e. if the symbol AAB with datetime 2023-08-01 17:30 already exists
      * the open, close, low, high and volume will be updated for this symbol and datetime/timestamp.
@@ -250,7 +243,7 @@ public class CandlestickDao implements DAO<Candlestick> {
     @Override
     public void addRowOverwrite(String symbol, Candlestick candlestick) {
         if (symbol == null || candlestick == null) {
-            StockAppLogger.INSTANCE.logInfo("Cannot add row: Symbol or candlestick is null");
+            logger.info("Cannot add row: Symbol or candlestick is null");
             return;
         }
 
@@ -267,12 +260,11 @@ public class CandlestickDao implements DAO<Candlestick> {
             statement.setString(8, candlestick.getInterval());
             
             int rowsAffected = statement.executeUpdate();
-            StockAppLogger.INSTANCE.logInfo("Updated/inserted candlestick for symbol " + symbol + 
+            logger.info("Updated/inserted candlestick for symbol " + symbol + 
                                           ", timestamp " + candlestick.getHumanReadableDate() + 
                                           ", rows affected: " + rowsAffected);
         } catch (SQLException e) {
-            StockAppLogger.INSTANCE.logInfo("Error updating candlestick for symbol " + symbol + ": " + e.getMessage());
-            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
+            logger.error("Error updating candlestick for symbol " + symbol + ": {}", e.getMessage(), e);
         }
     }
 
@@ -286,7 +278,7 @@ public class CandlestickDao implements DAO<Candlestick> {
     @Override
     public void addRows(String symbol, List<Candlestick> candlesticks) {
         if (symbol == null || symbol.trim().isEmpty() || candlesticks == null || candlesticks.isEmpty()) {
-            StockAppLogger.INSTANCE.logInfo("Cannot add rows: Symbol is null or candlesticks list is empty");
+            logger.info("Cannot add rows: Symbol is null or candlesticks list is empty");
             return;
         }
 
@@ -319,13 +311,11 @@ public class CandlestickDao implements DAO<Candlestick> {
                     }
                 }
                 
-                StockAppLogger.INSTANCE.logInfo("Successfully added " + successCount + 
-                                              " out of " + candlesticks.size() + 
-                                              " candlesticks for symbol: " + symbol);
+                logger.info("Successfully added {} out of {} candlesticks for symbol: {}", 
+                           successCount, candlesticks.size(), symbol);
             }
         } catch (SQLException e) {
-            StockAppLogger.INSTANCE.logInfo("Error adding candlesticks for symbol " + symbol + ": " + e.getMessage());
-            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
+            logger.error("Error adding candlesticks for symbol {}: {}", symbol, e.getMessage(), e);
         }
     }
 
@@ -341,7 +331,7 @@ public class CandlestickDao implements DAO<Candlestick> {
     @Override
     public void addRowNoOverwrite(String symbol, Candlestick candlestick) {
         if (symbol == null || symbol.trim().isEmpty() || candlestick == null) {
-            StockAppLogger.INSTANCE.logInfo("Cannot add row: Symbol is null/empty or candlestick is null");
+            logger.info("Cannot add row: Symbol is null/empty or candlestick is null");
             return;
         }
         
@@ -365,16 +355,12 @@ public class CandlestickDao implements DAO<Candlestick> {
             
             int rowsAffected = statement.executeUpdate();
             if (rowsAffected > 0) {
-                StockAppLogger.INSTANCE.logInfo("Added new candlestick for symbol " + symbol + 
-                                              " at timestamp " + candlestick.getHumanReadableDate());
+                logger.info("Added new candlestick for symbol {} at timestamp {}", symbol, candlestick.getHumanReadableDate());
             } else {
-                StockAppLogger.INSTANCE.logInfo("Candlestick already exists for symbol " + symbol + 
-                                              " at timestamp " + candlestick.getHumanReadableDate() + 
-                                              ", no changes made");
+                logger.info("Candlestick already exists for symbol {} at timestamp {}, no changes made", symbol, candlestick.getHumanReadableDate());
             }
         } catch (SQLException e) {
-            StockAppLogger.INSTANCE.logInfo("Error adding candlestick for symbol " + symbol + ": " + e.getMessage());
-            StockAppLogger.INSTANCE.logInfo("Stack trace: " + java.util.Arrays.toString(e.getStackTrace()));
+            logger.error("Error adding candlestick for symbol {}: {}", symbol, e.getMessage(), e);
         }
     }
 }

@@ -3,8 +3,9 @@ package stocker.data.parsers;
 import stocker.representation.Candlestick;
 import stocker.representation.Stock;
 import stocker.representation.TradingPeriod;
-import stocker.support.StockAppLogger;
-import stocker.support.Utils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -24,6 +25,7 @@ import static stocker.data.fetchers.JsonConstants.INDICATORS;
 import static stocker.data.fetchers.JsonConstants.RANGE;
 
 public class YahooFinanceParser extends BaseParser {// TODO divide this class? It does two things now? SAngle responsibility!! Now it parses and creates a TradingPeriod?
+    private static final Logger logger = LoggerFactory.getLogger(YahooFinanceParser.class);
     private final DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
     private String symbol;
@@ -52,12 +54,9 @@ public class YahooFinanceParser extends BaseParser {// TODO divide this class? I
 
     @Override
     protected void initParsedObject() {
-        StockAppLogger.INSTANCE.logInfo(String.format("Number of timestamps: %s - %s::%s",
-                timestampList.size(), getClass().getCanonicalName(), Utils.getMethodName()));
-        StockAppLogger.INSTANCE.logInfo(String.format("Number of volumes: %s - %s::%s",
-                volumeList.size(), getClass().getCanonicalName(), Utils.getMethodName()));
-        StockAppLogger.INSTANCE.logInfo(String.format("Number of close: %s - %s::%s",
-                closeList.size(), getClass().getCanonicalName(), Utils.getMethodName()));
+        logger.info("Initializing parsed object - Number of timestamps: {}", timestampList.size());
+        logger.info("Initializing parsed object - Number of volumes: {}", volumeList.size());
+        logger.info("Initializing parsed object - Number of close prices: {}", closeList.size());
 
         tradingPeriod = createTradingPeriod();
     }
@@ -95,15 +94,15 @@ public class YahooFinanceParser extends BaseParser {// TODO divide this class? I
             case HIGH -> highList.add(
                     Double.valueOf(decimalFormat.format(jsonReader.nextDouble())));
             case VOLUME -> volumeList.add(jsonReader.nextLong());
-            default -> StockAppLogger.INSTANCE.logDebug(
-                    "default case in YahooFinanceParser::handleNumberToken() " + "Key: " + currentKey + " Value: "+ jsonReader.nextString());
+            default -> logger.debug(
+                    "default case in YahooFinanceParser::handleNumberToken() Key: {} Value: {}", currentKey, jsonReader.nextString());
         }
     }
 
     @Override
     protected void handleStringToken() throws IOException {
         final String currentString = jsonReader.nextString();
-        StockAppLogger.INSTANCE.logDebug(currentString);
+        logger.debug(currentString);
 
         if (DATA_GRANULARITY.equals(currentKey)) {
             interval = currentString;
@@ -115,21 +114,18 @@ public class YahooFinanceParser extends BaseParser {// TODO divide this class? I
     @Override
     protected void handleBooleanToken() throws IOException {
         final Boolean currentBoolean = jsonReader.nextBoolean();
-        StockAppLogger.INSTANCE.logDebug(currentBoolean.toString());
+        logger.debug(currentBoolean.toString());
     }
 
     @Override
     protected void handleNameToken() throws IOException {
         final String currentName = jsonReader.nextName();
         updateCurrentAndPreviousKeys(currentName);
-        StockAppLogger.INSTANCE.logDebug(currentName);
+        logger.debug(currentName);
 
         switch (currentName) {
             case INDICATORS -> {
-                StockAppLogger.INSTANCE.logInfo(
-                        "Inside indicators in switch statement - "
-                                + getClass().getCanonicalName() + "::"
-                                + Utils.getMethodName());
+                logger.info("Processing indicators section in JSON");
             }
             case SYMBOL -> this.symbol = currentName;
         }
@@ -138,7 +134,7 @@ public class YahooFinanceParser extends BaseParser {// TODO divide this class? I
     @Override
     protected void handleNullToken() throws IOException {
         jsonReader.nextNull();
-        StockAppLogger.INSTANCE.logDebug("null");
+        logger.debug("null");
     }
 
     public TradingPeriod getTradingPeriod() {

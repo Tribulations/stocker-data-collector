@@ -1,6 +1,7 @@
 package stocker.representation;
 
-import stocker.support.StockAppLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ import java.util.List;
  * e.g. calculating the max values maxHigh maxLow etc.?
  */
 public class TradingPeriod {
+    private static final Logger logger = LoggerFactory.getLogger(TradingPeriod.class);
     private final List<Candlestick> tradingPeriod;
     private final String RANGE;
     private final String INTERVAL;
@@ -72,10 +74,10 @@ public class TradingPeriod {
     public void removeLast() {
         Candlestick currentDayCandlestick = tradingPeriod.get(tradingPeriod.size() - 1);
 
-        StockAppLogger.INSTANCE.logInfo("Inside Stock constructor");
-        StockAppLogger.INSTANCE.logInfo("skipCurrentDayPriceData is set to true");
-        StockAppLogger.INSTANCE.logInfo(String.format("Removing current day price data for trading session: %s",
-                currentDayCandlestick.getHumanReadableDate()));
+        logger.info("Inside Stock constructor");
+        logger.info("skipCurrentDayPriceData is set to true");
+        logger.info("Removing current day price data for trading session: {}",
+                currentDayCandlestick.getHumanReadableDate());
 
         tradingPeriod.remove(currentDayCandlestick);
     }

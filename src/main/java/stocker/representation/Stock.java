@@ -2,7 +2,9 @@ package stocker.representation;
 
 import stocker.data.fetchers.YahooFinanceFetcher;
 import stocker.data.parsers.YahooFinanceParser;
-import stocker.support.StockAppLogger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.Map;
  * @since 1.0
  */
 public class Stock {
+    private static final Logger logger = LoggerFactory.getLogger(Stock.class);
     private final String symbol;
     private final TradingPeriod tradingPeriod;
     // TODO maybe have a map of trading periods? The interval can be the key?
@@ -82,11 +85,10 @@ public class Stock {
 
     private static void removeLatestCandlestick(List<Candlestick> candlesticks) {
         Candlestick currentDayCandlestick = candlesticks.get(candlesticks.size() - 1);
-        StockAppLogger.INSTANCE.logInfo("Inside Stock constructor");
-        StockAppLogger.INSTANCE.logInfo("skipCurrentDayPriceData is set to true");
-        StockAppLogger.INSTANCE.logInfo(String.format(
-                "Removing current day price data for trading session: %s",
-                currentDayCandlestick.getHumanReadableDate()));
+        logger.info("Inside Stock constructor");
+        logger.info("skipCurrentDayPriceData is set to true");
+        logger.info("Removing current day price data for trading session: {}",
+                currentDayCandlestick.getHumanReadableDate());
         candlesticks.remove(currentDayCandlestick);
     }
 

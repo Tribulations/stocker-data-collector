@@ -7,7 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.quality.Strictness;
 import stocker.representation.Candlestick;
-import stocker.support.StockAppLogger;
+
+import org.slf4j.Logger;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -45,7 +46,7 @@ class CandlestickDaoTest {
     private ResultSet mockResultSet;
 
     @Mock
-    private StockAppLogger mockLogger;
+    private Logger mockLogger;
 
     private CandlestickDao candlestickDao;
 
