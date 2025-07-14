@@ -7,6 +7,8 @@ import stocker.data.StockDataService;
 import stocker.data.fetchers.YahooFinanceFetcher;
 import stocker.database.CandlestickDao;
 import stocker.model.Candlestick;
+import stocker.model.Interval;
+import stocker.model.Range;
 
 import java.util.List;
 
@@ -45,8 +47,8 @@ public class ApiToDatabaseIntegrationIT {
     @Test
     void testAddCurrentDayDataForAAkAndABBToDb() {
         // Fetch and insert data to DB
-        stockDataService.addPriceDataToDb(List.of("AAK", "ABB"), StockDataService.Range.ONE_DAY,
-                StockDataService.Interval.ONE_DAY);
+        stockDataService.addPriceDataToDb(List.of("AAK", "ABB"), Range.ONE_DAY,
+                Interval.ONE_DAY);
 
         // Get data from DB
         List<Candlestick> aak = candlestickDao.getAllRowsByName("AAK.ST");
@@ -61,8 +63,8 @@ public class ApiToDatabaseIntegrationIT {
     @Test
     void testAddHistoricalDataForAAkAndABBToDb() {
         // Fetch and insert data to DB
-        stockDataService.addPriceDataToDb(List.of("AAK", "ABB"), StockDataService.Range.THREE_MONTHS,
-                StockDataService.Interval.ONE_DAY);
+        stockDataService.addPriceDataToDb(List.of("AAK", "ABB"), Range.THREE_MONTHS,
+                    Interval.ONE_DAY);
 
         // Get data from DB
         List<Candlestick> aak = candlestickDao.getAllRowsByName("AAK.ST");
