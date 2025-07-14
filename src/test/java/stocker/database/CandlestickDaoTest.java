@@ -166,10 +166,9 @@ class CandlestickDaoTest {
         verify(mockValidator, times(2)).validateCandlestick(any(Candlestick.class));
         verify(mockStatement, times(2)).addBatch();
         verify(mockStatement).executeBatch();
-        verify(mockConnection).setAutoCommit(false);
+        verify(mockConnection).setAutoCommit(false); // Transaction should be started
         verify(mockConnection).commit();
-        verify(mockConnection).setAutoCommit(true);
-        verify(mockConnection).close();
+        verify(mockConnection).close(); // Connection should be closed
     }
 
     @Test
@@ -208,7 +207,6 @@ class CandlestickDaoTest {
 
         // Verify transaction management even during errors
         verify(mockConnection).setAutoCommit(false); // Transaction should still be started
-        verify(mockConnection).setAutoCommit(true); // Auto-commit should be restored in finally
         verify(mockConnection).close(); // Connection should be closed in finally
     }
 

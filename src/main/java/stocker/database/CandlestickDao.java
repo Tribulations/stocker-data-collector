@@ -16,13 +16,30 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import static stocker.database.DbConstants.*;
+import static stocker.database.DbConstants.CLOSE_COLUMN;
+import static stocker.database.DbConstants.DB_PASSWORD;
+import static stocker.database.DbConstants.DB_URL;
+import static stocker.database.DbConstants.DB_USERNAME;
+import static stocker.database.DbConstants.HIGH_COLUMN;
+import static stocker.database.DbConstants.INSERT_CANDLESTICK_QUERY;
+import static stocker.database.DbConstants.LOW_COLUMN;
+import static stocker.database.DbConstants.OPEN_COLUMN;
+import static stocker.database.DbConstants.RESET_TABLE_QUERY;
+import static stocker.database.DbConstants.SELECT_ALL_QUERY;
+import static stocker.database.DbConstants.SELECT_BY_SYMBOL_QUERY;
+import static stocker.database.DbConstants.TIMESTAMP_COLUMN;
+import static stocker.database.DbConstants.VOLUME_COLUMN;
+
 
 /**
- * Database access object class. Used to interact with the database.
+ * Database access object class. Used to interact with the database for candlestick data.
  *
  * @author Joakim Colloz
  * @version 1.0
+ * @see DatabaseInputValidator
+ * @see Candlestick
+ * @see DAO
+ * @see DbConstants
  * @since 1.0
  */
 public class CandlestickDao implements DAO<Candlestick> {
@@ -184,116 +201,27 @@ public class CandlestickDao implements DAO<Candlestick> {
         logger.info("Starting to add {} candlesticks for symbol: {}",
                 candlesticks != null ? candlesticks.size() : 0, symbol);
 
-        // Validate inputs upfront
-        try {
-            validator.validateSymbol(symbol);
-            validator.validateCandlesticksList(candlesticks);
-            logger.debug("Input validation passed for addRows");
-        } catch (IllegalArgumentException e) {
-            logger.error("Validation failed for addRows: {}", e.getMessage());
-            throw e; // Let unchecked exception bubble up
-        }
-
-        // All candlesticks must be valid or none are processed
-        for (int i = 0; i < candlesticks.size(); i++) {
-            try {
-                validator.validateCandlestick(candlesticks.get(i));
-            } catch (IllegalArgumentException e) {
-                String errorMsg = "Invalid candlestick at index " + i + " for symbol " + symbol + ": " + e.getMessage();
-                logger.error(errorMsg);
-                throw new IllegalArgumentException(errorMsg);
-            }
-        }
-
+        validateInputs(symbol, candlesticks);
         logger.debug("All {} candlesticks passed validation for symbol: {}", candlesticks.size(), symbol);
 
-        Connection connection = null;
-        try {
-            connection = getDbConnection();
+        try (Connection connection = getDbConnection()) {
             connection.setAutoCommit(false); // Start transaction
-
-            logger.debug("Starting batch insert of {} candlesticks for symbol: {}",
-                    candlesticks.size(), symbol);
+            logger.debug("Starting batch insert of {} candlesticks for symbol: {}", candlesticks.size(), symbol);
 
             try (PreparedStatement statement = connection.prepareStatement(INSERT_CANDLESTICK_QUERY)) {
-
-                for (Candlestick candlestick : candlesticks) {
-                    statement.setLong(1, candlestick.getTimestamp());
-                    statement.setDouble(2, candlestick.getOpen());
-                    statement.setDouble(3, candlestick.getClose());
-                    statement.setDouble(4, candlestick.getLow());
-                    statement.setDouble(5, candlestick.getHigh());
-                    statement.setDouble(6, candlestick.getVolume());
-                    statement.setString(7, symbol);
-                    statement.addBatch();
-                }
-
-                // Execute batch and commit transaction
-                int[] results = statement.executeBatch();
-                connection.commit();
-
-                // Count successful inserts
-                int successCount = 0;
-                int failureCount = 0;
-                for (int result : results) {
-                    if (result > 0 || result == Statement.SUCCESS_NO_INFO) {
-                        successCount++;
-                    } else {
-                        failureCount++;
-                    }
-                }
-
-                logger.info("Successfully added {} candlesticks for symbol: {}",
-                        successCount, symbol);
-
-                if (failureCount > 0) {
-                    String errorMsg = "Batch execution had " + failureCount + " failures out of " +
-                            candlesticks.size() + " attempts for symbol: " + symbol;
-                    logger.error(errorMsg);
-                    throw new RuntimeException(errorMsg);
-                }
-
-                // Ensure all candlesticks were successfully inserted
-                if (successCount != candlesticks.size()) {
-                    String errorMsg = "Expected to insert " + candlesticks.size() +
-                            " candlesticks but only " + successCount +
-                            " were successful for symbol: " + symbol;
-                    logger.error(errorMsg);
-                    throw new RuntimeException(errorMsg);
-                }
-
+                batchInsert(symbol, candlesticks, statement, connection);
             } catch (SQLException e) {
                 logger.error("Database error during batch insert for symbol {}: {}", symbol, e.getMessage(), e);
-
-                // Attempt rollback
-                try {
-                    connection.rollback();
-                    logger.info("Transaction rolled back successfully for symbol: {}", symbol);
-                } catch (SQLException rollbackEx) {
-                    logger.error("Error during rollback for symbol {}: {}", symbol, rollbackEx.getMessage(), rollbackEx);
-                }
-
+                attemptRollback(symbol, connection);
                 throw new RuntimeException("Failed to add candlesticks for symbol: " + symbol, e);
             }
 
         } catch (SQLException e) {
             logger.error("Error establishing database connection for symbol {}: {}", symbol, e.getMessage(), e);
             throw new RuntimeException("Failed to establish database connection for symbol: " + symbol, e);
-        } finally {
-            // Restore auto-commit and close connection
-            if (connection != null) {
-                try {
-                    connection.setAutoCommit(true); // Restore auto-commit
-                    connection.close();
-                    logger.debug("Database connection closed for symbol: {}", symbol);
-                } catch (SQLException closeEx) {
-                    logger.error("Error closing connection for symbol {}: {}", symbol, closeEx.getMessage(), closeEx);
-                }
-            }
         }
 
-        logger.info("Successfully processed all {} candlesticks for symbol: {}",
-                candlesticks.size(), symbol);
+        logger.info("Successfully processed all {} candlesticks for symbol: {}", candlesticks.size(), symbol);
     }
 
     /**
@@ -321,6 +249,88 @@ public class CandlestickDao implements DAO<Candlestick> {
         } catch (SQLException e) {
             logger.error("Database connection error: {}", e.getMessage(), e);
             throw e; // Rethrow to allow handling by caller
+        }
+    }
+
+    private void validateInputs(String symbol, List<Candlestick> candlesticks) {
+        try {
+            validator.validateSymbol(symbol);
+            validator.validateCandlesticksList(candlesticks);
+            logger.debug("Input validation passed for addRows");
+        } catch (IllegalArgumentException e) {
+            logger.error("Validation failed for addRows: {}", e.getMessage());
+            throw e; // Let unchecked exception bubble up
+        }
+
+        // All candlesticks must be valid or none are processed
+        for (int i = 0; i < candlesticks.size(); i++) {
+            try {
+                validator.validateCandlestick(candlesticks.get(i));
+            } catch (IllegalArgumentException e) {
+                String errorMsg = "Invalid candlestick at index " + i + " for symbol " + symbol + ": " + e.getMessage();
+                logger.error(errorMsg);
+                throw new IllegalArgumentException(errorMsg);
+            }
+        }
+    }
+
+    private void batchInsert(String symbol, List<Candlestick> candlesticks,
+                             PreparedStatement statement, Connection connection) throws SQLException {
+        for (Candlestick candlestick : candlesticks) {
+            statement.setLong(1, candlestick.getTimestamp());
+            statement.setDouble(2, candlestick.getOpen());
+            statement.setDouble(3, candlestick.getClose());
+            statement.setDouble(4, candlestick.getLow());
+            statement.setDouble(5, candlestick.getHigh());
+            statement.setDouble(6, candlestick.getVolume());
+            statement.setString(7, symbol);
+            statement.addBatch();
+        }
+
+        // Execute batch and commit transaction
+        int[] results = statement.executeBatch();
+        connection.commit();
+
+        validateBatchResults(results, candlesticks.size(), symbol);
+    }
+
+    private void validateBatchResults(int[] results, int expectedCount, String symbol) {
+        int successCount = 0;
+        int failureCount = 0;
+
+        for (int result : results) {
+            if (result > 0 || result == Statement.SUCCESS_NO_INFO) {
+                successCount++;
+            } else {
+                failureCount++;
+            }
+        }
+
+        logger.info("Successfully added {} candlesticks for symbol: {}", successCount, symbol);
+
+        if (failureCount > 0) {
+            String errorMsg = "Batch execution had " + failureCount + " failures out of " +
+                    expectedCount + " attempts for symbol: " + symbol;
+            logger.error(errorMsg);
+            throw new RuntimeException(errorMsg);
+        }
+
+        // Ensure all candlesticks were successfully inserted
+        if (successCount != expectedCount) {
+            String errorMsg = "Expected to insert " + expectedCount +
+                    " candlesticks but only " + successCount +
+                    " were successful for symbol: " + symbol;
+            logger.error(errorMsg);
+            throw new RuntimeException(errorMsg);
+        }
+    }
+
+    private void attemptRollback(String symbol, Connection connection) {
+        try {
+            connection.rollback();
+            logger.info("Transaction rolled back successfully for symbol: {}", symbol);
+        } catch (SQLException rollbackEx) {
+            logger.error("Error during rollback for symbol {}: {}", symbol, rollbackEx.getMessage(), rollbackEx);
         }
     }
 
