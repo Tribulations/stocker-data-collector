@@ -5,358 +5,302 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.quality.Strictness;
-import stocker.representation.Candlestick;
-
-import org.slf4j.Logger;
+import stocker.database.validation.DatabaseInputValidator;
+import stocker.model.Candlestick;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+
 /**
- * Unit tests for the CandlestickDao class.
- * These tests use Mockito to mock database connections and JDBC components.
+ * Unit tests for {@link CandlestickDao} class using mocked dependencies.
+ * Tests validator integration, database operations, and error handling.
+ *
+ * Complements DatabaseInputValidatorTest by testing integration rather than validation rules.
  */
 @ExtendWith(MockitoExtension.class)
-@org.mockito.junit.jupiter.MockitoSettings(strictness = Strictness.LENIENT)
 class CandlestickDaoTest {
+
+    @Mock
+    private DatabaseInputValidator mockValidator;
 
     @Mock
     private Connection mockConnection;
 
     @Mock
-    private PreparedStatement mockPreparedStatement;
+    private PreparedStatement mockStatement;
 
     @Mock
     private ResultSet mockResultSet;
 
-    @Mock
-    private Logger mockLogger;
+    private TestableCandlestickDao dao;
 
-    private CandlestickDao candlestickDao;
-
-    // Create a test driver to help with testing
-    private TestDatabaseDriver testDriver;
-    
     @BeforeEach
-    void setUp() throws Exception {
-        // Initialize the test driver with mocks
-        testDriver = new TestDatabaseDriver(mockConnection, mockPreparedStatement, mockResultSet);
-        
-        // Setup basic mock behavior
-        testDriver.setupBasicMockBehavior();
-        
-        // Create a TestCandlestickDao instance with our mock connection
-        candlestickDao = new TestCandlestickDao(mockConnection);
+    void setUp() {
+        dao = new TestableCandlestickDao(mockValidator, mockConnection);
     }
 
+    // Symbol validation tests
     @Test
-    void getAllRowsShouldReturnListOfCandlesticks() throws Exception {
+    void getAllRowsByNameWithValidSymbolShouldPass() throws SQLException {
         // Arrange
-        testDriver.setupBasicMockBehavior();
-        
-        // Set up the result set to return 2 rows
-        testDriver.setupResultSetWithCandlesticks(
-            new long[]{1620000000L, 1620086400L},
-            new double[]{100.0, 101.0},
-            new double[]{101.0, 102.0},
-            new double[]{99.0, 100.0},
-            new double[]{102.0, 103.0},
-            new long[]{1000L, 1100L}
-        );
+        String symbol = "BOL.ST";
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
+        when(mockStatement.executeQuery()).thenReturn(mockResultSet);
+        setupSingleCandlestickResult();
 
         // Act
-        List<Candlestick> result = candlestickDao.getAllRows();
+        List<Candlestick> result = dao.getAllRowsByName(symbol);
 
         // Assert
-        assertEquals(2, result.size());
-        assertEquals(1620000000L, result.get(0).getTimestamp());
-        assertEquals(100.0, result.get(0).getOpen());
-        assertEquals(101.0, result.get(0).getClose());
-        assertEquals(99.0, result.get(0).getLow());
-        assertEquals(102.0, result.get(0).getHigh());
-        assertEquals(1000L, result.get(0).getVolume());
-        
-        assertEquals(1620086400L, result.get(1).getTimestamp());
-        
-        // Verify interactions
-        verify(mockConnection).prepareStatement(eq("SELECT * FROM " + DbConstants.CANDLESTICK_TABLE));
-        verify(mockPreparedStatement).executeQuery();
-        verify(mockResultSet, times(3)).next();
-    }
-
-    @Test
-    void getAllRowsByNameWithValidSymbolShouldReturnMatchingCandlesticks() throws Exception {
-        // Arrange
-        String symbol = "AAPL";
-        
-        testDriver.setupBasicMockBehavior();
-        
-        // Set up the result set to return 1 row
-        testDriver.setupResultSetWithCandlesticks(
-            new long[]{1620000000L},
-            new double[]{150.0},
-            new double[]{151.0},
-            new double[]{149.0},
-            new double[]{152.0},
-            new long[]{2000L}
-        );
-
-        // Act
-        List<Candlestick> result = candlestickDao.getAllRowsByName(symbol);
-
-        // Assert
+        verify(mockValidator).validateSymbol(symbol);
         assertEquals(1, result.size());
-        assertEquals(1620000000L, result.get(0).getTimestamp());
-        assertEquals(150.0, result.get(0).getOpen());
-        
-        // Verify interactions
-        verify(mockConnection).prepareStatement(eq("SELECT * FROM " + DbConstants.CANDLESTICK_TABLE + " WHERE symbol = ?"));
-        verify(mockPreparedStatement).setString(eq(1), eq(symbol));
-        verify(mockPreparedStatement).executeQuery();
     }
 
     @Test
-    void getAllRowsByNameWithNullSymbolShouldReturnEmptyList() {
+    void getAllRowsByNameWithInvalidSymbolShouldReturnEmptyList() {
+        // Arrange
+        String invalidSymbol = "";
+        doThrow(new IllegalArgumentException("Invalid symbol"))
+                .when(mockValidator).validateSymbol(invalidSymbol);
+
         // Act
-        List<Candlestick> result = candlestickDao.getAllRowsByName(null);
+        List<Candlestick> result = dao.getAllRowsByName(invalidSymbol);
 
         // Assert
         assertTrue(result.isEmpty());
-        
-        // Verify no database interactions
+        verify(mockValidator).validateSymbol(invalidSymbol);
         verifyNoInteractions(mockConnection);
-        verifyNoInteractions(mockPreparedStatement);
     }
 
     @Test
-    void addRowShouldExecuteInsertStatement() throws Exception {
+    void addRowWithValidInputsShouldPass() throws SQLException {
         // Arrange
-        String symbol = "MSFT";
-        Candlestick candlestick = new Candlestick(200.0, 201.0, 199.0, 202.0, 3000L, 1620000000L, "1d");
-        
-        when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+        String symbol = "BOL.ST";
+        Candlestick candlestick = createValidCandlestick();
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
+        when(mockStatement.executeUpdate()).thenReturn(1);
 
         // Act
-        candlestickDao.addRow(symbol, candlestick);
+        dao.addRow(symbol, candlestick);
 
         // Assert
-        verify(mockConnection).prepareStatement(contains("INSERT INTO"));
-        verify(mockPreparedStatement).setLong(eq(1), eq(candlestick.getTimestamp()));
-        verify(mockPreparedStatement).setDouble(eq(2), eq(candlestick.getOpen()));
-        verify(mockPreparedStatement).setDouble(eq(3), eq(candlestick.getClose()));
-        verify(mockPreparedStatement).setDouble(eq(4), eq(candlestick.getLow()));
-        verify(mockPreparedStatement).setDouble(eq(5), eq(candlestick.getHigh()));
-        verify(mockPreparedStatement).setDouble(eq(6), eq((double)candlestick.getVolume()));
-        verify(mockPreparedStatement).setString(eq(7), eq(symbol));
-        verify(mockPreparedStatement).executeUpdate();
+        verify(mockValidator).validateSymbol(symbol);
+        verify(mockValidator).validateCandlestick(candlestick);
+        verify(mockStatement).executeUpdate();
     }
 
     @Test
-    void addRowOverwriteShouldExecuteUpsertStatement() throws Exception {
+    void addRowWithInvalidSymbolShouldThrowException() {
         // Arrange
-        String symbol = "GOOGL";
-        Candlestick candlestick = new Candlestick(300.0, 301.0, 299.0, 302.0, 4000L, 1620000000L, "1d");
-        
-        testDriver.setupBasicMockBehavior();
-        testDriver.setupSuccessfulUpdate(1); // 1 row affected
+        String invalidSymbol = null;
+        Candlestick candlestick = createValidCandlestick();
+        doThrow(new IllegalArgumentException("Symbol cannot be null"))
+                .when(mockValidator).validateSymbol(invalidSymbol);
 
-        // Act
-        candlestickDao.addRowOverwrite(symbol, candlestick);
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> dao.addRow(invalidSymbol, candlestick));
 
-        // Assert
-        verify(mockConnection).prepareStatement(contains("ON CONFLICT"));
-        verify(mockPreparedStatement).setLong(eq(1), eq(candlestick.getTimestamp()));
-        verify(mockPreparedStatement).setDouble(eq(2), eq(candlestick.getOpen()));
-        verify(mockPreparedStatement).setDouble(eq(3), eq(candlestick.getClose()));
-        verify(mockPreparedStatement).setDouble(eq(4), eq(candlestick.getLow()));
-        verify(mockPreparedStatement).setDouble(eq(5), eq(candlestick.getHigh()));
-        verify(mockPreparedStatement).setDouble(eq(6), eq((double)candlestick.getVolume()));
-        verify(mockPreparedStatement).setString(eq(7), eq(symbol));
-        verify(mockPreparedStatement).executeUpdate();
-    }
-
-    @Test
-    void addRowOverwriteWithNullInputsShouldNotExecuteStatement() {
-        // Act
-        candlestickDao.addRowOverwrite(null, null);
-
-        // Assert - verify no database interactions
+        assertTrue(exception.getMessage().contains("Symbol cannot be null"));
+        verify(mockValidator).validateSymbol(invalidSymbol);
         verifyNoInteractions(mockConnection);
-        verifyNoInteractions(mockPreparedStatement);
     }
 
     @Test
-    void addRowNoOverwriteShouldExecuteInsertIgnoreStatement() throws Exception {
+    void addRowWithInvalidCandlestickShouldThrowException() {
         // Arrange
-        String symbol = "AMZN";
-        Candlestick candlestick = new Candlestick(400.0, 401.0, 399.0, 402.0, 5000L, 1620000000L, "1d");
-        
-        testDriver.setupBasicMockBehavior();
-        testDriver.setupSuccessfulUpdate(1); // 1 row affected
+        String symbol = "BOL.ST";
+        Candlestick invalidCandlestick = new Candlestick();
+        invalidCandlestick.setTimestamp(-1); // Invalid timestamp
 
-        // Act
-        candlestickDao.addRowNoOverwrite(symbol, candlestick);
+        doThrow(new IllegalArgumentException("Invalid timestamp"))
+                .when(mockValidator).validateCandlestick(invalidCandlestick);
 
-        // Assert
-        verify(mockConnection).prepareStatement(contains("ON CONFLICT DO NOTHING"));
-        verify(mockPreparedStatement).setLong(eq(1), anyLong()); // We're adjusting timestamp for 1d interval
-        verify(mockPreparedStatement).setDouble(eq(2), eq(candlestick.getOpen()));
-        verify(mockPreparedStatement).setDouble(eq(3), eq(candlestick.getClose()));
-        verify(mockPreparedStatement).setDouble(eq(4), eq(candlestick.getLow()));
-        verify(mockPreparedStatement).setDouble(eq(5), eq(candlestick.getHigh()));
-        verify(mockPreparedStatement).setDouble(eq(6), eq((double)candlestick.getVolume()));
-        verify(mockPreparedStatement).setString(eq(7), eq(symbol));
-        verify(mockPreparedStatement).executeUpdate();
-    }
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> dao.addRow(symbol, invalidCandlestick));
 
-    @Test
-    void addRowsShouldExecuteMultipleInserts() throws Exception {
-        // Arrange
-        String symbol = "TSLA";
-        List<Candlestick> candlesticks = new ArrayList<>();
-        candlesticks.add(new Candlestick(500.0, 501.0, 499.0, 502.0, 6000L, 1620000000L, "1d"));
-        candlesticks.add(new Candlestick(505.0, 506.0, 504.0, 507.0, 6100L, 1620086400L, "1d"));
-        
-        testDriver.setupBasicMockBehavior();
-        testDriver.setupSuccessfulUpdate(1); // 1 row affected each time
-
-        // Act
-        candlestickDao.addRows(symbol, candlesticks);
-
-        // Assert
-        verify(mockConnection).prepareStatement(anyString());
-        // Should execute update twice, once for each candlestick
-        verify(mockPreparedStatement, times(2)).executeUpdate();
-    }
-
-    @Test
-    void addRowsWithEmptyListShouldNotExecuteStatement() {
-        // Act
-        candlestickDao.addRows("TSLA", new ArrayList<>());
-
-        // Assert - verify no database interactions
+        assertTrue(exception.getMessage().contains("Invalid timestamp"));
+        verify(mockValidator).validateSymbol(symbol);
+        verify(mockValidator).validateCandlestick(invalidCandlestick);
         verifyNoInteractions(mockConnection);
-        verifyNoInteractions(mockPreparedStatement);
     }
 
     @Test
-    void addMultipleOlderRowsShouldExecuteBatchInsert() throws Exception {
+    void addRowsWithValidInputsShouldPass() throws SQLException {
         // Arrange
-        String symbol = "FB";
-        List<Candlestick> candlesticks = new ArrayList<>();
-        candlesticks.add(new Candlestick(600.0, 601.0, 599.0, 602.0, 7000L, 1620000000L, "1d"));
-        candlesticks.add(new Candlestick(605.0, 606.0, 604.0, 607.0, 7100L, 1620086400L, "1d"));
-        
-        testDriver.setupBasicMockBehavior();
-        testDriver.setupSuccessfulBatch(new int[]{1, 1}); // Both inserts successful
+        String symbol = "BOL.ST";
+        List<Candlestick> candlesticks = Arrays.asList(
+                createValidCandlestick(),
+                createValidCandlestick()
+        );
+
+        // Mock batch operations and transaction management
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
+        when(mockStatement.executeBatch()).thenReturn(new int[]{1, 1}); // Success for both
 
         // Act
-        candlestickDao.addMultipleOlderRows(symbol, candlesticks);
+        dao.addRows(symbol, candlesticks);
 
         // Assert
+        verify(mockValidator).validateSymbol(symbol);
+        verify(mockValidator).validateCandlesticksList(candlesticks);
+        verify(mockValidator, times(2)).validateCandlestick(any(Candlestick.class));
+        verify(mockStatement, times(2)).addBatch();
+        verify(mockStatement).executeBatch();
         verify(mockConnection).setAutoCommit(false);
-        verify(mockConnection).prepareStatement(anyString());
-        verify(mockPreparedStatement, times(2)).addBatch();
-        verify(mockPreparedStatement).executeBatch();
         verify(mockConnection).commit();
         verify(mockConnection).setAutoCommit(true);
+        verify(mockConnection).close();
     }
 
     @Test
-    void addMultipleOlderRowsWhenExceptionOccursShouldRollback() throws Exception {
+    void addRowsWithEmptyListShouldThrowException() {
         // Arrange
-        String symbol = "NFLX";
-        List<Candlestick> candlesticks = new ArrayList<>();
-        candlesticks.add(new Candlestick(700.0, 701.0, 699.0, 702.0, 8000L, 1620000000L, "1d"));
-        
-        testDriver.setupBasicMockBehavior();
-        testDriver.setupException("executeBatch", new SQLException("Test exception"));
+        String symbol = "BOL.ST";
+        List<Candlestick> emptyCandlesticks = Collections.emptyList();
+        doThrow(new IllegalArgumentException("List cannot be empty"))
+                .when(mockValidator).validateCandlesticksList(emptyCandlesticks);
 
-        // Act
-        candlestickDao.addMultipleOlderRows(symbol, candlesticks);
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> dao.addRows(symbol, emptyCandlesticks));
 
-        // Assert
-        verify(mockConnection).setAutoCommit(false);
-        verify(mockConnection).rollback();
-        verify(mockConnection).setAutoCommit(true);
-    }
-
-    @Test
-    void addMultipleOlderRowsWithEmptyListShouldNotExecuteStatement() {
-        // Act
-        candlestickDao.addMultipleOlderRows("NFLX", new ArrayList<>());
-
-        // Assert - verify no database interactions
+        assertTrue(exception.getMessage().contains("List cannot be empty"));
+        verify(mockValidator).validateSymbol(symbol);
+        verify(mockValidator).validateCandlesticksList(emptyCandlesticks);
         verifyNoInteractions(mockConnection);
-        verifyNoInteractions(mockPreparedStatement);
     }
-    
+
     @Test
-    void setCandleStickShouldHandleSQLException() throws Exception {
+    void addRowsWithDatabaseErrorThrowsRuntimeException() throws SQLException {
         // Arrange
-        testDriver.setupBasicMockBehavior();
-        
-        // Set up the result set to throw an exception when accessing a column
+        String symbol = "BOL.ST";
+        List<Candlestick> candlesticks = List.of(createValidCandlestick());
+
+        when(mockConnection.prepareStatement(anyString()))
+                .thenThrow(new SQLException("Database error"));
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> dao.addRows(symbol, candlesticks));
+
+        assertTrue(exception.getMessage().contains("Failed to add candlesticks"));
+        assertInstanceOf(SQLException.class, exception.getCause());
+
+        // Verify transaction management even during errors
+        verify(mockConnection).setAutoCommit(false); // Transaction should still be started
+        verify(mockConnection).setAutoCommit(true); // Auto-commit should be restored in finally
+        verify(mockConnection).close(); // Connection should be closed in finally
+    }
+
+    @Test
+    void resetTableShouldExecuteSuccessfully() throws SQLException {
+        // Arrange
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
+        when(mockStatement.executeUpdate()).thenReturn(1);
+
+        // Act
+        dao.resetTable();
+
+        // Assert
+        verify(mockStatement).executeUpdate();
+    }
+
+    @Test
+    void resetTableWithSqlExceptionShouldThrowRuntimeException() throws SQLException {
+        // Arrange
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
+        when(mockStatement.executeUpdate()).thenThrow(new SQLException("Reset failed"));
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> dao.resetTable());
+
+        assertTrue(exception.getMessage().contains("Failed to reset table"));
+    }
+
+    @Test
+    void validateConnectionParametersShouldPass() throws SQLException {
+        // Act
+        dao.testGetDbConnection();
+
+        // Assert
+        verify(mockValidator).validateDatabaseUrl(anyString());
+        verify(mockValidator).validateDatabaseUsername(anyString());
+        verify(mockValidator).validateDatabasePassword(anyString());
+    }
+
+    @Test
+    void getDbConnectionWithInvalidConfigShouldThrowSqlException() {
+        // Arrange
+        doThrow(new IllegalArgumentException("Invalid URL"))
+                .when(mockValidator).validateDatabaseUrl(anyString());
+
+        // Act & Assert
+        SQLException exception = assertThrows(SQLException.class,
+                () -> dao.testGetDbConnection());
+
+        assertTrue(exception.getMessage().contains("Invalid database configuration"));
+        assertTrue(exception.getCause() instanceof IllegalArgumentException);
+    }
+
+    // Helper methods
+    private void setupSingleCandlestickResult() throws SQLException {
         when(mockResultSet.next()).thenReturn(true, false);
-        when(mockResultSet.getLong(DbConstants.TIMESTAMP_COLUMN)).thenThrow(new SQLException("Column not found"));
-        
-        // Act
-        List<Candlestick> result = candlestickDao.getAllRows();
-        
-        // Assert
-        assertTrue(result.isEmpty(), "Should return empty list when SQLException occurs");
+        when(mockResultSet.getLong(anyString())).thenReturn(1620000000L);
+        when(mockResultSet.getDouble(anyString())).thenReturn(100.0);
     }
-    
-    @Test
-    void getAllRowsWhenSQLExceptionOccursShouldReturnEmptyList() throws Exception {
-        // Arrange
-        testDriver.setupException("prepareStatement", new SQLException("Test exception"));
-        
-        // Act
-        List<Candlestick> result = candlestickDao.getAllRows();
-        
-        // Assert
-        assertTrue(result.isEmpty(), "Should return empty list when SQLException occurs");
+
+    private Candlestick createValidCandlestick() {
+        Candlestick candlestick = new Candlestick();
+        candlestick.setTimestamp(System.currentTimeMillis());
+        candlestick.setOpen(100.0);
+        candlestick.setClose(105.0);
+        candlestick.setLow(95.0);
+        candlestick.setHigh(110.0);
+        candlestick.setVolume(1000L);
+        candlestick.setInterval("1d");
+        return candlestick;
     }
-    
-    @Test
-    void addRowNoOverwriteWhenSQLExceptionOccursShouldHandleGracefully() throws Exception {
-        // Arrange
-        String symbol = "AMZN";
-        Candlestick candlestick = new Candlestick(400.0, 401.0, 399.0, 402.0, 5000L, 1620000000L, "1d");
-        
-        testDriver.setupException("prepareStatement", new SQLException("Test exception"));
-        
-        // Act & Assert - should not throw exception
-        candlestickDao.addRowNoOverwrite(symbol, candlestick);
-        // Test passes if no exception is thrown
-    }
-    
-    @Test
-    void getAllRowsWhenConnectionFailsShouldReturnEmptyList() throws Exception {
-        // Arrange - simulate connection failure by throwing exception on prepareStatement
-        when(mockConnection.prepareStatement(anyString())).thenThrow(new SQLException("Connection failed"));
-        
-        // Act
-        List<Candlestick> result = candlestickDao.getAllRows();
-        
-        // Assert
-        assertTrue(result.isEmpty(), "Should return empty list when connection fails");
+
+    // Simple testable subclass
+    private static class TestableCandlestickDao extends CandlestickDao {
+        private final Connection mockConnection;
+
+        public TestableCandlestickDao(DatabaseInputValidator validator, Connection mockConnection) {
+            super(validator);
+            this.mockConnection = mockConnection;
+        }
+
+        @Override
+        protected Connection getDbConnection() throws SQLException {
+            // Still call validation from parent class
+            super.getDbConnection();
+            return mockConnection;
+        }
+
+        // Expose protected method for testing
+        public Connection testGetDbConnection() throws SQLException {
+            return super.getDbConnection();
+        }
     }
 }

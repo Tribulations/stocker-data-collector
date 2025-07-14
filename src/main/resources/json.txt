@@ -1,6 +1,0 @@
-{"chart": [
-        {"meta": "metaVal"},
-        {"timestamp": "timestampVal"}
-    ],
- "error": "errorVal"
-}

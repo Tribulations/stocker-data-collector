@@ -3,10 +3,12 @@ package stocker;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import stocker.data.MainDataFetcher;
+import stocker.data.StockDataService;
 import stocker.data.fetchers.YahooFinanceFetcher;
 import stocker.database.CandlestickDao;
-import stocker.representation.Candlestick;
+import stocker.model.Candlestick;
+import stocker.model.Interval;
+import stocker.model.Range;
 
 import java.util.List;
 
@@ -20,18 +22,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author Joakim Colloz
  * @version 1.0
- * @see stocker.data.MainDataFetcher
+ * @see StockDataService
  * @see YahooFinanceFetcher
  * @see stocker.data.parsers.YahooFinanceParser
  * @see stocker.database.CandlestickDao
  */
 public class ApiToDatabaseIntegrationIT {
-    private MainDataFetcher mainDataFetcher;
+    private StockDataService stockDataService;
     private static CandlestickDao candlestickDao;
 
     @BeforeEach
     void setUp() {
-        mainDataFetcher = new MainDataFetcher();
+        stockDataService = new StockDataService();
 
         candlestickDao = new CandlestickDao();
         candlestickDao.resetTable();
@@ -45,8 +47,8 @@ public class ApiToDatabaseIntegrationIT {
     @Test
     void testAddCurrentDayDataForAAkAndABBToDb() {
         // Fetch and insert data to DB
-        mainDataFetcher.addPriceDataToDb(List.of("AAK", "ABB"), MainDataFetcher.Range.ONE_DAY,
-                MainDataFetcher.Interval.ONE_DAY);
+        stockDataService.addPriceDataToDb(List.of("AAK", "ABB"), Range.ONE_DAY,
+                Interval.ONE_DAY);
 
         // Get data from DB
         List<Candlestick> aak = candlestickDao.getAllRowsByName("AAK.ST");
@@ -61,8 +63,8 @@ public class ApiToDatabaseIntegrationIT {
     @Test
     void testAddHistoricalDataForAAkAndABBToDb() {
         // Fetch and insert data to DB
-        mainDataFetcher.addPriceDataToDb(List.of("AAK", "ABB"), MainDataFetcher.Range.THREE_MONTHS,
-                MainDataFetcher.Interval.ONE_DAY);
+        stockDataService.addPriceDataToDb(List.of("AAK", "ABB"), Range.THREE_MONTHS,
+                    Interval.ONE_DAY);
 
         // Get data from DB
         List<Candlestick> aak = candlestickDao.getAllRowsByName("AAK.ST");
