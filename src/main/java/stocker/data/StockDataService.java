@@ -15,13 +15,13 @@ import java.util.List;
  * @author Joakim Colloz
  * @version 1.0
  */
-public class MainDataFetcher {
-    private static final Logger logger = LoggerFactory.getLogger(MainDataFetcher.class);
+public class StockDataService {
+    private static final Logger logger = LoggerFactory.getLogger(StockDataService.class);
     private static final String MARKET_SUFFIX_SWE = ".ST";
 
     private final DataFetcherInputValidator validator;
 
-    public MainDataFetcher() {
+    public StockDataService() {
         this.validator = new DataFetcherInputValidator();
         logger.debug("MainDataFetcher initialized");
     }
