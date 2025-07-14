@@ -50,3 +50,4 @@ dependency-reduced-pom.xml
 
 # Misc
 README_local.md
+src/main/resources/ignored-files/
