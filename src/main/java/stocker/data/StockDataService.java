@@ -6,7 +6,7 @@ import stocker.data.fetchers.YahooFinanceFetcher;
 import stocker.data.parsers.YahooFinanceParser;
 import stocker.data.validation.DataFetcherInputValidator;
 import stocker.database.CandlestickDao;
-import stocker.representation.TradingPeriod;
+import stocker.model.TradingPeriod;
 
 import java.util.List;
 

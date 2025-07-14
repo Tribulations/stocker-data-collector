@@ -1,6 +1,6 @@
 package stocker.database.validation;
 
-import stocker.representation.Candlestick;
+import stocker.model.Candlestick;
 import java.util.List;
 
 /**

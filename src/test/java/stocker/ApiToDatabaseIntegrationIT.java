@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import stocker.data.StockDataService;
 import stocker.data.fetchers.YahooFinanceFetcher;
 import stocker.database.CandlestickDao;
-import stocker.representation.Candlestick;
+import stocker.model.Candlestick;
 
 import java.util.List;
 

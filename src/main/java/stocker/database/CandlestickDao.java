@@ -1,6 +1,6 @@
 package stocker.database;
 
-import stocker.representation.Candlestick;
+import stocker.model.Candlestick;
 import stocker.database.validation.DatabaseInputValidator;
 
 import org.slf4j.Logger;

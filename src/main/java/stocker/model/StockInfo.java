@@ -1,4 +1,4 @@
-package stocker.representation;
+package stocker.model;
 
 /**
  * Class storing a stock name, stock symbol name and, stock id.

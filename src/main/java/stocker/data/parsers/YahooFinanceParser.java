@@ -1,8 +1,8 @@
 package stocker.data.parsers;
 
-import stocker.representation.Candlestick;
-import stocker.representation.Stock;
-import stocker.representation.TradingPeriod;
+import stocker.model.Candlestick;
+import stocker.model.Stock;
+import stocker.model.TradingPeriod;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

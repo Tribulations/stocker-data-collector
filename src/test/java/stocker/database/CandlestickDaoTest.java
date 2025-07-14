@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import stocker.database.validation.DatabaseInputValidator;
-import stocker.representation.Candlestick;
+import stocker.model.Candlestick;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

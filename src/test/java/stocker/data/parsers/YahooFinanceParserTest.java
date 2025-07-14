@@ -1,7 +1,7 @@
 package stocker.data.parsers;
 
 import org.junit.jupiter.api.Test;
-import stocker.representation.TradingPeriod;
+import stocker.model.TradingPeriod;
 
 import java.io.IOException;
 import java.io.InputStream;

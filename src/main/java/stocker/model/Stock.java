@@ -1,4 +1,4 @@
-package stocker.representation;
+package stocker.model;
 
 import stocker.data.exception.DataFetchException;
 import stocker.data.fetchers.YahooFinanceFetcher;
