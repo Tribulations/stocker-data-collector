@@ -1,5 +1,6 @@
 package stocker.representation;
 
+import stocker.data.exception.DataFetchException;
 import stocker.data.fetchers.YahooFinanceFetcher;
 import stocker.data.parsers.YahooFinanceParser;
 
@@ -21,7 +22,6 @@ public class Stock {
     private static final Logger logger = LoggerFactory.getLogger(Stock.class);
     private final String symbol;
     private final TradingPeriod tradingPeriod;
-    // TODO maybe have a map of trading periods? The interval can be the key?
     private final Map<String, TradingPeriod> tradingPeriodMap = new HashMap<>();
 
     /**
@@ -31,12 +31,8 @@ public class Stock {
      */
     public Stock(String symbol, TradingPeriod tradingPeriod) {
         this.symbol = symbol;
-        this.tradingPeriod = tradingPeriod; /* todo having a TradingPeriod class is weird??
-         Should just be candlesticks? Or maybe not beacuase a trading period can be of the same period
-         but with different intervals. So we might have two 6 month trading periods where one has a one
-         day iterval and the other one hour interval. This way maybe we should store the interval as a
-         member in TradingPeriod? */
-        this.tradingPeriodMap.put(tradingPeriod.getINTERVAL(), tradingPeriod);
+        this.tradingPeriod = tradingPeriod;
+        this.tradingPeriodMap.put(tradingPeriod.getINTERVAL(), tradingPeriod); // TODO: Is this map needed?
     }
 
     /**
@@ -49,7 +45,7 @@ public class Stock {
      * @param range The time range for the trading period (e.g., "1d", "1mo", "6mo", "1y").
      * @param interval The time interval between each candlestick (e.g., "1m", "5m", "15m", "1h", "1d").
      */
-    public Stock(String symbol, final String range, final String interval) {
+    public Stock(String symbol, final String range, final String interval) throws DataFetchException {
         this.symbol = symbol;
         final YahooFinanceParser yahooFinanceParser = new YahooFinanceParser(
                 YahooFinanceFetcher.INSTANCE.fetchData(symbol, range, interval));
@@ -68,10 +64,9 @@ public class Stock {
      * @param range The time range for the trading period (e.g., "1d", "1mo", "6mo", "1y").
      * @param interval The time interval between each candlestick (e.g., "1m", "5m", "15m", "1h", "1d").
      * @param skipCurrentDayPriceData If true, excludes the current day's price data from the results.
-     *                                This is recommended when fetching data during an ongoing trading day
-     *                                to prevent duplicate entries for the current session.
      */
-    public Stock(String symbol, final String range, final String interval, final boolean skipCurrentDayPriceData) {
+    public Stock(String symbol, final String range, final String interval, final boolean skipCurrentDayPriceData)
+            throws DataFetchException {
         this.symbol = symbol;
         final YahooFinanceParser yahooFinanceParser = new YahooFinanceParser(
                 YahooFinanceFetcher.INSTANCE.fetchData(symbol, range, interval));
@@ -98,41 +93,5 @@ public class Stock {
 
     public TradingPeriod getTradingPeriod() {
         return tradingPeriod;
-    }
-
-    // valid ranges
-    public class Range {
-        public static final String ONE_DAY = "1d";
-        public static final String ONE_WEEK = "1wk";
-        public static final String FIVE_DAY = "5d";
-        public static final String ONE_MONTH = "1mo";
-        public static final String THREE_MONTHS = "3mo";
-        public static final String SIX_MONTHS = "6mo";
-        public static final String ONE_YEAR = "1y";
-        public static final String TWO_YEAR = "2y";
-        public static final String FIVE_YEARS = "5y";
-        public static final String TEN_YEARS = "10y";
-        public static final String YTD = "ytd";
-        public static final String MAX = "max";
-    }
-
-    // valid intervals
-    public class Interval {
-        public static final String ONE_MIN = "1m";
-        public static final String FIVE_MIN = "5m";
-        public static final String FIFTEEN_MIN = "15m";
-        public static final String ONE_HOUR = "1h";
-        public static final String ONE_WEEK = "1wk";
-        public static final String ONE_DAY = "1d";
-        public static final String FIVE_DAY = "5d";
-        public static final String ONE_MONTH = "1mo";
-        public static final String THREE_MONTHS = "3mo";
-        public static final String SIX_MONTHS = "6mo";
-        public static final String ONE_YEAR = "1y";
-        public static final String TWO_YEAR = "2y";
-        public static final String FIVE_YEARS = "5y";
-        public static final String TEN_YEARS = "10y";
-        public static final String YTD = "ytd";
-        public static final String MAX = "max";
     }
 }

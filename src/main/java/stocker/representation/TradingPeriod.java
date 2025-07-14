@@ -73,8 +73,6 @@ public class TradingPeriod {
 
     public void removeLast() {
         Candlestick currentDayCandlestick = tradingPeriod.get(tradingPeriod.size() - 1);
-
-        logger.info("Inside Stock constructor");
         logger.info("skipCurrentDayPriceData is set to true");
         logger.info("Removing current day price data for trading session: {}",
                 currentDayCandlestick.getHumanReadableDate());
