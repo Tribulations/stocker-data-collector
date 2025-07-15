@@ -93,24 +93,24 @@ public class StockDataService {
 
                 // Get parsed data as TradingPeriod
                 TradingPeriod tradingPeriod = yahooFinanceParser.getTradingPeriod();
-                if (tradingPeriod == null || tradingPeriod.getCandlesticks() == null
-                        || tradingPeriod.getCandlesticks().isEmpty()) {
+                if (tradingPeriod == null || tradingPeriod.candlesticks() == null
+                        || tradingPeriod.candlesticks().isEmpty()) {
                     logger.warn("No candlesticks available for symbol: {} - trading period is null or empty", fullSymbol);
                     failureCount++;
                     continue;
                 }
 
-                int originalCandlestickCount = tradingPeriod.getCandlesticks().size();
+                int originalCandlestickCount = tradingPeriod.candlesticks().size();
                 logger.debug("Retrieved {} candlesticks for symbol: {}", originalCandlestickCount, fullSymbol);
 
                 // Remove the last day's data if needed
-                if (skipCurrentDayPriceData && !tradingPeriod.getCandlesticks().isEmpty()) {
+                if (skipCurrentDayPriceData && !tradingPeriod.candlesticks().isEmpty()) {
                     tradingPeriod.removeLast();
                     logger.debug("Removed last candlestick (current day) for symbol: {} - {} candlesticks remaining",
-                            fullSymbol, tradingPeriod.getCandlesticks().size());
+                            fullSymbol, tradingPeriod.candlesticks().size());
                 }
 
-                if (tradingPeriod.getCandlesticks().isEmpty()) {
+                if (tradingPeriod.candlesticks().isEmpty()) {
                     logger.warn("No candlesticks left after processing for symbol: {} - skipping database insertion", fullSymbol);
                     failureCount++;
                     continue;
@@ -119,10 +119,10 @@ public class StockDataService {
                 // Add data to database
                 try {
                     logger.debug("Inserting {} candlesticks into database for symbol: {}",
-                            tradingPeriod.getCandlesticks().size(), fullSymbol);
-                    candlestickDao.addRows(fullSymbol, tradingPeriod.getCandlesticks());
+                            tradingPeriod.candlesticks().size(), fullSymbol);
+                    candlestickDao.addRows(fullSymbol, tradingPeriod.candlesticks());
                     logger.info("Successfully added {} candlesticks for symbol: {}",
-                            tradingPeriod.getCandlesticks().size(), fullSymbol);
+                            tradingPeriod.candlesticks().size(), fullSymbol);
                     successCount++;
                 } catch (Exception e) {
                     logger.error("Error adding candlesticks to database for symbol {}: {}",

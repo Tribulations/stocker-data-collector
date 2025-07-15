@@ -32,7 +32,7 @@ public class Stock {
     public Stock(String symbol, TradingPeriod tradingPeriod) {
         this.symbol = symbol;
         this.tradingPeriod = tradingPeriod;
-        this.tradingPeriodMap.put(tradingPeriod.getInterval(), tradingPeriod); // TODO: Is this map needed?
+        this.tradingPeriodMap.put(tradingPeriod.interval(), tradingPeriod); // TODO: Is this map needed?
     }
 
     /**
@@ -73,7 +73,7 @@ public class Stock {
         yahooFinanceParser.parse();
 
         if (skipCurrentDayPriceData) {
-            removeLatestCandlestick(yahooFinanceParser.getTradingPeriod().getCandlesticks());
+            removeLatestCandlestick(yahooFinanceParser.getTradingPeriod().candlesticks());
         }
         this.tradingPeriod = yahooFinanceParser.getTradingPeriod();
     }

@@ -22,7 +22,7 @@ class YahooFinanceParserTest {
 
         // Assert: The TradingPeriod should not be null and have 1 candlestick
         assertNotNull(oneDay, "TradingPeriod should not be null after parsing");
-        assertEquals(1, oneDay.getCandlesticks().size());
+        assertEquals(1, oneDay.candlesticks().size());
     }
 
     @Test
@@ -37,7 +37,7 @@ class YahooFinanceParserTest {
 
         // Assert: The TradingPeriod should not be null and have 60 candlesticks
         assertNotNull(period, "TradingPeriod should not be null after parsing");
-        assertEquals(60, period.getCandlesticks().size(), "Should have 60 daily candlesticks for 3 months");
+        assertEquals(60, period.candlesticks().size(), "Should have 60 daily candlesticks for 3 months");
     }
 
     private String loadTestJSON(final String jsonFileName) {
