@@ -81,10 +81,11 @@ public class StockDataService {
 
                 // Parse data
                 logger.debug("Parsing JSON data for symbol: {}", fullSymbol);
-                final YahooFinanceParser yahooFinanceParser = new YahooFinanceParser(json);
-                try {
+                TradingPeriod tradingPeriod;
+                try (YahooFinanceParser yahooFinanceParser = new YahooFinanceParser(json)) {
                     yahooFinanceParser.parse();
                     logger.debug("JSON parsing completed for symbol: {}", fullSymbol);
+                    tradingPeriod = yahooFinanceParser.getTradingPeriod();
                 } catch (Exception e) {
                     logger.error("Failed to parse JSON data for symbol {}: {}", fullSymbol, e.getMessage(), e);
                     failureCount++;
@@ -92,7 +93,6 @@ public class StockDataService {
                 }
 
                 // Get parsed data as TradingPeriod
-                TradingPeriod tradingPeriod = yahooFinanceParser.getTradingPeriod();
                 if (tradingPeriod == null || tradingPeriod.candlesticks() == null
                         || tradingPeriod.candlesticks().isEmpty()) {
                     logger.warn("No candlesticks available for symbol: {} - trading period is null or empty", fullSymbol);
