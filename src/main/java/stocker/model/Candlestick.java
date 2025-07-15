@@ -5,7 +5,11 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 /**
- * a stock candlestick.
+ * This class represents a single candlestick in a time series of stock data.
+ * It stores information about the opening, closing, low, high, volume, and timestamp of the candlestick.
+ *
+ * @author Joakim Colloz
+ * @version 1.0
  */
 public class Candlestick {
     private double open;
@@ -14,9 +18,8 @@ public class Candlestick {
     private double high;
     private long volume;
     private long timestamp;
-    // todo we have to keep track of the candlesticks interval e.g. 1 min, 15 min, 1 day etc. because we use it when
-    //  adding data to the database so we can set the timestamp/date correctly
-    private String interval;
+    private String interval; // TODO: Is this necessary? The interval is not stored in the database as each table stores data for a single interval
+    // TODO: but when we fetch data from the database we set this field to the correct interval.
 
     /**
      * Default public construction initializing all member fields to 0.
@@ -30,15 +33,6 @@ public class Candlestick {
         this.timestamp = 0;
         this.interval = "";
     }
-//    public Candlestick(final double open, final double close, final double low, final double high,
-//                       final long volume, final long timestamp) {
-//        this.open = open;
-//        this.close = close;
-//        this.low = low;
-//        this.high = high;
-//        this.volume = volume;
-//        this.timestamp = timestamp;
-//    }
 
     /**
      * Public construction initializing all member fields.
@@ -126,13 +120,6 @@ public class Candlestick {
                 "yyyy-MM-dd HH:mm:ss").format(
                         Instant.ofEpochSecond(timestamp).atZone(ZoneId.systemDefault()));
     }
-
-//    public static String asHumanReadableDate(long timestamp) {
-//        return DateTimeFormatter.ofPattern(
-//                "yyyy-MM-dd HH:mm").format(
-//                Instant.ofEpochSecond(timestamp).atZone(ZoneId.systemDefault()));
-//    }
-
 
     public void setOpen(double open) {
         this.open = open;
