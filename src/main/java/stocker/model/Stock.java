@@ -32,7 +32,7 @@ public class Stock {
     public Stock(String symbol, TradingPeriod tradingPeriod) {
         this.symbol = symbol;
         this.tradingPeriod = tradingPeriod;
-        this.tradingPeriodMap.put(tradingPeriod.getINTERVAL(), tradingPeriod); // TODO: Is this map needed?
+        this.tradingPeriodMap.put(tradingPeriod.getInterval(), tradingPeriod); // TODO: Is this map needed?
     }
 
     /**

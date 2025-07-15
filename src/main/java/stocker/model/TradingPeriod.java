@@ -5,57 +5,39 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+/**
+ * Class representing a trading period i.e., a list of candlesticks which all have the same interval and range.
+ *
+ * @author Joakim Colloz
+ * @version 1.0
+ * @since 1.0
+ */
 public class TradingPeriod {
     private static final Logger logger = LoggerFactory.getLogger(TradingPeriod.class);
     private final List<Candlestick> tradingPeriod;
-    private final String RANGE;
-    private final String INTERVAL;
-
-    private final double maxOpen = 0.0;
-    private final double maxClose = 0.0;
-    private final double maxLow = 0.0;
-    private final double maxHigh = 0.0;
-    private final long maxVolume = 0;
+    private final String range;
+    private final String interval;
 
     public TradingPeriod(final List<Candlestick> candlesticks, final String range, final String interval) {
         this.tradingPeriod = candlesticks;
-        this.RANGE = range;
-        this.INTERVAL = interval;
+        this.range = range;
+        this.interval = interval;
     }
 
     public void printTradingPeriod() {
         tradingPeriod.forEach(System.out::println);
     }
 
-    /**
-     * Returns the candlestick that has the highest volume in the trading period.
-     * @return the Candlestick
-     */
-    public Candlestick getMaxVolumeCandlestick() {
-        Candlestick maxVolumeCandlestick = null;
-        long maxVolume = Long.MIN_VALUE;
-
-        for (Candlestick candlestick : tradingPeriod) {
-            long volume = candlestick.getVolume();
-            if (volume > maxVolume) {
-                maxVolume = volume;
-                maxVolumeCandlestick = candlestick;
-            }
-        }
-
-        return maxVolumeCandlestick;
-    }
-
     public List<Candlestick> getCandlesticks() {
         return tradingPeriod;
     }
 
-    public String getRANGE() {
-        return RANGE;
+    public String getRange() {
+        return range;
     }
 
-    public String getINTERVAL() {
-        return INTERVAL;
+    public String getInterval() {
+        return interval;
     }
 
     public void removeLast() {
