@@ -168,8 +168,7 @@ class YahooFinanceJsonToDatabaseTest {
      * @throws RuntimeException if parsing fails
      */
     private List<Candlestick> parseJsonToCandlesticks(String json) {
-        try {
-            YahooFinanceParser parser = new YahooFinanceParser(json);
+        try (YahooFinanceParser parser = new YahooFinanceParser(json)) {
             parser.parse();
             TradingPeriod tradingPeriod = parser.getTradingPeriod();
 

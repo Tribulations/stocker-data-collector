@@ -1,5 +1,6 @@
 package stocker.model;
 
+import com.google.gson.JsonParseException;
 import stocker.data.exception.DataFetchException;
 import stocker.data.fetchers.YahooFinanceFetcher;
 import stocker.data.parsers.YahooFinanceParser;
@@ -32,7 +33,7 @@ public class Stock {
     public Stock(String symbol, TradingPeriod tradingPeriod) {
         this.symbol = symbol;
         this.tradingPeriod = tradingPeriod;
-        this.tradingPeriodMap.put(tradingPeriod.getInterval(), tradingPeriod); // TODO: Is this map needed?
+        this.tradingPeriodMap.put(tradingPeriod.interval(), tradingPeriod); // TODO: Is this map needed?
     }
 
     /**
@@ -45,12 +46,14 @@ public class Stock {
      * @param range The time range for the trading period (e.g., "1d", "1mo", "6mo", "1y").
      * @param interval The time interval between each candlestick (e.g., "1m", "5m", "15m", "1h", "1d").
      */
-    public Stock(String symbol, final String range, final String interval) throws DataFetchException {
+    public Stock(String symbol, final String range, final String interval) throws DataFetchException, JsonParseException {
         this.symbol = symbol;
-        final YahooFinanceParser yahooFinanceParser = new YahooFinanceParser(
-                YahooFinanceFetcher.INSTANCE.fetchData(symbol, range, interval));
-        yahooFinanceParser.parse();
-        this.tradingPeriod = yahooFinanceParser.getTradingPeriod();
+
+        final String json = YahooFinanceFetcher.INSTANCE.fetchData(symbol, range, interval);
+        try (YahooFinanceParser yahooFinanceParser = new YahooFinanceParser(json)) {
+            yahooFinanceParser.parse();
+            this.tradingPeriod = yahooFinanceParser.getTradingPeriod();
+        }
     }
 
     /**
@@ -68,14 +71,17 @@ public class Stock {
     public Stock(String symbol, final String range, final String interval, final boolean skipCurrentDayPriceData)
             throws DataFetchException {
         this.symbol = symbol;
-        final YahooFinanceParser yahooFinanceParser = new YahooFinanceParser(
-                YahooFinanceFetcher.INSTANCE.fetchData(symbol, range, interval));
-        yahooFinanceParser.parse();
 
-        if (skipCurrentDayPriceData) {
-            removeLatestCandlestick(yahooFinanceParser.getTradingPeriod().getCandlesticks());
+        final String json = YahooFinanceFetcher.INSTANCE.fetchData(symbol, range, interval);
+        try (YahooFinanceParser yahooFinanceParser = new YahooFinanceParser(json)) {
+            yahooFinanceParser.parse();
+
+            if (skipCurrentDayPriceData) {
+                removeLatestCandlestick(yahooFinanceParser.getTradingPeriod().candlesticks());
+            }
+
+            this.tradingPeriod = yahooFinanceParser.getTradingPeriod();
         }
-        this.tradingPeriod = yahooFinanceParser.getTradingPeriod();
     }
 
     private static void removeLatestCandlestick(List<Candlestick> candlesticks) {
