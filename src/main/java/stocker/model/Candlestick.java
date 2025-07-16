@@ -18,9 +18,8 @@ public class Candlestick {
     private double high;
     private long volume;
     private long timestamp;
-    private String interval; // TODO: Is this necessary? The interval is not stored in the database as each table stores data for a single interval
-    // TODO: but when we fetch data from the database we set this field to the correct interval.
-
+    private String interval;
+    
     /**
      * Default public construction initializing all member fields to 0.
      */
