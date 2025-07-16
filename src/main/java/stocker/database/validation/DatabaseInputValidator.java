@@ -58,37 +58,37 @@ public class DatabaseInputValidator {
         }
 
         // Validate timestamp
-        if (candlestick.getTimestamp() <= 0) {
+        if (candlestick.timestamp() <= 0) {
             throw new IllegalArgumentException("Candlestick timestamp must be positive");
         }
 
         // Validate prices are not negative
-        if (candlestick.getOpen() < 0) {
+        if (candlestick.open() < 0) {
             throw new IllegalArgumentException("Candlestick open price cannot be negative");
         }
-        if (candlestick.getClose() < 0) {
+        if (candlestick.close() < 0) {
             throw new IllegalArgumentException("Candlestick close price cannot be negative");
         }
-        if (candlestick.getHigh() < 0) {
+        if (candlestick.high() < 0) {
             throw new IllegalArgumentException("Candlestick high price cannot be negative");
         }
-        if (candlestick.getLow() < 0) {
+        if (candlestick.low() < 0) {
             throw new IllegalArgumentException("Candlestick low price cannot be negative");
         }
 
         // Validate volume is not negative
-        if (candlestick.getVolume() < 0) {
+        if (candlestick.volume() < 0) {
             throw new IllegalArgumentException("Candlestick volume cannot be negative");
         }
 
         // Validate price relationships (high >= low, etc.)
-        if (candlestick.getHigh() < candlestick.getLow()) {
+        if (candlestick.high() < candlestick.low()) {
             throw new IllegalArgumentException("Candlestick high price cannot be less than low price");
         }
-        if (candlestick.getOpen() > candlestick.getHigh() || candlestick.getOpen() < candlestick.getLow()) {
+        if (candlestick.open() > candlestick.high() || candlestick.open() < candlestick.low()) {
             throw new IllegalArgumentException("Candlestick open price must be between high and low prices");
         }
-        if (candlestick.getClose() > candlestick.getHigh() || candlestick.getClose() < candlestick.getLow()) {
+        if (candlestick.close() > candlestick.high() || candlestick.close() < candlestick.low()) {
             throw new IllegalArgumentException("Candlestick close price must be between high and low prices");
         }
     }

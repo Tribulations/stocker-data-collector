@@ -82,8 +82,7 @@ public class CandlestickDao implements DAO<Candlestick> {
 
             int count = 0;
             while (resultSet.next()) {
-                Candlestick candlestick = new Candlestick();
-                setCandleStick(resultSet, candlestick);
+                Candlestick candlestick = createCandlestick(resultSet);
                 candlesticks.add(candlestick);
                 count++;
             }
@@ -118,8 +117,7 @@ public class CandlestickDao implements DAO<Candlestick> {
             try (ResultSet resultSet = statement.executeQuery()) {
                 int count = 0;
                 while (resultSet.next()) {
-                    Candlestick candlestick = new Candlestick();
-                    setCandleStick(resultSet, candlestick);
+                    Candlestick candlestick = createCandlestick(resultSet);
                     candlesticks.add(candlestick);
                     count++;
                 }
@@ -149,14 +147,13 @@ public class CandlestickDao implements DAO<Candlestick> {
         try (Connection connection = getDbConnection();
              PreparedStatement statement = connection.prepareStatement(INSERT_CANDLESTICK_QUERY)
         ) {
-            statement.setLong(1, candlestick.getTimestamp());
-            statement.setDouble(2, candlestick.getOpen());
-            statement.setDouble(3, candlestick.getClose());
-            statement.setDouble(4, candlestick.getLow());
-            statement.setDouble(5, candlestick.getHigh());
-            statement.setDouble(6, candlestick.getVolume());
+            statement.setLong(1, candlestick.timestamp());
+            statement.setDouble(2, candlestick.open());
+            statement.setDouble(3, candlestick.close());
+            statement.setDouble(4, candlestick.low());
+            statement.setDouble(5, candlestick.high());
+            statement.setDouble(6, candlestick.volume());
             statement.setString(7, symbol);
-            statement.setString(8, candlestick.getInterval());
 
             int rowsAffected = statement.executeUpdate();
             if (rowsAffected > 0) {
@@ -277,12 +274,12 @@ public class CandlestickDao implements DAO<Candlestick> {
     private void batchInsert(String symbol, List<Candlestick> candlesticks,
                              PreparedStatement statement, Connection connection) throws SQLException {
         for (Candlestick candlestick : candlesticks) {
-            statement.setLong(1, candlestick.getTimestamp());
-            statement.setDouble(2, candlestick.getOpen());
-            statement.setDouble(3, candlestick.getClose());
-            statement.setDouble(4, candlestick.getLow());
-            statement.setDouble(5, candlestick.getHigh());
-            statement.setDouble(6, candlestick.getVolume());
+            statement.setLong(1, candlestick.timestamp());
+            statement.setDouble(2, candlestick.open());
+            statement.setDouble(3, candlestick.close());
+            statement.setDouble(4, candlestick.low());
+            statement.setDouble(5, candlestick.high());
+            statement.setDouble(6, candlestick.volume());
             statement.setString(7, symbol);
             statement.addBatch();
         }
@@ -339,17 +336,14 @@ public class CandlestickDao implements DAO<Candlestick> {
      * This method handles the mapping of database columns to Candlestick properties.
      *
      * @param resultSet the ResultSet containing the data to extract
-     * @param candlestick the Candlestick object to populate
+     * @return the populated Candlestick object
      * @throws SQLException if a database access error occurs or the column names don't exist
      */
-    private void setCandleStick(final ResultSet resultSet, final Candlestick candlestick) throws SQLException {
+    private Candlestick createCandlestick(final ResultSet resultSet) throws SQLException {
         try {
-            candlestick.setTimestamp(resultSet.getLong(TIMESTAMP_COLUMN));
-            candlestick.setOpen(resultSet.getDouble(OPEN_COLUMN));
-            candlestick.setClose(resultSet.getDouble(CLOSE_COLUMN));
-            candlestick.setLow(resultSet.getDouble(LOW_COLUMN));
-            candlestick.setHigh(resultSet.getDouble(HIGH_COLUMN));
-            candlestick.setVolume(resultSet.getLong(VOLUME_COLUMN));
+            return new Candlestick(resultSet.getDouble(OPEN_COLUMN), resultSet.getDouble(CLOSE_COLUMN),
+                    resultSet.getDouble(LOW_COLUMN), resultSet.getDouble(HIGH_COLUMN),
+                    resultSet.getLong(VOLUME_COLUMN), resultSet.getLong(TIMESTAMP_COLUMN));
         } catch (SQLException e) {
             logger.error("Error setting candlestick properties: {}", e.getMessage(), e);
             throw e; // Rethrow to allow handling by caller

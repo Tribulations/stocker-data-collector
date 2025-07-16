@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 /**
- * Class representing a trading period i.e., a list of candlesticks which all have the same interval and range.
+ * Record representing a trading period i.e., a list of {@link Candlestick} which all have the same interval and range.
  *
  * @author Joakim Colloz
  * @version 1.0
