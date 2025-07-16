@@ -190,12 +190,12 @@ class YahooFinanceJsonToDatabaseTest {
      */
     private void verifyCandlestickDataMatches(Candlestick expected, Candlestick actual) {
         assertAll("Candlestick data should match",
-                () -> assertEquals(expected.getTimestamp(), actual.getTimestamp(), "Timestamp should match"),
-                () -> assertEquals(expected.getOpen(), actual.getOpen(), PRICE_DELTA, "Open price should match"),
-                () -> assertEquals(expected.getClose(), actual.getClose(), PRICE_DELTA, "Close price should match"),
-                () -> assertEquals(expected.getHigh(), actual.getHigh(), PRICE_DELTA, "High price should match"),
-                () -> assertEquals(expected.getLow(), actual.getLow(), PRICE_DELTA, "Low price should match"),
-                () -> assertEquals(expected.getVolume(), actual.getVolume(), "Volume should match")
+                () -> assertEquals(expected.timestamp(), actual.timestamp(), "Timestamp should match"),
+                () -> assertEquals(expected.open(), actual.open(), PRICE_DELTA, "Open price should match"),
+                () -> assertEquals(expected.close(), actual.close(), PRICE_DELTA, "Close price should match"),
+                () -> assertEquals(expected.high(), actual.high(), PRICE_DELTA, "High price should match"),
+                () -> assertEquals(expected.low(), actual.low(), PRICE_DELTA, "Low price should match"),
+                () -> assertEquals(expected.volume(), actual.volume(), "Volume should match")
         );
     }
 

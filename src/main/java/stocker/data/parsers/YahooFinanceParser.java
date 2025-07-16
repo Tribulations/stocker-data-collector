@@ -122,8 +122,7 @@ public class YahooFinanceParser extends BaseParser {
                 try {
                     Candlestick candlestick = new Candlestick(
                             openList.get(i), closeList.get(i), lowList.get(i),
-                            highList.get(i), volumeList.get(i), timestampList.get(i), interval
-                    );
+                            highList.get(i), volumeList.get(i), timestampList.get(i));
                     candlestickList.add(candlestick);
 
                     logger.trace("Created candlestick {} with timestamp {}", i, timestampList.get(i));

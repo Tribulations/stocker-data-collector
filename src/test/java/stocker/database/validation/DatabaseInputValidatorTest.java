@@ -93,8 +93,8 @@ class DatabaseInputValidatorTest {
 
     @Test
     void candlestickWithZeroTimestampShouldThrowException() {
-        Candlestick candlestick = createValidCandlestick();
-        candlestick.setTimestamp(0);
+        Candlestick candlestick = new Candlestick(100.0, 105.0, 95.0,
+                110.0, 1000L, 0);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> validator.validateCandlestick(candlestick));
@@ -103,8 +103,8 @@ class DatabaseInputValidatorTest {
 
     @Test
     void candlestickWithNegativeTimestampShouldThrowException() {
-        Candlestick candlestick = createValidCandlestick();
-        candlestick.setTimestamp(-1000);
+        Candlestick candlestick = new Candlestick(100.0, 105.0, 95.0,
+                110.0, 1000L, -1000);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> validator.validateCandlestick(candlestick));
@@ -114,8 +114,8 @@ class DatabaseInputValidatorTest {
     @ParameterizedTest
     @ValueSource(doubles = {-1.0, -0.01, -100.0})
     void candlestickWithNegativeOpenPriceShouldThrowException(double negativePrice) {
-        Candlestick candlestick = createValidCandlestick();
-        candlestick.setOpen(negativePrice);
+        Candlestick candlestick = new Candlestick(negativePrice, 105.0, 95.0,
+                110.0, 1000L, System.currentTimeMillis());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> validator.validateCandlestick(candlestick));
@@ -125,8 +125,8 @@ class DatabaseInputValidatorTest {
     @ParameterizedTest
     @ValueSource(doubles = {-1.0, -0.01, -100.0})
     void candlestickWithNegativeClosePriceShouldThrowException(double negativePrice) {
-        Candlestick candlestick = createValidCandlestick();
-        candlestick.setClose(negativePrice);
+        Candlestick candlestick = new Candlestick(100.0, negativePrice, 95.0,
+                110.0, 1000L, System.currentTimeMillis());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> validator.validateCandlestick(candlestick));
@@ -136,8 +136,8 @@ class DatabaseInputValidatorTest {
     @ParameterizedTest
     @ValueSource(doubles = {-1.0, -0.01, -100.0})
     void candlestickWithNegativeHighPriceShouldThrowException(double negativePrice) {
-        Candlestick candlestick = createValidCandlestick();
-        candlestick.setHigh(negativePrice);
+        Candlestick candlestick = new Candlestick(100.0, 105.0, 95.0,
+                negativePrice, 1000L, System.currentTimeMillis());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> validator.validateCandlestick(candlestick));
@@ -147,8 +147,8 @@ class DatabaseInputValidatorTest {
     @ParameterizedTest
     @ValueSource(doubles = {-1.0, -0.01, -100.0})
     void candlestickWithNegativeLowPriceShouldThrowException(double negativePrice) {
-        Candlestick candlestick = createValidCandlestick();
-        candlestick.setLow(negativePrice);
+        Candlestick candlestick = new Candlestick(100.0, 105.0, negativePrice,
+                110.0, 1000L, System.currentTimeMillis());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> validator.validateCandlestick(candlestick));
@@ -158,8 +158,8 @@ class DatabaseInputValidatorTest {
     @ParameterizedTest
     @ValueSource(longs = {-1L, -100L, -1000L})
     void candlestickWithNegativeVolumeShouldThrowException(long negativeVolume) {
-        Candlestick candlestick = createValidCandlestick();
-        candlestick.setVolume(negativeVolume);
+        Candlestick candlestick = new Candlestick(100.0, 105.0, 95.0,
+                110.0, negativeVolume, System.currentTimeMillis());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> validator.validateCandlestick(candlestick));
@@ -168,21 +168,16 @@ class DatabaseInputValidatorTest {
 
     @Test
     void shouldThrowExceptionWhenLowIsGreaterThanHigh() {
-        Candlestick candlestick = createValidCandlestick();
-        candlestick.setHigh(100.0);
-        candlestick.setLow(150.0);
-
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> validator.validateCandlestick(candlestick));
+                () -> validator.validateCandlestick(new Candlestick(100.0, 105.0, 150.0,
+                        100.0, 1000L, System.currentTimeMillis())));
         assertTrue(exception.getMessage().contains("high price cannot be less than low price"));
     }
 
     @Test
     void shouldThrowExceptionWhenOpenIsAboveHigh() {
-        Candlestick candlestick = createValidCandlestick();
-        candlestick.setHigh(100.0);
-        candlestick.setLow(90.0);
-        candlestick.setOpen(110.0);
+        Candlestick candlestick = new Candlestick(110.0, 105.0, 90.0,
+                100.0, 1000L, System.currentTimeMillis());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> validator.validateCandlestick(candlestick));
@@ -191,10 +186,8 @@ class DatabaseInputValidatorTest {
 
     @Test
     void shouldThrowExceptionWhenOpenIsBelowLow() {
-        Candlestick candlestick = createValidCandlestick();
-        candlestick.setHigh(100.0);
-        candlestick.setLow(90.0);
-        candlestick.setOpen(80.0);
+        Candlestick candlestick = new Candlestick(80.0, 105.0, 90.0,
+                100.0, 1000L, System.currentTimeMillis());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> validator.validateCandlestick(candlestick));
@@ -203,10 +196,8 @@ class DatabaseInputValidatorTest {
 
     @Test
     void shouldThrowExceptionWhenCloseIsAboveHigh() {
-        Candlestick candlestick = createValidCandlestick();
-        candlestick.setHigh(100.0);
-        candlestick.setLow(90.0);
-        candlestick.setClose(110.0);
+        Candlestick candlestick = new Candlestick(95.0, 110.0, 90.0,
+                100.0, 1000L, System.currentTimeMillis());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> validator.validateCandlestick(candlestick));
@@ -215,10 +206,8 @@ class DatabaseInputValidatorTest {
 
     @Test
     void shouldThrowExceptionWhenCloseIsBelowLow() {
-        Candlestick candlestick = createValidCandlestick();
-        candlestick.setHigh(100.0);
-        candlestick.setLow(90.0);
-        candlestick.setClose(80.0);
+        Candlestick candlestick = new Candlestick(95.0, 80.0, 90.0,
+                100.0, 1000L, System.currentTimeMillis());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> validator.validateCandlestick(candlestick));
@@ -229,8 +218,8 @@ class DatabaseInputValidatorTest {
     @Test
     void oneInvalidCandlestickShouldThrowException() {
         Candlestick validCandlestick = createValidCandlestick();
-        Candlestick invalidCandlestick = createValidCandlestick();
-        invalidCandlestick.setTimestamp(-1000); // Invalid timestamp
+        Candlestick invalidCandlestick = new Candlestick(100.0, 105.0, 99.0,
+                115.0, 1000L, -1000); // Invalid timestamp
 
         List<Candlestick> candlesticks = Arrays.asList(validCandlestick, invalidCandlestick);
 
@@ -304,13 +293,7 @@ class DatabaseInputValidatorTest {
 
     // Helper method to create valid candlestick
     private Candlestick createValidCandlestick() {
-        Candlestick candlestick = new Candlestick();
-        candlestick.setTimestamp(System.currentTimeMillis());
-        candlestick.setOpen(100.0);
-        candlestick.setClose(105.0);
-        candlestick.setHigh(110.0);
-        candlestick.setLow(95.0);
-        candlestick.setVolume(1000L);
-        return candlestick;
+        return new Candlestick(100.0, 105.0, 95.0,
+                110.0, 1000L, System.currentTimeMillis());
     }
 }
