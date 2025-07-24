@@ -7,19 +7,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 import static stocker.database.DbConstants.CLOSE_COLUMN;
-import static stocker.database.DbConstants.DB_PASSWORD;
-import static stocker.database.DbConstants.DB_URL;
-import static stocker.database.DbConstants.DB_USERNAME;
 import static stocker.database.DbConstants.HIGH_COLUMN;
 import static stocker.database.DbConstants.INSERT_CANDLESTICK_QUERY;
 import static stocker.database.DbConstants.LOW_COLUMN;
@@ -30,38 +25,45 @@ import static stocker.database.DbConstants.SELECT_BY_SYMBOL_QUERY;
 import static stocker.database.DbConstants.TIMESTAMP_COLUMN;
 import static stocker.database.DbConstants.VOLUME_COLUMN;
 
-
 /**
  * Database access object class. Used to interact with the database for candlestick data.
+ * Uses {@link DatabaseManager} for connection management.
  *
  * @author Joakim Colloz
- * @version 1.0
+ * @version 2.0
  * @see DatabaseInputValidator
  * @see Candlestick
  * @see DAO
  * @see DbConstants
+ * @see DatabaseManager
  * @since 1.0
  */
 public class CandlestickDao implements DAO<Candlestick> {
     private static final Logger logger = LoggerFactory.getLogger(CandlestickDao.class);
     private final DatabaseInputValidator validator;
+    private final DatabaseManager databaseManager;
 
     /**
-     * Default constructor that initializes the validator.
+     * Constructor that uses {@link DatabaseManager} for connection management.
+     * Preferably use {@link DatabaseManager#createCandlestickDao()} instead of calling this constructor directly.
+     * @param databaseManager the database manager to use for connections
      */
-    public CandlestickDao() {
+    public CandlestickDao(DatabaseManager databaseManager) {
+        this.databaseManager = databaseManager;
         this.validator = new DatabaseInputValidator();
-        logger.debug("CandlestickDao initialized with validator");
+        logger.debug("CandlestickDao initialized with DatabaseManager and validator");
     }
 
     /**
      * Constructor for dependency injection (for testing).
      *
+     * @param databaseManager the database manager to use for connections
      * @param validator the database input validator to use
      */
-    public CandlestickDao(DatabaseInputValidator validator) {
+    public CandlestickDao(DatabaseManager databaseManager, DatabaseInputValidator validator) {
+        this.databaseManager = databaseManager;
         this.validator = validator;
-        logger.debug("CandlestickDao initialized with injected validator");
+        logger.debug("CandlestickDao initialized with injected DatabaseManager and validator");
     }
 
     /**
@@ -76,7 +78,7 @@ public class CandlestickDao implements DAO<Candlestick> {
         List<Candlestick> candlesticks = new ArrayList<>();
         logger.debug("Starting to retrieve all candlesticks from database");
 
-        try (Connection connection = getDbConnection();
+        try (Connection connection = databaseManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(SELECT_ALL_QUERY);
              ResultSet resultSet = statement.executeQuery()) {
 
@@ -108,7 +110,7 @@ public class CandlestickDao implements DAO<Candlestick> {
             return candlesticks; // Return empty list for invalid input
         }
 
-        try (Connection connection = getDbConnection();
+        try (Connection connection = databaseManager.getConnection();
              PreparedStatement statement = connection.prepareStatement(SELECT_BY_SYMBOL_QUERY)) {
 
             statement.setString(1, name);
@@ -144,9 +146,9 @@ public class CandlestickDao implements DAO<Candlestick> {
             throw e; // Let unchecked exception bubble up
         }
 
-        try (Connection connection = getDbConnection();
-             PreparedStatement statement = connection.prepareStatement(INSERT_CANDLESTICK_QUERY)
-        ) {
+        try (Connection connection = databaseManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(INSERT_CANDLESTICK_QUERY)) {
+
             statement.setLong(1, candlestick.timestamp());
             statement.setDouble(2, candlestick.open());
             statement.setDouble(3, candlestick.close());
@@ -171,9 +173,10 @@ public class CandlestickDao implements DAO<Candlestick> {
     public void resetTable() {
         logger.info("Starting to reset/truncate candlestick table");
 
-        try (Connection cn = getDbConnection();
-             PreparedStatement st = cn.prepareStatement(RESET_TABLE_QUERY)) {
-            st.executeUpdate();
+        try (Connection connection = databaseManager.getConnection();
+             PreparedStatement statement = connection.prepareStatement(RESET_TABLE_QUERY)) {
+
+            statement.executeUpdate();
             logger.info("Table truncated successfully.");
         } catch (SQLException e) {
             logger.error("Error truncating table: {}", e.getMessage(), e);
@@ -201,7 +204,7 @@ public class CandlestickDao implements DAO<Candlestick> {
         validateInputs(symbol, candlesticks);
         logger.debug("All {} candlesticks passed validation for symbol: {}", candlesticks.size(), symbol);
 
-        try (Connection connection = getDbConnection()) {
+        try (Connection connection = databaseManager.getConnection()) {
             connection.setAutoCommit(false); // Start transaction
             logger.debug("Starting batch insert of {} candlesticks for symbol: {}", candlesticks.size(), symbol);
 
@@ -219,34 +222,6 @@ public class CandlestickDao implements DAO<Candlestick> {
         }
 
         logger.info("Successfully processed all {} candlesticks for symbol: {}", candlesticks.size(), symbol);
-    }
-
-    /**
-     * Gets a database connection.
-     * @return a valid database connection
-     * @throws SQLException if a database access error occurs or the url is null
-     * @throws IllegalArgumentException if the database configuration is invalid
-     */
-    protected Connection getDbConnection() throws SQLException {
-        try {
-            // Validate connection parameters
-            validator.validateDatabaseUrl(DB_URL);
-            validator.validateDatabaseUsername(DB_USERNAME);
-            validator.validateDatabasePassword(DB_PASSWORD);
-
-            Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
-            if (connection == null) {
-                throw new SQLException("Failed to establish database connection");
-            }
-            logger.debug("Database connection established successfully");
-            return connection;
-        } catch (IllegalArgumentException e) {
-            logger.error("Database configuration validation failed: {}", e.getMessage());
-            throw new SQLException("Invalid database configuration", e);
-        } catch (SQLException e) {
-            logger.error("Database connection error: {}", e.getMessage(), e);
-            throw e; // Rethrow to allow handling by caller
-        }
     }
 
     private void validateInputs(String symbol, List<Candlestick> candlesticks) {
