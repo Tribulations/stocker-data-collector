@@ -1,16 +1,25 @@
 package stocker;
 
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import stocker.data.StockDataService;
 import stocker.data.fetchers.YahooFinanceFetcher;
+import stocker.data.validation.DataFetcherInputValidator;
 import stocker.database.CandlestickDao;
+import stocker.database.DatabaseManager;
+import stocker.database.DatabaseConfig;
 import stocker.model.Candlestick;
 import stocker.model.Interval;
 import stocker.model.Range;
 
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -21,27 +30,69 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * is correctly saved to the database.
  *
  * @author Joakim Colloz
- * @version 1.0
+ * @version 2.0
  * @see StockDataService
  * @see YahooFinanceFetcher
  * @see stocker.data.parsers.YahooFinanceParser
  * @see stocker.database.CandlestickDao
+ * @see DatabaseManager
  */
+@Testcontainers
+@DisplayName("API to Database Integration Tests")
 public class ApiToDatabaseIntegrationIT {
+    private static final Logger logger = LoggerFactory.getLogger(ApiToDatabaseIntegrationIT.class);
+
+    @Container
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:13-alpine")
+            .withDatabaseName("stockdb_integration_test")
+            .withUsername("integration_user")
+            .withPassword("integration_password")
+            .withReuse(false); // Fresh container for each test run
+
     private StockDataService stockDataService;
-    private static CandlestickDao candlestickDao;
+    private CandlestickDao candlestickDao;
+    private DatabaseManager databaseManager;
 
     @BeforeEach
     void setUp() {
-        stockDataService = new StockDataService();
+        logger.debug("Setting up integration test with container: {}:{}",
+                postgres.getHost(), postgres.getFirstMappedPort());
 
-        candlestickDao = new CandlestickDao();
+        // Create config using container connection details
+        DatabaseConfig config = new DatabaseConfig(
+                postgres.getHost(),
+                postgres.getFirstMappedPort().toString(),
+                postgres.getDatabaseName(),
+                postgres.getUsername(),
+                postgres.getPassword()
+        );
+
+        // Initialize DatabaseManager and run migrations
+        databaseManager = new DatabaseManager(config);
+        databaseManager.initialize();
+
+        // Create DAO using DatabaseManager
+        candlestickDao = databaseManager.createCandlestickDao();
         candlestickDao.resetTable();
+
+        // Initialize StockDataService
+        stockDataService = new StockDataService(new DataFetcherInputValidator(), databaseManager);
+
+        logger.debug("Integration test setup completed successfully");
     }
 
-    @AfterAll
-    static void tearDown() {
-        candlestickDao.resetTable();
+    @AfterEach
+    void tearDown() {
+        try {
+            if (candlestickDao != null) {
+                candlestickDao.resetTable();
+            }
+            if (databaseManager != null) {
+                databaseManager.close();
+            }
+        } catch (Exception e) {
+            logger.warn("Error during integration test cleanup: {}", e.getMessage());
+        }
     }
 
     @Test
@@ -55,16 +106,16 @@ public class ApiToDatabaseIntegrationIT {
         List<Candlestick> abb = candlestickDao.getAllRowsByName("ABB.ST");
 
         assertFalse(aak.isEmpty(), "AAK current day data should exist in DB");
-        assertEquals(1, abb.size(), "There should be 1 day of AAB price data in the database");
+        assertEquals(1, aak.size(), "There should be 1 day of AAK price data in the database");
         assertFalse(abb.isEmpty(), "ABB current day data should exist in DB");
-        assertEquals(1, abb.size(), "There should be 1 day of AAK price data in the database");
+        assertEquals(1, abb.size(), "There should be 1 day of ABB price data in the database");
     }
 
     @Test
     void testAddHistoricalDataForAAkAndABBToDb() {
         // Fetch and insert data to DB
         stockDataService.addPriceDataToDb(List.of("AAK", "ABB"), Range.THREE_MONTHS,
-                    Interval.ONE_DAY);
+                Interval.ONE_DAY);
 
         // Get data from DB
         List<Candlestick> aak = candlestickDao.getAllRowsByName("AAK.ST");

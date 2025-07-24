@@ -1,14 +1,18 @@
 package stocker;
 
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import stocker.data.parsers.YahooFinanceParser;
 import stocker.database.CandlestickDao;
-import stocker.database.validation.DatabaseInputValidator;
+import stocker.database.DatabaseManager;
+import stocker.database.DatabaseConfig;
 import stocker.model.Candlestick;
 import stocker.model.TradingPeriod;
 
@@ -29,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Tests the complete flow from JSON data to database storage and retrieval
  * using predefined test JSON files without making actual API calls.
  */
+@Testcontainers
 @DisplayName("Yahoo Finance JSON to Database Integration Tests")
 class YahooFinanceJsonToDatabaseTest {
 
@@ -38,31 +43,49 @@ class YahooFinanceJsonToDatabaseTest {
     private static final double PRICE_DELTA = 0.01; // Tolerance for floating-point price comparisons
     private static final int EXPECTED_THREE_MONTH_CANDLESTICKS = 60;
 
-    private static CandlestickDao candlestickDao;
+    @Container
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:13-alpine")
+            .withDatabaseName("stockdb_test")
+            .withUsername("test_user")
+            .withPassword("test_password")
+            .withReuse(false);
+
+    private DatabaseManager databaseManager;
+    private CandlestickDao candlestickDao;
 
     @BeforeEach
     void setUp() {
-        logger.info("Setting up integration test");
+        logger.info("Setting up integration test with Testcontainers");
         try {
-            DatabaseInputValidator validator = new DatabaseInputValidator();
-            candlestickDao = new CandlestickDao(validator);
+            // Create config using container connection details
+            DatabaseConfig config = new DatabaseConfig(
+                    postgres.getHost(),
+                    postgres.getFirstMappedPort().toString(),
+                    postgres.getDatabaseName(),
+                    postgres.getUsername(),
+                    postgres.getPassword()
+            );
+
+            databaseManager = new DatabaseManager(config);
+            databaseManager.initialize(); // Run migrations
+
+            // Create DAO using DatabaseManager
+            candlestickDao = databaseManager.createCandlestickDao();
             candlestickDao.resetTable();
+
         } catch (Exception e) {
             logger.error("Failed to set up test: {}", e.getMessage(), e);
             fail("Test setup failed: " + e.getMessage());
         }
     }
 
-    @AfterAll
-    static void tearDown() {
+    @AfterEach
+    void tearDown() {
         logger.info("Cleaning up after integration tests");
         try {
-            if (candlestickDao == null) {
-                DatabaseInputValidator validator = new DatabaseInputValidator();
-                candlestickDao = new CandlestickDao(validator);
+            if (databaseManager != null) {
+                databaseManager.close();
             }
-            candlestickDao.resetTable();
-            logger.debug("Test cleanup completed successfully");
         } catch (Exception e) {
             logger.error("Failed to clean up after tests: {}", e.getMessage(), e);
         }
