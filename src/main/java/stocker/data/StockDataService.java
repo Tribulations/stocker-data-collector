@@ -6,6 +6,8 @@ import stocker.data.fetchers.YahooFinanceFetcher;
 import stocker.data.parsers.YahooFinanceParser;
 import stocker.data.validation.DataFetcherInputValidator;
 import stocker.database.CandlestickDao;
+import stocker.database.DatabaseConfig;
+import stocker.database.DatabaseManager;
 import stocker.model.Interval;
 import stocker.model.Range;
 import stocker.model.TradingPeriod;
@@ -22,10 +24,18 @@ public class StockDataService {
     private static final String MARKET_SUFFIX_SWE = ".ST";
 
     private final DataFetcherInputValidator validator;
+    private final DatabaseManager databaseManager;
 
     public StockDataService() {
         this.validator = new DataFetcherInputValidator();
+        this.databaseManager = new DatabaseManager(new DatabaseConfig());
         logger.debug("MainDataFetcher initialized");
+    }
+
+    public StockDataService(DataFetcherInputValidator validator, DatabaseManager databaseManager) {
+        this.validator = validator;
+        this.databaseManager = databaseManager;
+        logger.debug("MainDataFetcher initialized with injected validator");
     }
 
     /**
@@ -56,7 +66,7 @@ public class StockDataService {
             throw e;
         }
 
-        CandlestickDao candlestickDao = new CandlestickDao();
+        CandlestickDao candlestickDao = databaseManager.createCandlestickDao();
         final boolean skipCurrentDayPriceData = range != Range.ONE_DAY;
         int successCount = 0;
         int failureCount = 0;
