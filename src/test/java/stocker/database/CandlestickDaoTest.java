@@ -28,18 +28,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-
 /**
  * Unit tests for {@link CandlestickDao} class using mocked dependencies.
  * Tests validator integration, database operations, and error handling.
- *
- * Complements DatabaseInputValidatorTest by testing integration rather than validation rules.
  */
 @ExtendWith(MockitoExtension.class)
 class CandlestickDaoTest {
 
     @Mock
     private DatabaseInputValidator mockValidator;
+
+    @Mock
+    private DatabaseManager mockDatabaseManager;
 
     @Mock
     private Connection mockConnection;
@@ -50,11 +50,11 @@ class CandlestickDaoTest {
     @Mock
     private ResultSet mockResultSet;
 
-    private TestableCandlestickDao dao;
+    private CandlestickDao dao;
 
     @BeforeEach
     void setUp() {
-        dao = new TestableCandlestickDao(mockValidator, mockConnection);
+        dao = new CandlestickDao(mockDatabaseManager, mockValidator);
     }
 
     // Symbol validation tests
@@ -62,6 +62,7 @@ class CandlestickDaoTest {
     void getAllRowsByNameWithValidSymbolShouldPass() throws SQLException {
         // Arrange
         String symbol = "BOL.ST";
+        when(mockDatabaseManager.getConnection()).thenReturn(mockConnection);
         when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
         when(mockStatement.executeQuery()).thenReturn(mockResultSet);
         setupSingleCandlestickResult();
@@ -72,6 +73,7 @@ class CandlestickDaoTest {
         // Assert
         verify(mockValidator).validateSymbol(symbol);
         assertEquals(1, result.size());
+        verify(mockDatabaseManager).getConnection();
     }
 
     @Test
@@ -87,7 +89,7 @@ class CandlestickDaoTest {
         // Assert
         assertTrue(result.isEmpty());
         verify(mockValidator).validateSymbol(invalidSymbol);
-        verifyNoInteractions(mockConnection);
+        verifyNoInteractions(mockDatabaseManager);
     }
 
     @Test
@@ -95,6 +97,7 @@ class CandlestickDaoTest {
         // Arrange
         String symbol = "BOL.ST";
         Candlestick candlestick = createValidCandlestick();
+        when(mockDatabaseManager.getConnection()).thenReturn(mockConnection);
         when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
         when(mockStatement.executeUpdate()).thenReturn(1);
 
@@ -105,6 +108,7 @@ class CandlestickDaoTest {
         verify(mockValidator).validateSymbol(symbol);
         verify(mockValidator).validateCandlestick(candlestick);
         verify(mockStatement).executeUpdate();
+        verify(mockDatabaseManager).getConnection();
     }
 
     @Test
@@ -121,7 +125,7 @@ class CandlestickDaoTest {
 
         assertTrue(exception.getMessage().contains("Symbol cannot be null"));
         verify(mockValidator).validateSymbol(invalidSymbol);
-        verifyNoInteractions(mockConnection);
+        verifyNoInteractions(mockDatabaseManager);
     }
 
     @Test
@@ -141,7 +145,7 @@ class CandlestickDaoTest {
         assertTrue(exception.getMessage().contains("Invalid timestamp"));
         verify(mockValidator).validateSymbol(symbol);
         verify(mockValidator).validateCandlestick(invalidCandlestick);
-        verifyNoInteractions(mockConnection);
+        verifyNoInteractions(mockDatabaseManager);
     }
 
     @Test
@@ -154,6 +158,7 @@ class CandlestickDaoTest {
         );
 
         // Mock batch operations and transaction management
+        when(mockDatabaseManager.getConnection()).thenReturn(mockConnection);
         when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
         when(mockStatement.executeBatch()).thenReturn(new int[]{1, 1}); // Success for both
 
@@ -169,6 +174,7 @@ class CandlestickDaoTest {
         verify(mockConnection).setAutoCommit(false); // Transaction should be started
         verify(mockConnection).commit();
         verify(mockConnection).close(); // Connection should be closed
+        verify(mockDatabaseManager).getConnection();
     }
 
     @Test
@@ -186,7 +192,7 @@ class CandlestickDaoTest {
         assertTrue(exception.getMessage().contains("List cannot be empty"));
         verify(mockValidator).validateSymbol(symbol);
         verify(mockValidator).validateCandlesticksList(emptyCandlesticks);
-        verifyNoInteractions(mockConnection);
+        verifyNoInteractions(mockDatabaseManager);
     }
 
     @Test
@@ -195,6 +201,7 @@ class CandlestickDaoTest {
         String symbol = "BOL.ST";
         List<Candlestick> candlesticks = List.of(createValidCandlestick());
 
+        when(mockDatabaseManager.getConnection()).thenReturn(mockConnection);
         when(mockConnection.prepareStatement(anyString()))
                 .thenThrow(new SQLException("Database error"));
 
@@ -207,12 +214,14 @@ class CandlestickDaoTest {
 
         // Verify transaction management even during errors
         verify(mockConnection).setAutoCommit(false); // Transaction should still be started
-        verify(mockConnection).close(); // Connection should be closed in finally
+        verify(mockConnection).close(); // Connection should be closed
+        verify(mockDatabaseManager).getConnection();
     }
 
     @Test
     void resetTableShouldExecuteSuccessfully() throws SQLException {
         // Arrange
+        when(mockDatabaseManager.getConnection()).thenReturn(mockConnection);
         when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
         when(mockStatement.executeUpdate()).thenReturn(1);
 
@@ -221,11 +230,13 @@ class CandlestickDaoTest {
 
         // Assert
         verify(mockStatement).executeUpdate();
+        verify(mockDatabaseManager).getConnection();
     }
 
     @Test
     void resetTableWithSqlExceptionShouldThrowRuntimeException() throws SQLException {
         // Arrange
+        when(mockDatabaseManager.getConnection()).thenReturn(mockConnection);
         when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
         when(mockStatement.executeUpdate()).thenThrow(new SQLException("Reset failed"));
 
@@ -234,31 +245,23 @@ class CandlestickDaoTest {
                 () -> dao.resetTable());
 
         assertTrue(exception.getMessage().contains("Failed to reset table"));
+        verify(mockDatabaseManager).getConnection();
     }
 
     @Test
-    void validateConnectionParametersShouldPass() throws SQLException {
+    void getAllRowsShouldReturnAllCandlesticks() throws SQLException {
+        // Arrange
+        when(mockDatabaseManager.getConnection()).thenReturn(mockConnection);
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockStatement);
+        when(mockStatement.executeQuery()).thenReturn(mockResultSet);
+        setupSingleCandlestickResult();
+
         // Act
-        dao.testGetDbConnection();
+        List<Candlestick> result = dao.getAllRows();
 
         // Assert
-        verify(mockValidator).validateDatabaseUrl(anyString());
-        verify(mockValidator).validateDatabaseUsername(anyString());
-        verify(mockValidator).validateDatabasePassword(anyString());
-    }
-
-    @Test
-    void getDbConnectionWithInvalidConfigShouldThrowSqlException() {
-        // Arrange
-        doThrow(new IllegalArgumentException("Invalid URL"))
-                .when(mockValidator).validateDatabaseUrl(anyString());
-
-        // Act & Assert
-        SQLException exception = assertThrows(SQLException.class,
-                () -> dao.testGetDbConnection());
-
-        assertTrue(exception.getMessage().contains("Invalid database configuration"));
-        assertTrue(exception.getCause() instanceof IllegalArgumentException);
+        assertEquals(1, result.size());
+        verify(mockDatabaseManager).getConnection();
     }
 
     // Helper methods
@@ -271,27 +274,5 @@ class CandlestickDaoTest {
     private Candlestick createValidCandlestick() {
         return new Candlestick(100.0, 105.0, 95.0,
                 110.0, 1000L, System.currentTimeMillis());
-    }
-
-    // Simple testable subclass
-    private static class TestableCandlestickDao extends CandlestickDao {
-        private final Connection mockConnection;
-
-        public TestableCandlestickDao(DatabaseInputValidator validator, Connection mockConnection) {
-            super(validator);
-            this.mockConnection = mockConnection;
-        }
-
-        @Override
-        protected Connection getDbConnection() throws SQLException {
-            // Still call validation from parent class
-            super.getDbConnection();
-            return mockConnection;
-        }
-
-        // Expose protected method for testing
-        public Connection testGetDbConnection() throws SQLException {
-            return super.getDbConnection();
-        }
     }
 }
