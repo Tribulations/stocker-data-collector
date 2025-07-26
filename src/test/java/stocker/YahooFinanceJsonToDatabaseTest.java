@@ -56,14 +56,11 @@ class YahooFinanceJsonToDatabaseTest {
     @BeforeEach
     void setUp() {
         logger.info("Setting up integration test with Testcontainers");
+
         try {
             // Create config using container connection details
-            DatabaseConfig config = new DatabaseConfig(
-                    postgres.getHost(),
-                    postgres.getFirstMappedPort().toString(),
-                    postgres.getDatabaseName(),
-                    postgres.getUsername(),
-                    postgres.getPassword()
+            DatabaseConfig config = PostgresTestContainerUtil.createConfig(
+                "stockdb_test", "test_user", "test_password"
             );
 
             databaseManager = new DatabaseManager(config);
@@ -72,7 +69,6 @@ class YahooFinanceJsonToDatabaseTest {
             // Create DAO using DatabaseManager
             candlestickDao = databaseManager.createCandlestickDao();
             candlestickDao.resetTable();
-
         } catch (Exception e) {
             logger.error("Failed to set up test: {}", e.getMessage(), e);
             fail("Test setup failed: " + e.getMessage());

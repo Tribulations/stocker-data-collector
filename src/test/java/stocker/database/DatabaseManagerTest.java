@@ -49,12 +49,8 @@ class DatabaseManagerTest {
                 postgres.getHost(), postgres.getFirstMappedPort());
 
         // Create config using container connection details
-        testConfig = new DatabaseConfig(
-                postgres.getHost(),
-                postgres.getFirstMappedPort().toString(),
-                postgres.getDatabaseName(),
-                postgres.getUsername(),
-                postgres.getPassword()
+        testConfig = PostgresTestContainerUtil.createConfig(
+            "stockdb_test", "test_user", "test_password"
         );
 
         databaseManager = new DatabaseManager(testConfig);

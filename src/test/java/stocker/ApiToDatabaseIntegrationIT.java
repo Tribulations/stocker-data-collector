@@ -60,12 +60,8 @@ public class ApiToDatabaseIntegrationIT {
                 postgres.getHost(), postgres.getFirstMappedPort());
 
         // Create config using container connection details
-        DatabaseConfig config = new DatabaseConfig(
-                postgres.getHost(),
-                postgres.getFirstMappedPort().toString(),
-                postgres.getDatabaseName(),
-                postgres.getUsername(),
-                postgres.getPassword()
+        DatabaseConfig config = PostgresTestContainerUtil.createConfig(
+            "stockdb_integration_test", "integration_user", "integration_password"
         );
 
         // Initialize DatabaseManager and run migrations
@@ -78,7 +74,6 @@ public class ApiToDatabaseIntegrationIT {
 
         // Initialize StockDataService
         stockDataService = new StockDataService(new DataFetcherInputValidator(), databaseManager);
-
         logger.debug("Integration test setup completed successfully");
     }
 
