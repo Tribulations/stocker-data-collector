@@ -15,6 +15,7 @@ import stocker.database.DatabaseManager;
 import stocker.database.DatabaseConfig;
 import stocker.model.Candlestick;
 import stocker.model.TradingPeriod;
+import stocker.util.PostgresTestContainerUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,11 +45,10 @@ class YahooFinanceJsonToDatabaseTest {
     private static final int EXPECTED_THREE_MONTH_CANDLESTICKS = 60;
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:13-alpine")
+    static PostgreSQLContainer<?> postgres = PostgresTestContainerUtil.POSTGRES
             .withDatabaseName("stockdb_test")
             .withUsername("test_user")
-            .withPassword("test_password")
-            .withReuse(false);
+            .withPassword("test_password");
 
     private DatabaseManager databaseManager;
     private CandlestickDao candlestickDao;
@@ -56,14 +56,11 @@ class YahooFinanceJsonToDatabaseTest {
     @BeforeEach
     void setUp() {
         logger.info("Setting up integration test with Testcontainers");
+
         try {
             // Create config using container connection details
-            DatabaseConfig config = new DatabaseConfig(
-                    postgres.getHost(),
-                    postgres.getFirstMappedPort().toString(),
-                    postgres.getDatabaseName(),
-                    postgres.getUsername(),
-                    postgres.getPassword()
+            DatabaseConfig config = PostgresTestContainerUtil.createConfig(
+                "stockdb_test", "test_user", "test_password"
             );
 
             databaseManager = new DatabaseManager(config);
@@ -72,7 +69,6 @@ class YahooFinanceJsonToDatabaseTest {
             // Create DAO using DatabaseManager
             candlestickDao = databaseManager.createCandlestickDao();
             candlestickDao.resetTable();
-
         } catch (Exception e) {
             logger.error("Failed to set up test: {}", e.getMessage(), e);
             fail("Test setup failed: " + e.getMessage());

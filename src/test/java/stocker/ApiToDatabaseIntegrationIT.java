@@ -16,6 +16,7 @@ import stocker.database.DatabaseConfig;
 import stocker.model.Candlestick;
 import stocker.model.Interval;
 import stocker.model.Range;
+import stocker.util.PostgresTestContainerUtil;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public class ApiToDatabaseIntegrationIT {
     private static final Logger logger = LoggerFactory.getLogger(ApiToDatabaseIntegrationIT.class);
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:13-alpine")
+    static PostgreSQLContainer<?> postgres = PostgresTestContainerUtil.POSTGRES
             .withDatabaseName("stockdb_integration_test")
             .withUsername("integration_user")
             .withPassword("integration_password")
@@ -59,12 +60,8 @@ public class ApiToDatabaseIntegrationIT {
                 postgres.getHost(), postgres.getFirstMappedPort());
 
         // Create config using container connection details
-        DatabaseConfig config = new DatabaseConfig(
-                postgres.getHost(),
-                postgres.getFirstMappedPort().toString(),
-                postgres.getDatabaseName(),
-                postgres.getUsername(),
-                postgres.getPassword()
+        DatabaseConfig config = PostgresTestContainerUtil.createConfig(
+            "stockdb_integration_test", "integration_user", "integration_password"
         );
 
         // Initialize DatabaseManager and run migrations
@@ -77,7 +74,6 @@ public class ApiToDatabaseIntegrationIT {
 
         // Initialize StockDataService
         stockDataService = new StockDataService(new DataFetcherInputValidator(), databaseManager);
-
         logger.debug("Integration test setup completed successfully");
     }
 
