@@ -16,6 +16,7 @@ import stocker.database.DatabaseConfig;
 import stocker.model.Candlestick;
 import stocker.model.Interval;
 import stocker.model.Range;
+import stocker.util.PostgresTestContainerUtil;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public class ApiToDatabaseIntegrationIT {
     private static final Logger logger = LoggerFactory.getLogger(ApiToDatabaseIntegrationIT.class);
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:13-alpine")
+    static PostgreSQLContainer<?> postgres = PostgresTestContainerUtil.POSTGRES
             .withDatabaseName("stockdb_integration_test")
             .withUsername("integration_user")
             .withPassword("integration_password")
