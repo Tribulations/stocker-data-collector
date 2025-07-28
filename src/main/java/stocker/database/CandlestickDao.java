@@ -186,15 +186,24 @@ public class CandlestickDao implements DAO<Candlestick> {
 
     /**
      * Adds multiple candlesticks to the database using batch processing.
-     * All candlesticks must pass validation and be successfully inserted, or the entire operation fails
-     * with no changes made to the database.
+     * If a candlestick with the same symbol and date already exists,
+     * a database trigger will update the existing row with the new data instead of inserting a duplicate.
+     * <p>
+     * The batch result is considered successful if the result is:
+     * <ul>
+     *   <li>&gt;0: row inserted</li>
+     *   <li>0: trigger updated an existing row (insert skipped)</li>
+     *   <li>Statement.SUCCESS_NO_INFO: driver could not determine affected row count</li>
+     * </ul>
+     * Any other result or a thrown SQLException is considered a failure. The operation is transactional:
+     * all candlesticks must pass validation and be successfully processed, or no changes will be made to the database.
      *
-     * @param symbol the stock symbol
-     * @param candlesticks list of candlesticks to add to the database
+     * @param symbol        the stock symbol
+     * @param candlesticks  list of candlesticks to add to the database
      * @throws IllegalArgumentException if symbol is invalid, candlesticks list is null/empty,
      *                                  or any individual candlestick fails validation
-     * @throws RuntimeException if database connection fails, batch execution fails,
-     *                          or not all candlesticks are successfully inserted
+     * @throws RuntimeException         if database connection fails, batch execution fails,
+     *                                  or not all candlesticks are successfully processed
      */
     @Override
     public void addRows(String symbol, List<Candlestick> candlesticks) {
@@ -266,12 +275,22 @@ public class CandlestickDao implements DAO<Candlestick> {
         validateBatchResults(results, candlesticks.size(), symbol);
     }
 
+    /**
+     * Validates the results of a batch insert.
+     * Treats result > 0 (inserted), 0 (updated by trigger), and Statement.SUCCESS_NO_INFO as success.
+     * Any other result or a thrown SQLException is considered a failure.
+     *
+     * @param results       the batch execution result array
+     * @param expectedCount the number of attempted inserts
+     * @param symbol        the stock symbol
+     * @throws RuntimeException if any batch result is a true failure or not all were successful
+     */
     private void validateBatchResults(int[] results, int expectedCount, String symbol) {
         int successCount = 0;
         int failureCount = 0;
 
         for (int result : results) {
-            if (result > 0 || result == Statement.SUCCESS_NO_INFO) {
+            if (result > 0 || result == Statement.SUCCESS_NO_INFO || result == 0) {
                 successCount++;
             } else {
                 failureCount++;
