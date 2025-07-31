@@ -6,7 +6,10 @@ import io.github.cdimascio.dotenv.Dotenv;
  * Simple Database configuration class.
  */
 public class DatabaseConfig {
-    private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+    private static final Dotenv dotenv = Dotenv.configure()
+            .ignoreIfMissing()
+            .systemProperties() // Check system env as fallback
+            .load();
 
     private final String jdbcUrl;
     private final String username;
