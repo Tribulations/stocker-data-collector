@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import stocker.util.PostgresTestContainerUtil;
+import stocker.util.TestDatabaseUtil;
 
 /**
  * Integration tests using Testcontainers.
@@ -35,10 +35,8 @@ class DatabaseManagerTest {
     private static final Logger logger = LoggerFactory.getLogger(DatabaseManagerTest.class);
 
     @Container
-    static PostgreSQLContainer<?> postgres = PostgresTestContainerUtil.POSTGRES
-            .withDatabaseName("stockdb_test")
-            .withUsername("test_user")
-            .withPassword("test_password");
+    static PostgreSQLContainer<?> postgreSQLContainer = TestDatabaseUtil.createContainer(
+            "stockdb_test", "test_user", "test_password");
 
     private DatabaseManager databaseManager;
     private DatabaseConfig testConfig;
@@ -46,12 +44,10 @@ class DatabaseManagerTest {
     @BeforeEach
     void setUp() {
         logger.debug("Setting up DatabaseManager test with container: {}:{}",
-                postgres.getHost(), postgres.getFirstMappedPort());
+                postgreSQLContainer.getHost(), postgreSQLContainer.getFirstMappedPort());
 
         // Create config using container connection details
-        testConfig = PostgresTestContainerUtil.createConfig(
-            "stockdb_test", "test_user", "test_password"
-        );
+        testConfig = TestDatabaseUtil.createConfig(postgreSQLContainer);
 
         databaseManager = new DatabaseManager(testConfig);
     }

@@ -15,7 +15,7 @@ import stocker.database.DatabaseManager;
 import stocker.database.DatabaseConfig;
 import stocker.model.Candlestick;
 import stocker.model.TradingPeriod;
-import stocker.util.PostgresTestContainerUtil;
+import stocker.util.TestDatabaseUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,10 +45,8 @@ class YahooFinanceJsonToDatabaseTest {
     private static final int EXPECTED_THREE_MONTH_CANDLESTICKS = 60;
 
     @Container
-    static PostgreSQLContainer<?> postgres = PostgresTestContainerUtil.POSTGRES
-            .withDatabaseName("stockdb_test")
-            .withUsername("test_user")
-            .withPassword("test_password");
+    static PostgreSQLContainer<?> postgreSQLContainer = TestDatabaseUtil.createContainer(
+            "stockdb_test", "test_user", "test_password");
 
     private DatabaseManager databaseManager;
     private CandlestickDao candlestickDao;
@@ -59,9 +57,7 @@ class YahooFinanceJsonToDatabaseTest {
 
         try {
             // Create config using container connection details
-            DatabaseConfig config = PostgresTestContainerUtil.createConfig(
-                "stockdb_test", "test_user", "test_password"
-            );
+            DatabaseConfig config = TestDatabaseUtil.createConfig(postgreSQLContainer);
 
             databaseManager = new DatabaseManager(config);
             databaseManager.initialize(); // Run migrations

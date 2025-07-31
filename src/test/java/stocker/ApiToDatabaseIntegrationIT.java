@@ -16,7 +16,7 @@ import stocker.database.DatabaseConfig;
 import stocker.model.Candlestick;
 import stocker.model.Interval;
 import stocker.model.Range;
-import stocker.util.PostgresTestContainerUtil;
+import stocker.util.TestDatabaseUtil;
 
 import java.util.List;
 import org.slf4j.Logger;
@@ -44,11 +44,8 @@ public class ApiToDatabaseIntegrationIT {
     private static final Logger logger = LoggerFactory.getLogger(ApiToDatabaseIntegrationIT.class);
 
     @Container
-    static PostgreSQLContainer<?> postgres = PostgresTestContainerUtil.POSTGRES
-            .withDatabaseName("stockdb_integration_test")
-            .withUsername("integration_user")
-            .withPassword("integration_password")
-            .withReuse(false); // Fresh container for each test run
+    static PostgreSQLContainer<?> postgreSQLContainer = TestDatabaseUtil.createContainer(
+            "stockdb_integration_test", "integration_user", "integration_password");
 
     private StockDataService stockDataService;
     private CandlestickDao candlestickDao;
@@ -57,12 +54,10 @@ public class ApiToDatabaseIntegrationIT {
     @BeforeEach
     void setUp() {
         logger.debug("Setting up integration test with container: {}:{}",
-                postgres.getHost(), postgres.getFirstMappedPort());
+                postgreSQLContainer.getHost(), postgreSQLContainer.getFirstMappedPort());
 
         // Create config using container connection details
-        DatabaseConfig config = PostgresTestContainerUtil.createConfig(
-            "stockdb_integration_test", "integration_user", "integration_password"
-        );
+        DatabaseConfig config = TestDatabaseUtil.createConfig(postgreSQLContainer);
 
         // Initialize DatabaseManager and run migrations
         databaseManager = new DatabaseManager(config);
