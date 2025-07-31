@@ -7,21 +7,24 @@ import io.github.cdimascio.dotenv.Dotenv;
  */
 public final class DbConstants {
     
-    private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+    private static final Dotenv dotenv = Dotenv.configure()
+            .ignoreIfMissing()
+            .systemProperties() // Check system env as fallback
+            .load();
     
     public DbConstants() {
         throw new IllegalStateException("Utility class");
     }
 
     /** Database connection constants */
-    public static final String DB_IP_ADDRESS = dotenv.get("DB_IP_ADDRESS", "localhost");
-    public static final String DB_PORT = ":" + dotenv.get("DB_PORT", "5432");
-    public static final String DB_NAME = dotenv.get("DB_NAME", "test_db");
+    public static final String DB_IP_ADDRESS = dotenv.get("DB_IP_ADDRESS");
+    public static final String DB_PORT = ":" + dotenv.get("DB_PORT");
+    public static final String DB_NAME = dotenv.get("DB_NAME");
     public static final String DB_URL = "jdbc:postgresql://" + DB_IP_ADDRESS + DB_PORT + "/" + DB_NAME;
-    public static final String DB_USERNAME = dotenv.get("DB_USERNAME", "");
-    public static final String DB_PASSWORD = dotenv.get("DB_PASSWORD", "");
-    public static final String CANDLESTICK_TABLE = dotenv.get("DB_SCHEMA", "test_schema") + "." + 
-                                                  dotenv.get("DB_TABLE", "stock_prices1");
+    public static final String DB_USERNAME = dotenv.get("DB_USERNAME");
+    public static final String DB_PASSWORD = dotenv.get("DB_PASSWORD");
+    public static final String CANDLESTICK_TABLE = dotenv.get("DB_SCHEMA") + "." +
+                                                  dotenv.get("DB_TABLE");
 
     /** Database table and attribute name constants */
     public static final String TIMESTAMP_COLUMN = "timestamp";
