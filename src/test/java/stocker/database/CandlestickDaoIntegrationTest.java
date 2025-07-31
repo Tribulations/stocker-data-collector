@@ -8,7 +8,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import stocker.model.Candlestick;
-import stocker.util.PostgresTestContainerUtil;
+import stocker.util.TestDatabaseUtil;
 
 import java.util.List;
 
@@ -18,10 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DisplayName("CandlestickDao Integration Tests - Date Overwrite Logic")
 class CandlestickDaoIntegrationTest {
     @Container
-    static PostgreSQLContainer<?> postgres = PostgresTestContainerUtil.POSTGRES
-            .withDatabaseName("stockdb_test")
-            .withUsername("test_user")
-            .withPassword("test_password");
+    static PostgreSQLContainer<?> postgreSQLContainer = TestDatabaseUtil.createContainer(
+            "stockdb_test", "test_user", "test_password");
 
     private DatabaseManager databaseManager;
     private CandlestickDao candlestickDao;
@@ -29,9 +27,7 @@ class CandlestickDaoIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        databaseManager = new DatabaseManager(PostgresTestContainerUtil.createConfig(
-                "stockdb_test", "test_user", "test_password"
-        ));
+        databaseManager = new DatabaseManager(TestDatabaseUtil.createConfig(postgreSQLContainer));
         databaseManager.initialize();
         candlestickDao = databaseManager.createCandlestickDao();
         candlestickDao.resetTable();
