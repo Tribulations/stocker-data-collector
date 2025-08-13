@@ -4,21 +4,21 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>stocker</groupId>
+    <groupId>com.joakimcolloz</groupId>
 
     <!-- Project artifact ID -->
-    <artifactId>Stocker</artifactId>
+    <artifactId>stocker-data-collector</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <!-- Project packaging type -->
     <packaging>jar</packaging>
     <!-- Project name -->
-    <name>Stocker</name>
+    <name>Stocker Data Collector</name>
     <!-- Project URL -->
     <url>${project.artifactId}</url>
     <!-- Project description -->
     <description>
-        Stocker: An application providing different functionality to facilitate finding stock trading opportunities.
+        Stocker Data Collector: A service built in Java for collecting and storing stock market data via APIs.
     </description>
 
     <!-- Stating path to JavaDoc output, so that pages link correctly -->
@@ -197,7 +197,7 @@
                             <!-- Set classpath prefix -->
                             <classpathPrefix>lib/</classpathPrefix>
                             <!-- Set main class for the executable JAR -->
-                            <mainClass>stocker.Main</mainClass>
+                            <mainClass>com.joakimcolloz.stocker.datacollector.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -216,7 +216,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>stocker.Main</mainClass>
+                                    <mainClass>com.joakimcolloz.stocker.datacollector.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
