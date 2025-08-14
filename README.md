@@ -1,3 +1,8 @@
+# Stocker Data Collector
+A backend service built in Java for collecting and storing stock market data from third-party APIs. This component focuses on data fetching, parsing, and storage, keeping the system modular, reliable, and easy to maintain.
+
+The stored data can be accessed via a separate REST API component: [Stocker REST API](https://github.com/Tribulations/stocker-rest-api).
+
 # Table of Contents
 - [System Description](#System-Description)
 - [Requirements](#Requirements)
