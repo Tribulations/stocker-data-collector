@@ -107,4 +107,8 @@ public class DatabaseManager {
     public void close() {
         logger.info("DatabaseManager closed");
     }
+
+    public MigrationManager getMigrationManager() {
+        return migrationManager;
+    }
 }
