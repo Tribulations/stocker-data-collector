@@ -35,7 +35,7 @@ jobs:
         env:
           DB_SCHEMA: stock_prices_schema
           DB_TABLE: stock_prices_1day
-          YAHOO_API_KEY: ${{ secrets.YAHOO_API_KEY }}
+          RAPID_API_KEY: ${{ secrets.RAPID_API_KEY }}
         run: mvn failsafe:integration-test failsafe:verify
 
       - name: Show stocker log contents

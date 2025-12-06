@@ -18,11 +18,15 @@ public class YahooFinanceFetcher extends BaseDataFetcher {
     private static final String YAHOO_API_URL = "https://stock-data-yahoo-finance-alternative.p.rapidapi.com" +
             "/v8/finance/chart/";
 
+    protected String buildApiUrl(String stockName, String range, String interval) {
+        return YAHOO_API_URL + stockName + "?range=" + range + "&interval=" + interval;
+    }
+
     private YahooFinanceFetcher() {
         super(
             YAHOO_API_KEY_HEADER,
             YAHOO_API_HOST_HEADER,
-            dotenv.get("YAHOO_API_KEY"),
+            dotenv.get("RAPID_API_KEY"),
             YAHOO_API_HOST,
             YAHOO_API_URL
         );

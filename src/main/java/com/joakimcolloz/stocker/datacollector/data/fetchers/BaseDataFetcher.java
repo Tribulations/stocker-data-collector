@@ -40,7 +40,7 @@ public abstract class BaseDataFetcher {
         // Validate API configuration parameters
         try {
             validator.validateApiConfig(apiKeyHeader, apiHostHeader, apiKey, apiHost, apiUrl);
-            logger.debug("API configuration validation passed");
+            logger.debug("API configuration validation passed"); // TODO: move this to a separate method
         } catch (IllegalArgumentException e) {
             logger.error("API configuration validation failed: {}", e.getMessage());
             throw e;
@@ -63,7 +63,7 @@ public abstract class BaseDataFetcher {
         // Validate API configuration parameters
         try {
             validator.validateApiConfig(apiKeyHeader, apiHostHeader, apiKey, apiHost, apiUrl);
-            logger.debug("API configuration validation passed");
+            logger.debug("API configuration validation passed"); // TODO: move this to a separate method
         } catch (IllegalArgumentException e) {
             logger.error("API configuration validation failed: {}", e.getMessage());
             throw e;
@@ -119,9 +119,7 @@ public abstract class BaseDataFetcher {
         return responseBody;
     }
 
-    private String buildApiUrl(String stockName, String range, String interval) {
-        return apiUrl + stockName + "?range=" + range + "&interval=" + interval;
-    }
+    protected abstract String buildApiUrl(String stockName, String range, String interval);
 
     private HttpRequest createHttpRequest(String apiUrl) throws DataFetchException {
         try {

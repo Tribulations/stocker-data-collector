@@ -10,8 +10,15 @@ import com.joakimcolloz.stocker.datacollector.database.DatabaseConfig;
 @Testcontainers
 public class TestDatabaseUtil {
 
+    /**
+     * Creates a new PostgreSQLContainer with the given parameters.
+     * @param dbName the name of the database
+     * @param username the username for the database
+     * @param password the password for the database
+     * @return the created {@link PostgreSQLContainer}
+     */
     public static PostgreSQLContainer<?> createContainer(String dbName, String username, String password) {
-        return new PostgreSQLContainer<>("postgres:13-alpine")  // ✅ NEW instance each time
+        return new PostgreSQLContainer<>("postgres:13-alpine")
                 .withDatabaseName(dbName)
                 .withUsername(username)
                 .withPassword(password)

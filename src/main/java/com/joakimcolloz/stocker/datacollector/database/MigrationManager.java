@@ -1,6 +1,8 @@
 package com.joakimcolloz.stocker.datacollector.database;
 
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.FlywayException;
+import org.flywaydb.core.api.output.RepairResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,6 +85,18 @@ public class MigrationManager {
         } catch (Exception e) {
             logger.warn("Could not determine current database version in schema {}: {}", APP_SCHEMA, e.getMessage());
             return "Unknown";
+        }
+    }
+
+    /**
+     * Attempts to repair the Flyway schema history table by delegating to Flyways repair() method.
+     */
+    public void repair() {
+        try {
+            RepairResult repairResult = flyway.repair();
+        } catch (FlywayException e) {
+            logger.error("Repair failed in schema {}: {}", APP_SCHEMA, e.getMessage(), e);
+            throw e;
         }
     }
 }

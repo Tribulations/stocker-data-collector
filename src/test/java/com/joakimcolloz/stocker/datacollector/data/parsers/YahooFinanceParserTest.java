@@ -13,7 +13,7 @@ class YahooFinanceParserTest {
     @Test
     void shouldCreateOneDayCandleStick() {
         // Arrange: Load the test JSON resource from the classpath
-        String json = loadTestJSON("BOL.ST-1d-1d.json");
+        String json = loadTestJSON("YahooFinance-BOL.ST-1d-1d.json");
 
         // Act: Parse the JSON using YahooFinanceParser
         try (YahooFinanceParser parser = new YahooFinanceParser(json)) {
@@ -29,7 +29,7 @@ class YahooFinanceParserTest {
     @Test
     void shouldParse3MonthDailyCandlesticksAndHave60Candles() {
         // Arrange: Load the test JSON resource from the classpath
-        String json = loadTestJSON("BOL.ST-1d-3month.json");
+        String json = loadTestJSON("YahooFinance-BOL.ST-1d-3month.json");
 
         // Act: Parse the JSON using YahooFinanceParser
         try (YahooFinanceParser parser = new YahooFinanceParser(json)) {
