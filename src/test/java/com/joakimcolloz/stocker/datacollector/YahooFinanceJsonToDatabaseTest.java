@@ -87,7 +87,7 @@ class YahooFinanceJsonToDatabaseTest {
     @DisplayName("Should successfully insert and retrieve single day candlestick data")
     void shouldInsertAndRetrieveSingleDayCandlestick() {
         // Arrange
-        String json = loadJsonFromResource("BOL.ST-1d-1d.json");
+        String json = loadJsonFromResource("YahooFinance-BOL.ST-1d-1d.json");
         List<Candlestick> originalCandlesticks = parseJsonToCandlesticks(json);
 
         assertFalse(originalCandlesticks.isEmpty(), "Should have parsed candlesticks from JSON");
@@ -105,7 +105,7 @@ class YahooFinanceJsonToDatabaseTest {
     @DisplayName("Should successfully insert and retrieve three months of candlestick data")
     void shouldInsertAndRetrieveThreeMonthsCandlesticks() {
         // Arrange
-        String json = loadJsonFromResource("BOL.ST-1d-3month.json");
+        String json = loadJsonFromResource("YahooFinance-BOL.ST-1d-3month.json");
         List<Candlestick> originalCandlesticks = parseJsonToCandlesticks(json);
 
         assertFalse(originalCandlesticks.isEmpty(), "Should have parsed candlesticks from JSON");
@@ -124,8 +124,8 @@ class YahooFinanceJsonToDatabaseTest {
     @DisplayName("Should handle multiple stocks with different data sets")
     void shouldHandleMultipleStocksWithDifferentDataSets() {
         // Arrange
-        String oneDayJson = loadJsonFromResource("BOL.ST-1d-1d.json");
-        String threeMonthJson = loadJsonFromResource("BOL.ST-1d-3month.json");
+        String oneDayJson = loadJsonFromResource("YahooFinance-BOL.ST-1d-1d.json");
+        String threeMonthJson = loadJsonFromResource("YahooFinance-BOL.ST-1d-3month.json");
 
         List<Candlestick> oneDayCandlesticks = parseJsonToCandlesticks(oneDayJson);
         List<Candlestick> threeMonthCandlesticks = parseJsonToCandlesticks(threeMonthJson);

@@ -1,0 +1,98 @@
+{
+  "chart": {
+    "result": [
+      {
+        "meta": {
+          "currency": "SEK",
+          "symbol": "BOL.ST",
+          "exchangeName": "STO",
+          "fullExchangeName": "Stockholm",
+          "instrumentType": "EQUITY",
+          "firstTradeDate": 1007539200,
+          "regularMarketTime": 1756394980,
+          "hasPrePostMarketData": false,
+          "gmtoffset": 7200,
+          "timezone": "CEST",
+          "exchangeTimezoneName": "Europe/Stockholm",
+          "regularMarketPrice": 326.9,
+          "fiftyTwoWeekHigh": 393,
+          "fiftyTwoWeekLow": 259.4,
+          "regularMarketDayHigh": 330.3,
+          "regularMarketDayLow": 325.8,
+          "regularMarketVolume": 547119,
+          "longName": "Boliden AB (publ)",
+          "shortName": "Boliden AB",
+          "chartPreviousClose": 324.7,
+          "priceHint": 2,
+          "currentTradingPeriod": {
+            "pre": {
+              "timezone": "CEST",
+              "start": 1756364400,
+              "end": 1756364400,
+              "gmtoffset": 7200
+            },
+            "regular": {
+              "timezone": "CEST",
+              "start": 1756364400,
+              "end": 1756395000,
+              "gmtoffset": 7200
+            },
+            "post": {
+              "timezone": "CEST",
+              "start": 1756395000,
+              "end": 1756395000,
+              "gmtoffset": 7200
+            }
+          },
+          "dataGranularity": "1d",
+          "range": "1d",
+          "validRanges": [
+            "1d",
+            "5d",
+            "1mo",
+            "3mo",
+            "6mo",
+            "1y",
+            "2y",
+            "5y",
+            "10y",
+            "ytd",
+            "max"
+          ]
+        },
+        "timestamp": [
+          1756394980
+        ],
+        "indicators": {
+          "quote": [
+            {
+              "open": [
+                325.79998779296875
+              ],
+              "close": [
+                326.8999938964844
+              ],
+              "volume": [
+                547119
+              ],
+              "low": [
+                325.79998779296875
+              ],
+              "high": [
+                330.29998779296875
+              ]
+            }
+          ],
+          "adjclose": [
+            {
+              "adjclose": [
+                326.8999938964844
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "error": null
+  }
+}
