@@ -38,6 +38,7 @@ class BaseDataFetcherTest {
     private HttpResponse<String> mockHttpResponse;
 
     private TestableBaseDataFetcher fetcher;
+    private static final String apiUrl = "https://api.example.com/stock/";
 
     @BeforeEach
     void setUp() {
@@ -46,7 +47,7 @@ class BaseDataFetcherTest {
                 "X-API-Host",
                 "test-api-key",
                 "test-api-host",
-                "https://api.example.com/stock/"
+                apiUrl
         );
     }
 
@@ -156,6 +157,11 @@ class BaseDataFetcherTest {
         public TestableBaseDataFetcher(String apiKeyHeader, String apiHostHeader,
                                        String apiKey, String apiHost, String apiUrl) {
             super(apiKeyHeader, apiHostHeader, apiKey, apiHost, apiUrl);
+        }
+
+        @Override
+        protected String buildApiUrl(String stockName, String range, String interval) {
+            return apiUrl + stockName + "?range=" + range + "&interval=" + interval;
         }
     }
 }

@@ -1,0 +1,32 @@
+package com.joakimcolloz.stocker.datacollector.data.fetchers;
+
+import io.github.cdimascio.dotenv.Dotenv;
+
+public class FinanceBirdFetcher extends BaseDataFetcher {
+    private static final Dotenv dotenv = Dotenv.configure()
+            .ignoreIfMissing()
+            .systemProperties() // Check system env as fallback
+            .load();
+    public static final FinanceBirdFetcher INSTANCE = new FinanceBirdFetcher();
+
+    private static final String API_KEY_HEADER = "x-rapidapi-key";
+    private static final String API_HOST_HEADER = "x-rapid-api-host";
+    private static final String API_HOST = "financebird.p.rapidapi.com";
+    private static final String API_URL = "https://financebird.p.rapidapi.com/quote/";
+    private static final String ENDPOINT = "/history";
+
+    @Override
+    protected String buildApiUrl(String stockName, String range, String interval) {
+        return API_URL + stockName + ENDPOINT + "?range=" + range + "&interval=" + interval;
+    }
+
+    private FinanceBirdFetcher() {
+        super(
+                API_KEY_HEADER,
+                API_HOST_HEADER,
+                dotenv.get("RAPID_API_KEY"),
+                API_HOST,
+                API_URL
+        );
+    }
+}
