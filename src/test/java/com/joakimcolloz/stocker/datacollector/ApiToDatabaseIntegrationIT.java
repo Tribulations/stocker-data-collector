@@ -70,7 +70,7 @@ public class ApiToDatabaseIntegrationIT {
 
         // Initialize StockDataService
         stockDataService = new StockDataService(new DataFetcherInputValidator(), databaseManager);
-        logger.debug("Integration test setup completed successfully");
+        logger.debug("Integration test setup completed successfully"); // TODO we should not log from a test class
     }
 
     @AfterEach
