@@ -22,9 +22,10 @@ class DataFetcherInputValidatorTest {
     }
 
     // Symbol Validation Tests
-    @Test
-    void validSymbolShouldPass() {
-        assertDoesNotThrow(() -> validator.validateSymbol("BOL.ST"));
+    @ParameterizedTest
+    @ValueSource(strings = {"BOL.ST", "HACKSAW", "VOLVOCAR-B", "SAMPO-SDB", "NP3"})
+    void validSymbolShouldPass(String symbol) {
+        assertDoesNotThrow(() -> validator.validateSymbol(symbol));
     }
 
     @Test
