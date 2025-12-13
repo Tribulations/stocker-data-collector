@@ -2,8 +2,8 @@ package com.joakimcolloz.stocker.datacollector.data;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.joakimcolloz.stocker.datacollector.data.fetchers.YahooFinanceFetcher;
-import com.joakimcolloz.stocker.datacollector.data.parsers.YahooFinanceParser;
+import com.joakimcolloz.stocker.datacollector.data.fetchers.FinanceBirdFetcher;
+import com.joakimcolloz.stocker.datacollector.data.parsers.FinanceBirdParser;
 import com.joakimcolloz.stocker.datacollector.data.validation.DataFetcherInputValidator;
 import com.joakimcolloz.stocker.datacollector.database.CandlestickDao;
 import com.joakimcolloz.stocker.datacollector.database.DatabaseConfig;
@@ -15,9 +15,11 @@ import com.joakimcolloz.stocker.datacollector.model.TradingPeriod;
 import java.util.List;
 
 /**
- *
+ * Changelog:
+ *  1.0 - Used YahooFinance
+ *  1.1 - Used FinanceBird
  * @author Joakim Colloz
- * @version 1.0
+ * @version 1.1
  */
 public class StockDataService {
     private static final Logger logger = LoggerFactory.getLogger(StockDataService.class);
@@ -29,13 +31,13 @@ public class StockDataService {
     public StockDataService() {
         this.validator = new DataFetcherInputValidator();
         this.databaseManager = new DatabaseManager(new DatabaseConfig());
-        logger.debug("MainDataFetcher initialized");
+        logger.debug("StockDataService initialized");
     }
 
     public StockDataService(DataFetcherInputValidator validator, DatabaseManager databaseManager) {
         this.validator = validator;
         this.databaseManager = databaseManager;
-        logger.debug("MainDataFetcher initialized with injected validator");
+        logger.debug("StockDataService initialized with injected validator");
     }
 
     /**
@@ -45,7 +47,7 @@ public class StockDataService {
      * Only stock symbols that belong to the Swedish market (i.e., symbols ending with ".ST") are processed.
      * </p>
      * <p>
-     * This method uses {@link YahooFinanceFetcher} to retrieve the data and {@link YahooFinanceParser} to parse it.
+     * This method uses {@link FinanceBirdFetcher} to retrieve the data and {@link FinanceBirdParser} to parse it.
      * </p>
      *
      * @param stockSymbols the list of stock symbols to process
@@ -83,7 +85,7 @@ public class StockDataService {
 
                 // Fetch data
                 logger.debug("Fetching data for symbol: {}", fullSymbol);
-                final String json = YahooFinanceFetcher.INSTANCE.fetchData(
+                final String json = FinanceBirdFetcher.INSTANCE.fetchData(
                         fullSymbol, range.toString(), interval.toString());
 
                 logger.debug("Received {} characters of JSON data for symbol: {}",
@@ -92,11 +94,12 @@ public class StockDataService {
                 // Parse data
                 logger.debug("Parsing JSON data for symbol: {}", fullSymbol);
                 TradingPeriod tradingPeriod;
-                try (YahooFinanceParser yahooFinanceParser = new YahooFinanceParser(json)) {
-                    yahooFinanceParser.parse();
+                try (FinanceBirdParser financeBirdParser = new FinanceBirdParser(json)) {
+                    financeBirdParser.parse();
                     logger.debug("JSON parsing completed for symbol: {}", fullSymbol);
-                    tradingPeriod = yahooFinanceParser.getTradingPeriod();
-                } catch (Exception e) {
+                    tradingPeriod = financeBirdParser.getTradingPeriod();
+                } catch (Exception e) { // TODO should catch JsonParseException | IOException  instead?
+                    // TODO Here we catch specific parsing errors/expected business failures
                     logger.error("Failed to parse JSON data for symbol {}: {}", fullSymbol, e.getMessage(), e);
                     failureCount++;
                     continue;
@@ -134,15 +137,16 @@ public class StockDataService {
                     logger.info("Successfully added {} candlesticks for symbol: {}",
                             tradingPeriod.candlesticks().size(), fullSymbol);
                     successCount++;
-                } catch (Exception e) {
-                    logger.error("Error adding candlesticks to database for symbol {}: {}",
-                            fullSymbol, e.getMessage(), e);
+                } catch (Exception e) { // TODO; Should be more specific here and catch RuntimeException instead so we do not catch programming errors such as NullPointerException
+                    // TODO: Here we catch expected database failures (validation, connection issues)
+                    logger.error("Error adding candlesticks to database for symbol {}: {}", fullSymbol, e.getMessage(), e);
                     failureCount++;
                 }
             } catch (IllegalArgumentException e) {
                 logger.error("Validation error for symbol {}: {}", symbol, e.getMessage());
                 failureCount++;
             } catch (Exception e) {
+                // TODO: and here we should catch RuntimeException again as these are unexpected runtime errors and these might be bugs!
                 logger.error("Unexpected error processing symbol {}: {}", symbol, e.getMessage(), e);
                 failureCount++;
             }

@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public class DataFetcherInputValidator {
 
     // Stock symbol pattern: 1-5 letters, optionally followed by a dot and 1-2 letters
-    private static final Pattern STOCK_SYMBOL_PATTERN = Pattern.compile("^[A-Z]{1,5}(\\.[A-Z]{1,2})?$");
+    private static final Pattern STOCK_SYMBOL_PATTERN = Pattern.compile("^[A-Z0-9]{1,10}(-[A-Z]{1,3})?(\\.[A-Z]{1,2})?$");
 
     // Fixed the typo: removed comma from "1wk"
     private static final String[] VALID_RANGES = {"1d", "5d", "1wk", "1mo", "3mo", "6mo",
@@ -32,7 +32,8 @@ public class DataFetcherInputValidator {
 
         if (!STOCK_SYMBOL_PATTERN.matcher(symbol).matches()) {
             throw new IllegalArgumentException("Invalid stock symbol format: " + symbol +
-                    ". Expected 1-5 letters all caps, optionally followed by a dot and 1-2 letters (e.g., BOL.ST, ABB.ST)");
+                    ". Expected format: 1–10 uppercase letters/numbers, optionally followed by a hyphen and 1 to 3" +
+                    " uppercase letters, and optionally followed by a dot and 1–2 letters (e.g., BOL.ST, ABB.ST).");
         }
     }
 
