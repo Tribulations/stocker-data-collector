@@ -31,6 +31,6 @@ public class Main {
             throw new RuntimeException(e);
         }
 
-        stockDataService.addPriceDataToDb(stockList, Range.ONE_DAY, Interval.ONE_DAY);
+        stockDataService.addPriceDataToDb(stockList, Range.THREE_MONTHS, Interval.ONE_DAY);
     }
 }
