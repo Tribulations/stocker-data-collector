@@ -48,8 +48,8 @@ class CandlestickDaoIntegrationTest {
         long timestamp1 = 1753524000L;
         // 2025-07-26 17:30:00 GMT+02:00 (same day, different time)
         long timestamp2 = 1753543800L;
-        Candlestick cs1 = new Candlestick(100.0, 110.0, 95.0, 112.0, 1000L, timestamp1);
-        Candlestick cs2 = new Candlestick(200.0, 210.0, 195.0, 212.0, 2000L, timestamp2);
+        Candlestick cs1 = new Candlestick(100.0, 112.0, 95.0, 110.0, 1000L, timestamp1);
+        Candlestick cs2 = new Candlestick(200.0, 212.0, 195.0, 210.0, 2000L, timestamp2);
 
         // Insert first candlestick
         candlestickDao.addRows(symbol, List.of(cs1));
@@ -77,7 +77,7 @@ class CandlestickDaoIntegrationTest {
         // Create a third candlestick with the same symbol and date but a time that is earlier than the second insert
         // 2025-07-26 09:00:00 GMT+02:00 (same day, different time)
         long timestamp3 = 1753513200L;
-        Candlestick cs3 = new Candlestick(199.0, 209.0, 191.0, 213.0, 25000L, timestamp3);
+        Candlestick cs3 = new Candlestick(199.0, 213.0, 191.0, 209.0, 25000L, timestamp3);
 
         // Insert third candlestick
         candlestickDao.addRows(symbol, List.of(cs3));
@@ -102,8 +102,8 @@ class CandlestickDaoIntegrationTest {
         // 2025-07-26 09:00:00 GMT+02:00 (timestamp in milliseconds)
         long timestamp2 = 1753513200000L;
 
-        Candlestick cs1 = new Candlestick(100.0, 110.0, 95.0, 112.0, 1000L, timestamp1);
-        Candlestick cs2 = new Candlestick(200.0, 210.0, 195.0, 212.0, 2000L, timestamp2);
+        Candlestick cs1 = new Candlestick(100.0, 112.0, 95.0, 110.0, 1000L, timestamp1);
+        Candlestick cs2 = new Candlestick(200.0, 212.0, 195.0, 210.0, 2000L, timestamp2);
 
         candlestickDao.addRows(symbol, List.of(cs1));
         candlestickDao.addRows(symbol, List.of(cs2));

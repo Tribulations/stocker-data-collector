@@ -260,9 +260,9 @@ public class CandlestickDao implements DAO<Candlestick> {
         for (Candlestick candlestick : candlesticks) {
             statement.setLong(1, candlestick.timestamp());
             statement.setDouble(2, candlestick.open());
-            statement.setDouble(3, candlestick.close());
+            statement.setDouble(3, candlestick.high());
             statement.setDouble(4, candlestick.low());
-            statement.setDouble(5, candlestick.high());
+            statement.setDouble(5, candlestick.close());
             statement.setDouble(6, candlestick.volume());
             statement.setString(7, symbol);
             statement.addBatch();
@@ -335,8 +335,8 @@ public class CandlestickDao implements DAO<Candlestick> {
      */
     private Candlestick createCandlestick(final ResultSet resultSet) throws SQLException {
         try {
-            return new Candlestick(resultSet.getDouble(OPEN_COLUMN), resultSet.getDouble(CLOSE_COLUMN),
-                    resultSet.getDouble(LOW_COLUMN), resultSet.getDouble(HIGH_COLUMN),
+            return new Candlestick(resultSet.getDouble(OPEN_COLUMN), resultSet.getDouble(HIGH_COLUMN),
+                    resultSet.getDouble(LOW_COLUMN), resultSet.getDouble(CLOSE_COLUMN),
                     resultSet.getLong(VOLUME_COLUMN), resultSet.getLong(TIMESTAMP_COLUMN));
         } catch (SQLException e) {
             logger.error("Error setting candlestick properties: {}", e.getMessage(), e);

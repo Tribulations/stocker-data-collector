@@ -121,8 +121,8 @@ public class FinanceBirdParser extends BaseParser {
             IntStream.range(0, openList.size()).forEach(i -> {
                 try {
                     Candlestick candlestick = new Candlestick(
-                            openList.get(i), closeList.get(i), lowList.get(i),
-                            highList.get(i), volumeList.get(i), timestampList.get(i));
+                            openList.get(i), highList.get(i), lowList.get(i),
+                            closeList.get(i), volumeList.get(i), timestampList.get(i));
                     candlestickList.add(candlestick);
 
                     logger.trace("Created candlestick {} with timestamp {}", i, timestampList.get(i));

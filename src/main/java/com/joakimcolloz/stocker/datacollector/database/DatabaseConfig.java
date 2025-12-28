@@ -8,7 +8,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 public class DatabaseConfig {
     private static final Dotenv dotenv = Dotenv.configure()
             .ignoreIfMissing()
-            .systemProperties() // Check system env as fallback
+            .systemProperties() // Check system env as fallback TODO: CHECK THIS: doesn't seem to work as expected
             .load();
 
     private final String jdbcUrl;

@@ -132,8 +132,8 @@ class CandlestickDaoTest {
     void addRowWithInvalidCandlestickShouldThrowException() {
         // Arrange
         String symbol = "BOL.ST";
-        Candlestick invalidCandlestick = new Candlestick(100.0, 105.0, 99.0,
-                115.0, 1000L, -1); // Invalid timestamp
+        Candlestick invalidCandlestick = new Candlestick(100.0, 115.0, 99.0,
+                105.0, 1000L, -1); // Invalid timestamp
 
         doThrow(new IllegalArgumentException("Invalid timestamp"))
                 .when(mockValidator).validateCandlestick(invalidCandlestick);
@@ -272,7 +272,7 @@ class CandlestickDaoTest {
     }
 
     private Candlestick createValidCandlestick() {
-        return new Candlestick(100.0, 105.0, 95.0,
-                110.0, 1000L, System.currentTimeMillis());
+        return new Candlestick(100.0, 110.0, 95.0,
+                105.0, 1000L, System.currentTimeMillis());
     }
 }

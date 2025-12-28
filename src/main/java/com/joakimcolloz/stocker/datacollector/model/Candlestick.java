@@ -11,9 +11,9 @@ import java.time.format.DateTimeFormatter;
  * candlesticks for a specific time range and interval.
  *
  * @param open the opening price for the time period
- * @param close the closing price for the time period
- * @param low the lowest price during the time period
  * @param high the highest price during the time period
+ * @param low the lowest price during the time period
+ * @param close the closing price for the time period
  * @param volume the number of shares traded during the time period
  * @param timestamp the Unix timestamp (seconds since epoch) for the period start
  *
@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter;
  * @see TradingPeriod
  * @see #getHumanReadableDate()
  */
-public record Candlestick(double open, double close, double low, double high, long volume, long timestamp) {
+public record Candlestick(double open, double high, double low, double close, long volume, long timestamp) {
     /**
      * Returns the candlestick's timestamp in a more readable way e.g. 2023-08-01 12:05:00.
      * @return the candlestick's timestamp with the format yyyy-MM-dd HH:mm:ss
@@ -37,6 +37,6 @@ public record Candlestick(double open, double close, double low, double high, lo
 
     @Override
     public String toString() {
-        return String.format("%s %s %s %s %s %s", getHumanReadableDate(), open, close, low, high, volume);
+        return String.format("%s %s %s %s %s %s", getHumanReadableDate(), open, high, low, close, volume);
     }
 }
