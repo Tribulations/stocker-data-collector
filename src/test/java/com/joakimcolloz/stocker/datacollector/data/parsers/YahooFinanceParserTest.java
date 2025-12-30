@@ -16,7 +16,8 @@ class YahooFinanceParserTest {
         String json = loadTestJSON("YahooFinance-BOL.ST-1d-1d.json");
 
         // Act: Parse the JSON using YahooFinanceParser
-        try (YahooFinanceParser parser = new YahooFinanceParser(json)) {
+        try (YahooFinanceParser parser = new YahooFinanceParser()) {
+            parser.setJsonString(json);
             parser.parse();
             TradingPeriod oneDay = parser.getTradingPeriod();
 
@@ -32,7 +33,8 @@ class YahooFinanceParserTest {
         String json = loadTestJSON("YahooFinance-BOL.ST-1d-3month.json");
 
         // Act: Parse the JSON using YahooFinanceParser
-        try (YahooFinanceParser parser = new YahooFinanceParser(json)) {
+        try (YahooFinanceParser parser = new YahooFinanceParser()) {
+            parser.setJsonString(json);
             parser.parse();
             TradingPeriod period = parser.getTradingPeriod();
 

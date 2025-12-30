@@ -16,7 +16,8 @@ class FinanceBirdParserTest {
         String json = loadTestJSON("FinanceBird-BOL.ST-1d-1d.json");
 
         // Act: Parse the JSON using FinanceBirdParser
-        try (FinanceBirdParser parser = new FinanceBirdParser(json)) {
+        try (FinanceBirdParser parser = new FinanceBirdParser()) {
+            parser.setJsonString(json);
             parser.parse();
             TradingPeriod oneDay = parser.getTradingPeriod();
 
@@ -32,7 +33,8 @@ class FinanceBirdParserTest {
         String json = loadTestJSON("FinanceBird-BOL.ST-1d-3month.json");
 
         // Act: Parse the JSON using FinanceBirdParser
-        try (FinanceBirdParser parser = new FinanceBirdParser(json)) {
+        try (FinanceBirdParser parser = new FinanceBirdParser()) {
+            parser.setJsonString(json);
             parser.parse();
             TradingPeriod period = parser.getTradingPeriod();
 
@@ -52,7 +54,8 @@ class FinanceBirdParserTest {
         String json = loadTestJSON("FinanceBird-BOL.ST-1d-1y.json");
 
         // Act: Parse the JSON using FinanceBirdParser
-        try (FinanceBirdParser parser = new FinanceBirdParser(json)) {
+        try (FinanceBirdParser parser = new FinanceBirdParser()) {
+            parser.setJsonString(json);
             parser.parse();
             TradingPeriod period = parser.getTradingPeriod();
 
@@ -72,7 +75,8 @@ class FinanceBirdParserTest {
         String json = loadTestJSON("FinanceBird-BOL.ST-1d-2y.json");
 
         // Act: Parse the JSON using FinanceBirdParser
-        try (FinanceBirdParser parser = new FinanceBirdParser(json)) {
+        try (FinanceBirdParser parser = new FinanceBirdParser()) {
+            parser.setJsonString(json);
             parser.parse();
             TradingPeriod period = parser.getTradingPeriod();
 
@@ -92,7 +96,8 @@ class FinanceBirdParserTest {
         String json = loadTestJSON("FinanceBird-BOL.ST-1d-3y.json");
 
         // Act: Parse the JSON using FinanceBirdParser
-        try (FinanceBirdParser parser = new FinanceBirdParser(json)) {
+        try (FinanceBirdParser parser = new FinanceBirdParser()) {
+            parser.setJsonString(json);
             parser.parse();
             TradingPeriod period = parser.getTradingPeriod();
 
@@ -112,7 +117,8 @@ class FinanceBirdParserTest {
         String json = loadTestJSON("FinanceBird-BOL.ST-1d-10y.json");
 
         // Act: Parse the JSON using FinanceBirdParser
-        try (FinanceBirdParser parser = new FinanceBirdParser(json)) {
+        try (FinanceBirdParser parser = new FinanceBirdParser()) {
+            parser.setJsonString(json);
             parser.parse();
             TradingPeriod period = parser.getTradingPeriod();
 

@@ -1,5 +1,7 @@
 package com.joakimcolloz.stocker.datacollector;
 
+import com.joakimcolloz.stocker.datacollector.data.fetchers.FinanceBirdFetcher;
+import com.joakimcolloz.stocker.datacollector.data.parsers.FinanceBirdParser;
 import com.joakimcolloz.stocker.datacollector.data.parsers.YahooFinanceParser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +22,7 @@ import com.joakimcolloz.stocker.datacollector.model.Range;
 import com.joakimcolloz.stocker.datacollector.util.TestDatabaseUtil;
 
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +72,8 @@ public class ApiToDatabaseIntegrationIT {
         candlestickDao.resetTable();
 
         // Initialize StockDataService
-        stockDataService = new StockDataService(new DataFetcherInputValidator(), databaseManager);
+        stockDataService = new StockDataService(FinanceBirdParser::new, new FinanceBirdFetcher(),
+                new DataFetcherInputValidator(), databaseManager);
         logger.debug("Integration test setup completed successfully"); // TODO we should not log from a test class
     }
 
