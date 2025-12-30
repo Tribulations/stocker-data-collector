@@ -1,5 +1,7 @@
 package com.joakimcolloz.stocker.datacollector.data;
 
+import com.joakimcolloz.stocker.datacollector.data.fetchers.BaseDataFetcher;
+import com.joakimcolloz.stocker.datacollector.data.parsers.BaseParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.joakimcolloz.stocker.datacollector.data.fetchers.FinanceBirdFetcher;
@@ -13,6 +15,7 @@ import com.joakimcolloz.stocker.datacollector.model.Range;
 import com.joakimcolloz.stocker.datacollector.model.TradingPeriod;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Changelog:
@@ -27,17 +30,34 @@ public class StockDataService {
 
     private final DataFetcherInputValidator validator;
     private final DatabaseManager databaseManager;
+    private final Supplier<BaseParser> baseParser;
+    private final BaseDataFetcher fetcher;
 
-    public StockDataService() {
+    public StockDataService(Supplier<BaseParser> baseParser, BaseDataFetcher fetcher) {
+        this.baseParser = baseParser;
+        this.fetcher = fetcher;
         this.validator = new DataFetcherInputValidator();
         this.databaseManager = new DatabaseManager(new DatabaseConfig());
-        logger.debug("StockDataService initialized");
+        logger.info("StockDataService initialized with default validator and database manager.");
+        logger.info("Parser: {}", baseParser);
+        logger.info("Fetcher: {}", fetcher);
     }
 
-    public StockDataService(DataFetcherInputValidator validator, DatabaseManager databaseManager) {
+    public StockDataService(
+            Supplier<BaseParser> baseParser,
+            BaseDataFetcher fetcher,
+            DataFetcherInputValidator validator,
+            DatabaseManager databaseManager)
+    {
+        this.baseParser = baseParser;
+        this.fetcher = fetcher;
         this.validator = validator;
         this.databaseManager = databaseManager;
-        logger.debug("StockDataService initialized with injected validator");
+        logger.info("StockDataService initialized");
+        logger.info("Parser: {}", baseParser);
+        logger.info("Fetcher: {}", fetcher);
+        logger.info("Validator: {}", validator);
+        logger.info("DatabaseManager: {}", databaseManager);
     }
 
     /**
@@ -85,19 +105,20 @@ public class StockDataService {
 
                 // Fetch data
                 logger.debug("Fetching data for symbol: {}", fullSymbol);
-                final String json = FinanceBirdFetcher.INSTANCE.fetchData(
+                final String json = fetcher.fetchData(
                         fullSymbol, range.toString(), interval.toString());
 
                 logger.debug("Received {} characters of JSON data for symbol: {}",
                         json.length(), fullSymbol);
 
                 // Parse data
-                logger.debug("Parsing JSON data for symbol: {}", fullSymbol);
+                logger.info("Parsing JSON data for symbol: {}", fullSymbol);
                 TradingPeriod tradingPeriod;
-                try (FinanceBirdParser financeBirdParser = new FinanceBirdParser(json)) {
-                    financeBirdParser.parse();
-                    logger.debug("JSON parsing completed for symbol: {}", fullSymbol);
-                    tradingPeriod = financeBirdParser.getTradingPeriod();
+                try (BaseParser parser = baseParser.get()) {
+                    parser.setJsonString(json);
+                    parser.parse();
+                    logger.info("JSON parsing completed for symbol: {}", fullSymbol);
+                    tradingPeriod = parser.getTradingPeriod();
                 } catch (Exception e) { // TODO should catch JsonParseException | IOException  instead?
                     // TODO Here we catch specific parsing errors/expected business failures
                     logger.error("Failed to parse JSON data for symbol {}: {}", fullSymbol, e.getMessage(), e);

@@ -10,7 +10,6 @@ public class YahooFinanceFetcher extends BaseDataFetcher {
             .ignoreIfMissing()
             .systemProperties() // Check system env as fallback
             .load();
-    public static final YahooFinanceFetcher INSTANCE = new YahooFinanceFetcher();
 
     private static final String YAHOO_API_KEY_HEADER = "X-RapidAPI-Key";
     private static final String YAHOO_API_HOST_HEADER = "X-RapidAPI-Host";
@@ -22,7 +21,7 @@ public class YahooFinanceFetcher extends BaseDataFetcher {
         return YAHOO_API_URL + stockName + "?range=" + range + "&interval=" + interval;
     }
 
-    private YahooFinanceFetcher() {
+    public YahooFinanceFetcher() {
         super(
             YAHOO_API_KEY_HEADER,
             YAHOO_API_HOST_HEADER,

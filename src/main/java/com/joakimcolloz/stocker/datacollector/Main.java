@@ -1,6 +1,8 @@
 package com.joakimcolloz.stocker.datacollector;
 
 import com.joakimcolloz.stocker.datacollector.data.StockDataService;
+import com.joakimcolloz.stocker.datacollector.data.fetchers.FinanceBirdFetcher;
+import com.joakimcolloz.stocker.datacollector.data.parsers.FinanceBirdParser;
 import com.joakimcolloz.stocker.datacollector.database.DatabaseConfig;
 import com.joakimcolloz.stocker.datacollector.database.DatabaseManager;
 import com.joakimcolloz.stocker.datacollector.model.Interval;
@@ -23,7 +25,10 @@ public class Main {
 
         ArrayList<String> stockList;
 
-        final StockDataService stockDataService = new StockDataService();
+        final StockDataService stockDataService = new StockDataService(
+                FinanceBirdParser::new,
+                new FinanceBirdFetcher()
+        );
         try {
             stockList = StockReader.readStockNamesFromResource("largecap.txt");
         } catch (IOException e) {

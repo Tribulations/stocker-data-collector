@@ -4,6 +4,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 
+import com.joakimcolloz.stocker.datacollector.model.TradingPeriod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,23 +24,36 @@ public abstract class BaseParser implements AutoCloseable {
     private static final Logger logger = LoggerFactory.getLogger(BaseParser.class);
     protected String currentKey = null;
     protected String previousKey = null;
-    protected final JsonReader jsonReader;
+    protected JsonReader jsonReader;
     protected JsonToken jsonToken;
+    protected TradingPeriod tradingPeriod;
+
+    protected BaseParser() {
+    }
 
     /**
-     * Constructor that initializes the JsonReader with the provided JSON string.
-     *
-     * @param jsonString the JSON string to be parsed
-     * @throws IllegalArgumentException if jsonString is null or empty
+     * Set the json string to parse. This method has to be called before parsing.
+     * @param jsonString the json string to parse
      */
-    protected BaseParser(final String jsonString) {
+    public void setJsonString(String jsonString) {
         if (jsonString == null || jsonString.trim().isEmpty()) {
             throw new IllegalArgumentException("JSON string cannot be null or empty");
         }
 
-        logger.debug("Initializing BaseParser with JSON string of {} characters", jsonString.length());
+        logger.debug("Using JSON string of {} characters", jsonString.length());
         this.jsonReader = new JsonReader(new StringReader(jsonString));
-        logger.debug("JsonReader initialized successfully");
+    }
+
+    /**
+     * Returns the parsed trading period.
+     *
+     * @return the trading period, or null if parsing hasn't completed successfully
+     */
+    public TradingPeriod getTradingPeriod() {
+        if (tradingPeriod == null) {
+            logger.warn("getTradingPeriod() called before parsing completed");
+        }
+        return tradingPeriod;
     }
 
     /**
@@ -61,6 +75,11 @@ public abstract class BaseParser implements AutoCloseable {
      * @throws JsonParseException if parsing fails due to malformed JSON or I/O errors
      */
     public void parse() throws JsonParseException {
+        if (jsonReader == null) {
+            logger.error("Cannot parse before setting JSON string");
+            throw new JsonParseException("Cannot parse before setting JSON string");
+        }
+
         logger.info("Starting JSON parsing");
         try {
             traverserJsonObject();
