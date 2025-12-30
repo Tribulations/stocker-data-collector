@@ -7,7 +7,6 @@ public class FinanceBirdFetcher extends BaseDataFetcher {
             .ignoreIfMissing()
             .systemProperties() // Check system env as fallback
             .load();
-    public static final FinanceBirdFetcher INSTANCE = new FinanceBirdFetcher();
 
     private static final String API_KEY_HEADER = "x-rapidapi-key";
     private static final String API_HOST_HEADER = "x-rapid-api-host";
@@ -20,7 +19,7 @@ public class FinanceBirdFetcher extends BaseDataFetcher {
         return API_URL + stockName + ENDPOINT + "?range=" + range + "&interval=" + interval;
     }
 
-    private FinanceBirdFetcher() {
+    public FinanceBirdFetcher() {
         super(
                 API_KEY_HEADER,
                 API_HOST_HEADER,

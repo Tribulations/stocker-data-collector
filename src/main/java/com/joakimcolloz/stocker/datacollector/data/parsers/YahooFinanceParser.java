@@ -44,7 +44,6 @@ public class YahooFinanceParser extends BaseParser {
     private final List<Double> highList;
     private String interval;
     private String range;
-    private TradingPeriod tradingPeriod;
 
     /**
      * Creates a new YahooFinanceParser for the given JSON string.
@@ -52,8 +51,7 @@ public class YahooFinanceParser extends BaseParser {
      * @param jsonString the Yahoo Finance JSON response to parse
      * @throws IllegalArgumentException if jsonString is null or empty
      */
-    public YahooFinanceParser(String jsonString) {
-        super(jsonString);
+    public YahooFinanceParser() {
         this.symbol = null;
         this.timestampList = new ArrayList<>();
         this.volumeList = new ArrayList<>();
@@ -278,18 +276,6 @@ public class YahooFinanceParser extends BaseParser {
             logger.error("Error reading null token at key '{}': {}", currentKey, e.getMessage(), e);
             throw new IOException("Failed to read null token at key: " + currentKey, e);
         }
-    }
-
-    /**
-     * Returns the parsed trading period.
-     *
-     * @return the trading period, or null if parsing hasn't completed successfully
-     */
-    public TradingPeriod getTradingPeriod() {
-        if (tradingPeriod == null) {
-            logger.warn("getTradingPeriod() called before parsing completed");
-        }
-        return tradingPeriod;
     }
 
     /**

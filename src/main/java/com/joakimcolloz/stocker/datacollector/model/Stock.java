@@ -49,8 +49,9 @@ public class Stock {
     public Stock(String symbol, final String range, final String interval) throws DataFetchException, JsonParseException {
         this.symbol = symbol;
 
-        final String json = YahooFinanceFetcher.INSTANCE.fetchData(symbol, range, interval);
-        try (YahooFinanceParser yahooFinanceParser = new YahooFinanceParser(json)) {
+        final String json = new YahooFinanceFetcher().fetchData(symbol, range, interval);
+        try (YahooFinanceParser yahooFinanceParser = new YahooFinanceParser()) {
+            yahooFinanceParser.setJsonString(json);
             yahooFinanceParser.parse();
             this.tradingPeriod = yahooFinanceParser.getTradingPeriod();
         }
@@ -72,8 +73,9 @@ public class Stock {
             throws DataFetchException {
         this.symbol = symbol;
 
-        final String json = YahooFinanceFetcher.INSTANCE.fetchData(symbol, range, interval);
-        try (YahooFinanceParser yahooFinanceParser = new YahooFinanceParser(json)) {
+        final String json = new YahooFinanceFetcher().fetchData(symbol, range, interval);
+        try (YahooFinanceParser yahooFinanceParser = new YahooFinanceParser()) {
+            yahooFinanceParser.setJsonString(json);
             yahooFinanceParser.parse();
 
             if (skipCurrentDayPriceData) {
