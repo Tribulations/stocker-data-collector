@@ -4,8 +4,6 @@ import com.joakimcolloz.stocker.datacollector.data.fetchers.BaseDataFetcher;
 import com.joakimcolloz.stocker.datacollector.data.parsers.BaseParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.joakimcolloz.stocker.datacollector.data.fetchers.FinanceBirdFetcher;
-import com.joakimcolloz.stocker.datacollector.data.parsers.FinanceBirdParser;
 import com.joakimcolloz.stocker.datacollector.data.validation.DataFetcherInputValidator;
 import com.joakimcolloz.stocker.datacollector.database.CandlestickDao;
 import com.joakimcolloz.stocker.datacollector.database.DatabaseConfig;
@@ -21,8 +19,9 @@ import java.util.function.Supplier;
  * Changelog:
  *  1.0 - Used YahooFinance
  *  1.1 - Used FinanceBird
+ *  1.2 - Added support for different data fetchers and parsers
  * @author Joakim Colloz
- * @version 1.1
+ * @version 1.2
  */
 public class StockDataService {
     private static final Logger logger = LoggerFactory.getLogger(StockDataService.class);
@@ -67,7 +66,7 @@ public class StockDataService {
      * Only stock symbols that belong to the Swedish market (i.e., symbols ending with ".ST") are processed.
      * </p>
      * <p>
-     * This method uses {@link FinanceBirdFetcher} to retrieve the data and {@link FinanceBirdParser} to parse it.
+     * The data is fetched using the {@link BaseDataFetcher} and parsed using the {@link BaseParser}.
      * </p>
      *
      * @param stockSymbols the list of stock symbols to process
@@ -89,13 +88,11 @@ public class StockDataService {
         }
 
         CandlestickDao candlestickDao = databaseManager.createCandlestickDao();
-        final boolean skipCurrentDayPriceData = range != Range.ONE_DAY;
         int successCount = 0;
         int failureCount = 0;
 
         logger.info("Starting to fetch and process data for {} stock symbols with range {} and interval {}",
                 stockSymbols.size(), range, interval);
-        logger.debug("Skip current day data: {}", skipCurrentDayPriceData);
 
         for (String symbol : stockSymbols) {
             logger.debug("Starting processing for symbol: {}", symbol);
@@ -136,13 +133,6 @@ public class StockDataService {
 
                 int originalCandlestickCount = tradingPeriod.candlesticks().size();
                 logger.debug("Retrieved {} candlesticks for symbol: {}", originalCandlestickCount, fullSymbol);
-
-                // Remove the last day's data if needed
-                if (skipCurrentDayPriceData && !tradingPeriod.candlesticks().isEmpty()) {
-                    tradingPeriod.removeLast();
-                    logger.debug("Removed last candlestick (current day) for symbol: {} - {} candlesticks remaining",
-                            fullSymbol, tradingPeriod.candlesticks().size());
-                }
 
                 if (tradingPeriod.candlesticks().isEmpty()) {
                     logger.warn("No candlesticks left after processing for symbol: {} - skipping database insertion", fullSymbol);
