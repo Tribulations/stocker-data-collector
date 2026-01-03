@@ -1,8 +1,5 @@
 package com.joakimcolloz.stocker.datacollector;
 
-import com.joakimcolloz.stocker.datacollector.data.fetchers.FinanceBirdFetcher;
-import com.joakimcolloz.stocker.datacollector.data.parsers.FinanceBirdParser;
-import com.joakimcolloz.stocker.datacollector.data.parsers.YahooFinanceParser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +8,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import com.joakimcolloz.stocker.datacollector.data.StockDataService;
+import com.joakimcolloz.stocker.datacollector.data.parsers.YahooFinanceParser;
 import com.joakimcolloz.stocker.datacollector.data.fetchers.YahooFinanceFetcher;
 import com.joakimcolloz.stocker.datacollector.data.validation.DataFetcherInputValidator;
 import com.joakimcolloz.stocker.datacollector.database.CandlestickDao;
@@ -72,7 +70,7 @@ public class ApiToDatabaseIntegrationIT {
         candlestickDao.resetTable();
 
         // Initialize StockDataService
-        stockDataService = new StockDataService(FinanceBirdParser::new, new FinanceBirdFetcher(),
+        stockDataService = new StockDataService(YahooFinanceParser::new, new YahooFinanceFetcher(),
                 new DataFetcherInputValidator(), databaseManager);
         logger.debug("Integration test setup completed successfully"); // TODO we should not log from a test class
     }
