@@ -27,7 +27,7 @@ fi
 echo "Version updated from $old_version to $new_version"
 echo "Running Maven clean install..."
 
-if ./mvnw clean install; then
+if mvn clean install; then
   git add pom.xml
   git commit -m "Bump minor version"
 	current_branch="$(git rev-parse --abbrev-ref HEAD)"
