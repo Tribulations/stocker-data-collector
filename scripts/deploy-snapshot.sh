@@ -51,12 +51,8 @@ scp -o BatchMode=yes "$local_jar" "$remote_user@$server_host:$remote_dir/$remote
 echo "Updating symlink and restarting service on $remote_user@$server_host"
 ssh -tt -o BatchMode=yes "$remote_user@$server_host" "set -euo pipefail; \
 	cd '$remote_dir'; \
-	sudo systemctl stop '$service_name' || true; \
 	mv '$remote_jar_tmp_rel' '$remote_jar_rel'; \
 	chmod 700 '$remote_jar_rel'; \
-	ln -sfn '$remote_jar_rel' '$current_symlink'; \
-	sudo systemctl daemon-reload; \
-	sudo systemctl enable '$service_name'; \
-	sudo systemctl start '$service_name'"
+	ln -sfn '$remote_jar_rel' '$current_symlink'"
 
 echo "Deploy snapshot steps completed."
