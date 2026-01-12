@@ -61,7 +61,7 @@ public class StockDataService {
 
     /**
      * Retrieves and inserts price data into the database for each stock symbol in the given {@code stockSymbols} list.
-     * The latest trading day is only included if the range is set to {@link Range#ONE_DAY}.
+     * The latest trading day is only included if the range is set to {@link Range#ONE_DAY}. // TODO: this is not true anymore? update doc!
      * <p>
      * Only stock symbols that belong to the Swedish market (i.e., symbols ending with ".ST") are processed.
      * </p>
