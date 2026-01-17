@@ -17,6 +17,13 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
+ * This class is responsible for fetching and inserting price data into the database for
+ * each stock symbol in the given {@code stockSymbols} list.
+ *
+ * It uses the {@link BaseDataFetcher} to fetch the data and the {@link BaseParser} to parse the data.
+ * It uses a delay between fetching data for each stock symbol to avoid overloading the API.
+ * The default delay is 100ms.
+ *
  * Changelog:
  *  1.0 - Used YahooFinance
  *  1.1 - Used FinanceBird
