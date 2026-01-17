@@ -20,8 +20,9 @@ import java.util.function.Supplier;
  *  1.0 - Used YahooFinance
  *  1.1 - Used FinanceBird
  *  1.2 - Added support for different data fetchers and parsers
+ *  1.3 - Added delay between fetching data for each stock symbol
  * @author Joakim Colloz
- * @version 1.2
+ * @version 1.3
  */
 public class StockDataService {
     private static final Logger logger = LoggerFactory.getLogger(StockDataService.class);
@@ -31,6 +32,7 @@ public class StockDataService {
     private final DatabaseManager databaseManager;
     private final Supplier<BaseParser> baseParser;
     private final BaseDataFetcher fetcher;
+    private long DELAY_IN_MS = 100;
 
     public StockDataService(Supplier<BaseParser> baseParser, BaseDataFetcher fetcher) {
         this.baseParser = baseParser;
@@ -163,6 +165,13 @@ public class StockDataService {
             }
             logger.debug("Completed processing for symbol: {} (success: {})",
                     symbol, successCount > (successCount + failureCount - stockSymbols.size() + 1) ? "true" : "false");
+
+            // Delay between fetching data for each stock symbol
+            try {
+                Thread.sleep(DELAY_IN_MS);
+            } catch (InterruptedException e) {
+                logger.warn("Thread interrupted while waiting to fetch next symbol", e);
+            }
         }
 
         // Log summary of operation
