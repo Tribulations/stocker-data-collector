@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  */
 public class DataFetcherInputValidator {
 
-    // Stock symbol pattern: 1-5 letters, optionally followed by a dot and 1-2 letters
+    // Stock symbol pattern: 1-5 letters, optionally followed by a dot and 1-2 letters TODO: 5 letters are not true anymore?
     private static final Pattern STOCK_SYMBOL_PATTERN = Pattern.compile("^[A-Z0-9]{1,10}(-[A-Z]{1,3})?(\\.[A-Z]{1,2})?$");
 
     // Fixed the typo: removed comma from "1wk"
