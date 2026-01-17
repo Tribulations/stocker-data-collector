@@ -32,6 +32,7 @@ public class Main {
         ArrayList<String> stockList;
 
         final StockDataService stockDataService = createStockDataService(args);
+        stockDataService.setDelayInMs(7000);
 
         try {
             stockList = StockReader.readStockNamesFromResource("largecap.txt");
