@@ -2,6 +2,7 @@ package com.joakimcolloz.stocker.datacollector.data.fetchers;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
+// TODO: add java doc mentioning link to price plan: https://rapidapi.com/shareefbassam3/api/financebird/pricing
 public class FinanceBirdFetcher extends BaseDataFetcher {
     private static final Dotenv dotenv = Dotenv.configure()
             .ignoreIfMissing()
