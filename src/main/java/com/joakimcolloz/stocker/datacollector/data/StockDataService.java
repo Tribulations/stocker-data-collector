@@ -1,5 +1,6 @@
 package com.joakimcolloz.stocker.datacollector.data;
 
+import com.joakimcolloz.stocker.datacollector.data.exception.DataFetchException;
 import com.joakimcolloz.stocker.datacollector.data.fetchers.BaseDataFetcher;
 import com.joakimcolloz.stocker.datacollector.data.parsers.BaseParser;
 import org.slf4j.Logger;
@@ -41,8 +42,7 @@ public class StockDataService {
         this.validator = new DataFetcherInputValidator();
         this.databaseManager = new DatabaseManager(new DatabaseConfig());
         logger.info("StockDataService initialized with default validator and database manager.");
-        logger.info("Parser: {}", baseParser);
-        logger.info("Fetcher: {}", fetcher);
+        logInitialization(baseParser, fetcher, validator, databaseManager);
     }
 
     public StockDataService(
@@ -56,10 +56,7 @@ public class StockDataService {
         this.validator = validator;
         this.databaseManager = databaseManager;
         logger.info("StockDataService initialized");
-        logger.info("Parser: {}", baseParser);
-        logger.info("Fetcher: {}", fetcher);
-        logger.info("Validator: {}", validator);
-        logger.info("DatabaseManager: {}", databaseManager);
+        logInitialization(baseParser, fetcher, validator, databaseManager);
     }
 
     /**
@@ -81,14 +78,7 @@ public class StockDataService {
         logger.info("Starting addPriceDataToDb with {} symbols, range: {}, interval: {}",
                 stockSymbols != null ? stockSymbols.size() : 0, range, interval);
 
-        // Validate input parameters using validator
-        try {
-            validator.validateStockSymbolsList(stockSymbols);
-            logger.debug("Input validation completed successfully");
-        } catch (IllegalArgumentException e) {
-            logger.error("Input validation failed: {}", e.getMessage());
-            throw e;
-        }
+        validate(stockSymbols);
 
         CandlestickDao candlestickDao = databaseManager.createCandlestickDao();
         int successCount = 0;
@@ -104,36 +94,26 @@ public class StockDataService {
                 logger.debug("Processing symbol: {} (full: {})", symbol, fullSymbol);
 
                 // Fetch data
-                logger.debug("Fetching data for symbol: {}", fullSymbol);
-                final String json = fetcher.fetchData(
-                        fullSymbol, range.toString(), interval.toString());
-
-                logger.debug("Received {} characters of JSON data for symbol: {}",
-                        json.length(), fullSymbol);
+                final String jsonResponse = fetchData(range, interval, fullSymbol);
 
                 // Parse data
-                logger.info("Parsing JSON data for symbol: {}", fullSymbol);
                 TradingPeriod tradingPeriod;
-                try (BaseParser parser = baseParser.get()) {
-                    parser.setJsonString(json);
-                    parser.parse();
-                    logger.info("JSON parsing completed for symbol: {}", fullSymbol);
-                    tradingPeriod = parser.getTradingPeriod();
-                } catch (Exception e) { // TODO should catch JsonParseException | IOException  instead?
-                    // TODO Here we catch specific parsing errors/expected business failures
-                    logger.error("Failed to parse JSON data for symbol {}: {}", fullSymbol, e.getMessage(), e);
-                    failureCount++;
+                ParsingResult parsingResult = parseResponse(jsonResponse, fullSymbol, failureCount);
+                if (parsingResult.parsedSuccessfully) {
+                    tradingPeriod = parsingResult.tradingPeriod;
+                    failureCount = parsingResult.failureCount;
+                } else {
                     continue;
                 }
 
-                // Get parsed data as TradingPeriod
-                if (tradingPeriod == null || tradingPeriod.candlesticks() == null
-                        || tradingPeriod.candlesticks().isEmpty()) {
+                // Validate trading period
+                if (isInvalidTradingPeriod(tradingPeriod)) {
                     logger.warn("No candlesticks available for symbol: {} - trading period is null or empty", fullSymbol);
                     failureCount++;
                     continue;
                 }
 
+                // Log number of candlesticks retrieved
                 int originalCandlestickCount = tradingPeriod.candlesticks().size();
                 logger.debug("Retrieved {} candlesticks for symbol: {}", originalCandlestickCount, fullSymbol);
 
@@ -145,17 +125,14 @@ public class StockDataService {
 
                 // Add data to database
                 try {
-                    logger.debug("Inserting {} candlesticks into database for symbol: {}",
-                            tradingPeriod.candlesticks().size(), fullSymbol);
-                    candlestickDao.addRows(fullSymbol, tradingPeriod.candlesticks());
-                    logger.info("Successfully added {} candlesticks for symbol: {}",
-                            tradingPeriod.candlesticks().size(), fullSymbol);
+                    insertToDatabase(tradingPeriod, fullSymbol, candlestickDao);
                     successCount++;
                 } catch (Exception e) { // TODO; Should be more specific here and catch RuntimeException instead so we do not catch programming errors such as NullPointerException
                     // TODO: Here we catch expected database failures (validation, connection issues)
                     logger.error("Error adding candlesticks to database for symbol {}: {}", fullSymbol, e.getMessage(), e);
                     failureCount++;
                 }
+
             } catch (IllegalArgumentException e) {
                 logger.error("Validation error for symbol {}: {}", symbol, e.getMessage());
                 failureCount++;
@@ -164,10 +141,11 @@ public class StockDataService {
                 logger.error("Unexpected error processing symbol {}: {}", symbol, e.getMessage(), e);
                 failureCount++;
             }
+
             logger.debug("Completed processing for symbol: {} (success: {})",
                     symbol, successCount > (successCount + failureCount - stockSymbols.size() + 1) ? "true" : "false");
 
-            // Delay between fetching data for each stock symbol
+            // Delay before fetching data for the next stock symbol
             try {
                 Thread.sleep(DELAY_IN_MS);
             } catch (InterruptedException e) {
@@ -195,4 +173,67 @@ public class StockDataService {
     public void setDelayInMs(long DELAY_IN_MS) {
         this.DELAY_IN_MS = DELAY_IN_MS;
     }
+
+    private static void insertToDatabase(TradingPeriod tradingPeriod, String fullSymbol, CandlestickDao candlestickDao) {
+        logger.debug("Inserting {} candlesticks into database for symbol: {}",
+                tradingPeriod.candlesticks().size(), fullSymbol);
+        candlestickDao.addRows(fullSymbol, tradingPeriod.candlesticks());
+        logger.info("Successfully added {} candlesticks for symbol: {}",
+                tradingPeriod.candlesticks().size(), fullSymbol);
+    }
+
+    private boolean isInvalidTradingPeriod(TradingPeriod tradingPeriod) {
+        return tradingPeriod == null
+                || tradingPeriod.candlesticks() == null
+                || tradingPeriod.candlesticks().isEmpty();
+    }
+
+    private String fetchData(Range range, Interval interval, String fullSymbol) throws DataFetchException {
+        logger.debug("Fetching data for symbol: {}", fullSymbol);
+        final String json = fetcher.fetchData(
+                fullSymbol, range.toString(), interval.toString());
+
+        logger.debug("Received {} characters of JSON data for symbol: {}",
+                json.length(), fullSymbol);
+        return json;
+    }
+
+    private void validate(List<String> stockSymbols) {
+        try {
+            validator.validateStockSymbolsList(stockSymbols);
+            logger.debug("Input validation completed successfully");
+        } catch (IllegalArgumentException e) {
+            logger.error("Input validation failed: {}", e.getMessage());
+            throw e;
+        }
+    }
+
+    private void logInitialization(Supplier<BaseParser> baseParser, BaseDataFetcher fetcher, DataFetcherInputValidator validator, DatabaseManager databaseManager) {
+        logger.info("Parser: {}", baseParser);
+        logger.info("Fetcher: {}", fetcher);
+        logger.info("Validator: {}", validator);
+        logger.info("DatabaseManager: {}", databaseManager);
+    }
+
+    private ParsingResult parseResponse(String jsonResponse, String fullSymbol, int failureCount) {
+        TradingPeriod tradingPeriod = null;
+        boolean parsedSuccessfully = false;
+
+        logger.info("Parsing JSON data for symbol: {}", fullSymbol);
+        try (BaseParser parser = baseParser.get()) {
+            parser.setJsonString(jsonResponse);
+            parser.parse();
+            logger.info("JSON parsing completed for symbol: {}", fullSymbol);
+            tradingPeriod = parser.getTradingPeriod();
+            parsedSuccessfully = true;
+        } catch (Exception e) { // TODO should catch JsonParseException | IOException  instead?
+            // TODO Here we catch specific parsing errors/expected business failures
+            logger.error("Failed to parse JSON data for symbol {}: {}", fullSymbol, e.getMessage(), e);
+            failureCount++;
+        }
+
+        return new ParsingResult(tradingPeriod, parsedSuccessfully, failureCount);
+    }
+
+    private record ParsingResult(TradingPeriod tradingPeriod, boolean parsedSuccessfully, int failureCount) {}
 }
