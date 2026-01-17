@@ -32,6 +32,7 @@ public class StockDataService {
     private final DatabaseManager databaseManager;
     private final Supplier<BaseParser> baseParser;
     private final BaseDataFetcher fetcher;
+
     private long DELAY_IN_MS = 100;
 
     public StockDataService(Supplier<BaseParser> baseParser, BaseDataFetcher fetcher) {
@@ -185,5 +186,13 @@ public class StockDataService {
         } else {
             logger.info("All {} symbols processed successfully (100% success rate)", stockSymbols.size());
         }
+    }
+
+    public long getDelayInMs() {
+        return DELAY_IN_MS;
+    }
+
+    public void setDelayInMs(long DELAY_IN_MS) {
+        this.DELAY_IN_MS = DELAY_IN_MS;
     }
 }
