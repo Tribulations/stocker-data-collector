@@ -66,7 +66,7 @@ public class FinanceBirdParser extends BaseParser {
 
     @Override
     protected void finalizeParsingResult() {
-        logger.info("Initializing trading period from parsed data");
+        logger.debug("Initializing trading period from parsed data");
 
         // Validate that we have consistent data
         validateParsedData();
