@@ -80,11 +80,11 @@ public abstract class BaseParser implements AutoCloseable {
             throw new JsonParseException("Cannot parse before setting JSON string");
         }
 
-        logger.info("Starting JSON parsing");
+        logger.debug("Starting JSON parsing");
         try {
             traverserJsonObject();
             finalizeParsingResult();
-            logger.info("JSON parsing completed successfully");
+            logger.debug("JSON parsing completed successfully");
         } catch (Exception e) {
             logger.error("Failed to parse JSON: {}", e.getMessage(), e);
             throw new JsonParseException("JSON parsing failed", e);
