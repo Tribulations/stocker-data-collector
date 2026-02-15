@@ -1,0 +1,18 @@
+[
+  {
+    "timestamp": 1731207600,
+    "open": null,
+    "high": 2.0,
+    "low": 0.5,
+    "close": 1.5,
+    "volume": 10
+  },
+  {
+    "timestamp": 1731207900,
+    "open": 1.0,
+    "high": 2.0,
+    "low": 0.5,
+    "close": 1.5,
+    "volume": 10
+  }
+]

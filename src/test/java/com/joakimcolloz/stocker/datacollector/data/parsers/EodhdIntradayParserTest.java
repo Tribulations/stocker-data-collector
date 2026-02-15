@@ -13,6 +13,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class EodhdIntradayParserTest {
 
     @Test
+    void shouldReturnEmptyListForEmptyJsonArray() {
+        EodhdIntradayParser parser = new EodhdIntradayParser();
+        List<Candlestick> candles = parser.parseCandles("[]");
+        assertNotNull(candles);
+        assertEquals(0, candles.size());
+    }
+
+    @Test
     void shouldParseCandlesWithMissingVolumeAsZero() {
         String json = loadTestJSON("EodhdIntraday-BOL.ST-5m-volume-missing.json");
 
@@ -35,6 +43,18 @@ class EodhdIntradayParserTest {
         assertNotNull(candles);
         assertEquals(1, candles.size());
         assertEquals(0L, candles.get(0).volume());
+    }
+
+    @Test
+    void shouldSkipCandlesWithNullOhlcFields() {
+        String json = loadTestJSON("EodhdIntraday-BOL.ST-5m-ohlc-null.json");
+
+        EodhdIntradayParser parser = new EodhdIntradayParser();
+        List<Candlestick> candles = parser.parseCandles(json);
+
+        assertNotNull(candles);
+        assertEquals(1, candles.size());
+        assertEquals(1731207900L, candles.get(0).timestamp());
     }
 
     private String loadTestJSON(final String jsonFileName) {

@@ -32,11 +32,15 @@ public class EodhdIntradayParser {
 
             JsonObject obj = element.getAsJsonObject();
 
-            long timestamp = obj.get("timestamp").getAsLong();
-            double open = obj.get("open").getAsDouble();
-            double high = obj.get("high").getAsDouble();
-            double low = obj.get("low").getAsDouble();
-            double close = obj.get("close").getAsDouble();
+            Long timestamp = getAsLongOrNull(obj.get("timestamp"));
+            Double open = getAsDoubleOrNull(obj.get("open"));
+            Double high = getAsDoubleOrNull(obj.get("high"));
+            Double low = getAsDoubleOrNull(obj.get("low"));
+            Double close = getAsDoubleOrNull(obj.get("close"));
+
+            if (timestamp == null || open == null || high == null || low == null || close == null) {
+                continue;
+            }
 
             long volume = 0;
             JsonElement volumeElement = obj.get("volume");
@@ -53,5 +57,27 @@ public class EodhdIntradayParser {
 
         candlesticks.sort(Comparator.comparingLong(Candlestick::timestamp));
         return candlesticks;
+    }
+
+    private Double getAsDoubleOrNull(JsonElement element) {
+        if (element == null || element.isJsonNull()) {
+            return null;
+        }
+        try {
+            return element.getAsDouble();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private Long getAsLongOrNull(JsonElement element) {
+        if (element == null || element.isJsonNull()) {
+            return null;
+        }
+        try {
+            return element.getAsLong();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
