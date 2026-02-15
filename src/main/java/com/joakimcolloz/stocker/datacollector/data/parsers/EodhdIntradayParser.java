@@ -13,6 +13,10 @@ import java.util.List;
 public class EodhdIntradayParser {
 
     public List<Candlestick> parseCandles(String json) {
+        return parseCandlesWithStats(json).candlesticks();
+    }
+
+    public ParseResult parseCandlesWithStats(String json) {
         if (json == null || json.trim().isEmpty()) {
             throw new IllegalArgumentException("JSON string cannot be null or empty");
         }
@@ -24,9 +28,12 @@ public class EodhdIntradayParser {
 
         JsonArray array = root.getAsJsonArray();
         List<Candlestick> candlesticks = new ArrayList<>(array.size());
+        int inputCount = array.size();
+        int skippedCount = 0;
 
         for (JsonElement element : array) {
             if (!element.isJsonObject()) {
+                skippedCount++;
                 continue;
             }
 
@@ -39,6 +46,7 @@ public class EodhdIntradayParser {
             Double close = getAsDoubleOrNull(obj.get("close"));
 
             if (timestamp == null || open == null || high == null || low == null || close == null) {
+                skippedCount++;
                 continue;
             }
 
@@ -56,7 +64,10 @@ public class EodhdIntradayParser {
         }
 
         candlesticks.sort(Comparator.comparingLong(Candlestick::timestamp));
-        return candlesticks;
+        return new ParseResult(candlesticks, inputCount, skippedCount);
+    }
+
+    public record ParseResult(List<Candlestick> candlesticks, int inputCount, int skippedCount) {
     }
 
     private Double getAsDoubleOrNull(JsonElement element) {

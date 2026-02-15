@@ -101,6 +101,8 @@ public class IntradayCandlestickDao {
             validator.validateCandlestick(candlesticks.get(i));
         }
 
+        logger.debug("Adding {} intraday candlesticks for symbol {} interval {}", candlesticks.size(), symbol, interval);
+
         try (Connection connection = databaseManager.getConnection()) {
             connection.setAutoCommit(false);
 
@@ -120,6 +122,7 @@ public class IntradayCandlestickDao {
                 int[] results = statement.executeBatch();
                 connection.commit();
                 validateBatchResults(results, candlesticks.size(), symbol, interval);
+                logger.debug("Batch insert completed for symbol {} interval {} (rows: {})", symbol, interval, results.length);
 
             } catch (SQLException e) {
                 attemptRollback(connection, symbol, interval);

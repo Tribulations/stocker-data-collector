@@ -52,7 +52,7 @@ public class EodhdIntradayFetcher {
     public String fetchIntraday(String symbol, String interval) throws DataFetchException {
         validateInputs(symbol, interval);
         String url = buildUrl(symbol, interval, null, null);
-        return executeRequest(url, symbol);
+        return executeRequest(url, symbol, interval, null, null);
     }
 
     public String fetchIntraday(String symbol, String interval, long fromEpoch, long toEpoch) throws DataFetchException {
@@ -60,7 +60,7 @@ public class EodhdIntradayFetcher {
         validateTimeRange(fromEpoch, toEpoch);
 
         String url = buildUrl(symbol, interval, fromEpoch, toEpoch);
-        return executeRequest(url, symbol);
+        return executeRequest(url, symbol, interval, fromEpoch, toEpoch);
     }
 
     private void validateInputs(String symbol, String interval) {
@@ -103,9 +103,14 @@ public class EodhdIntradayFetcher {
         return sb.toString();
     }
 
-    private String executeRequest(String url, String context) throws DataFetchException {
+    private String executeRequest(String url, String symbol, String interval, Long fromEpoch, Long toEpoch) throws DataFetchException {
         try {
-            logger.debug("Fetching EODHD intraday data for {}: {}", context, url);
+            if (fromEpoch != null && toEpoch != null) {
+                logger.debug("Fetching EODHD intraday data for symbol: {} interval: {} window: [{}-{}]",
+                        symbol, interval, fromEpoch, toEpoch);
+            } else {
+                logger.debug("Fetching EODHD intraday data for symbol: {} interval: {}", symbol, interval);
+            }
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -117,13 +122,13 @@ public class EodhdIntradayFetcher {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 400) {
-                throw new DataFetchException("HTTP request failed for " + context +
+                throw new DataFetchException("HTTP request failed for " + symbol +
                         " with status code: " + response.statusCode());
             }
 
             String body = response.body();
             if (body == null || body.trim().isEmpty()) {
-                throw new DataFetchException("Empty response body for " + context);
+                throw new DataFetchException("Empty response body for " + symbol);
             }
 
             return body;
@@ -131,12 +136,12 @@ public class EodhdIntradayFetcher {
         } catch (DataFetchException e) {
             throw e;
         } catch (IOException e) {
-            throw new DataFetchException("Network error while fetching data for " + context, e);
+            throw new DataFetchException("Network error while fetching data for " + symbol, e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new DataFetchException("Request was interrupted while fetching data for " + context, e);
+            throw new DataFetchException("Request was interrupted while fetching data for " + symbol, e);
         } catch (Exception e) {
-            throw new DataFetchException("Unexpected error while fetching data for " + context, e);
+            throw new DataFetchException("Unexpected error while fetching data for " + symbol, e);
         }
     }
 }

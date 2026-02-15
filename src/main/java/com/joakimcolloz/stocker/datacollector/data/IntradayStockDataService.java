@@ -58,6 +58,8 @@ public class IntradayStockDataService {
     }
 
     public void addIntradayPriceDataToDb(List<String> stockSymbols, Interval interval) {
+        logger.info("Starting addIntradayPriceDataToDb with {} symbols, interval: {}",
+                stockSymbols != null ? stockSymbols.size() : 0, interval);
         validator.validateStockSymbolsList(stockSymbols);
         if (interval == null) {
             throw new IllegalArgumentException("Interval cannot be null");
@@ -65,26 +67,48 @@ public class IntradayStockDataService {
 
         String intervalString = interval.toString();
 
+        int successCount = 0;
+        int failureCount = 0;
+
         for (String symbol : stockSymbols) {
             String fullSymbol = toFullSymbol(symbol);
+            logger.debug("Starting processing for symbol: {} (full: {})", symbol, fullSymbol);
 
             try {
                 String json = fetcher.fetchIntraday(fullSymbol, intervalString);
-                List<Candlestick> candles = parser.parseCandles(json);
+
+                logger.debug("Received {} characters of JSON data for symbol: {}", json.length(), fullSymbol);
+
+                EodhdIntradayParser.ParseResult parseResult = parser.parseCandlesWithStats(json);
+                List<Candlestick> candles = parseResult.candlesticks();
+                logger.info("Parsed intraday JSON for symbol: {} (candles: {}, skipped: {}, input: {})",
+                        fullSymbol, candles.size(), parseResult.skippedCount(), parseResult.inputCount());
 
                 if (candles.isEmpty()) {
+                    logger.warn("No intraday candlesticks available for symbol: {} - skipping database insertion", fullSymbol);
+                    failureCount++;
                     continue;
                 }
 
+                logger.debug("Inserting {} intraday candlesticks into database for symbol: {} interval: {}",
+                        candles.size(), fullSymbol, intervalString);
                 intradayDao.addRows(fullSymbol, intervalString, candles);
+                logger.info("Successfully added {} intraday candlesticks for symbol: {} interval: {}",
+                        candles.size(), fullSymbol, intervalString);
+                successCount++;
             } catch (DataFetchException e) {
                 logger.error("Failed to fetch intraday data for {}: {}", fullSymbol, e.getMessage(), e);
+                failureCount++;
             } catch (Exception e) {
                 logger.error("Failed to process intraday data for {}: {}", fullSymbol, e.getMessage(), e);
+                failureCount++;
             }
 
             sleep(delayInMs);
         }
+
+        logger.info("Completed addIntradayPriceDataToDb for {} symbols. Success: {}, Failure: {}",
+                stockSymbols.size(), successCount, failureCount);
     }
 
     public void addIntradayPriceDataToDbChunked(List<String> stockSymbols,
@@ -266,30 +290,53 @@ public class IntradayStockDataService {
                                                           long fromEpoch,
                                                           long toEpoch,
                                                           long chunkSeconds) {
+        logger.info("Starting intraday chunked collection with {} symbols, interval: {}, from: {}, to: {}, chunkSeconds: {}",
+                stockSymbols != null ? stockSymbols.size() : 0, intervalString, fromEpoch, toEpoch, chunkSeconds);
         if (chunkSeconds <= 0) {
             throw new IllegalArgumentException("chunkSeconds must be positive, got: " + chunkSeconds);
         }
 
+        validator.validateStockSymbolsList(stockSymbols);
+
+        int successCount = 0;
+        int failureCount = 0;
+
         for (String symbol : stockSymbols) {
             String fullSymbol = toFullSymbol(symbol);
+            logger.debug("Starting processing for symbol: {} (full: {})", symbol, fullSymbol);
 
             long chunkStart = fromEpoch;
             while (chunkStart < toEpoch) {
                 long chunkEnd = Math.min(chunkStart + chunkSeconds, toEpoch);
 
                 try {
+                    logger.info("Fetching intraday data for symbol: {} interval: {} window: [{}-{}]",
+                            fullSymbol, intervalString, chunkStart, chunkEnd);
                     String json = fetcher.fetchIntraday(fullSymbol, intervalString, chunkStart, chunkEnd);
-                    List<Candlestick> candles = parser.parseCandles(json);
+                    logger.debug("Received {} characters of JSON data for symbol: {} interval: {} window: [{}-{}]",
+                            json.length(), fullSymbol, intervalString, chunkStart, chunkEnd);
+
+                    EodhdIntradayParser.ParseResult parseResult = parser.parseCandlesWithStats(json);
+                    List<Candlestick> candles = parseResult.candlesticks();
+                    logger.info("Parsed intraday JSON for symbol: {} interval: {} window: [{}-{}] (candles: {}, skipped: {}, input: {})",
+                            fullSymbol, intervalString, chunkStart, chunkEnd, candles.size(), parseResult.skippedCount(), parseResult.inputCount());
 
                     if (!candles.isEmpty()) {
+                        logger.debug("Inserting {} intraday candlesticks into database for symbol: {} interval: {} window: [{}-{}]",
+                                candles.size(), fullSymbol, intervalString, chunkStart, chunkEnd);
                         intradayDao.addRows(fullSymbol, intervalString, candles);
+                        logger.info("Successfully added {} intraday candlesticks for symbol: {} interval: {} window: [{}-{}]",
+                                candles.size(), fullSymbol, intervalString, chunkStart, chunkEnd);
                     }
+                    successCount++;
                 } catch (DataFetchException e) {
                     logger.error("Failed to fetch intraday data for {} [{}-{}]: {}",
                             fullSymbol, chunkStart, chunkEnd, e.getMessage(), e);
+                    failureCount++;
                 } catch (Exception e) {
                     logger.error("Failed to process intraday data for {} [{}-{}]: {}",
                             fullSymbol, chunkStart, chunkEnd, e.getMessage(), e);
+                    failureCount++;
                 }
 
                 chunkStart = chunkEnd;
@@ -300,6 +347,9 @@ public class IntradayStockDataService {
 
             sleep(delayInMs);
         }
+
+        logger.info("Completed intraday chunked collection for {} symbols. Success: {}, Failure: {}",
+                stockSymbols.size(), successCount, failureCount);
     }
 
     private long defaultMaxDaysPerRequest(Interval interval) {
