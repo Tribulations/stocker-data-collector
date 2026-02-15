@@ -38,6 +38,8 @@ public class Main {
                 printEodhdIntradayHelp();
             } else {
                 printGeneralHelp();
+                System.out.println();
+                printEodhdIntradayHelp();
             }
             return;
         }
