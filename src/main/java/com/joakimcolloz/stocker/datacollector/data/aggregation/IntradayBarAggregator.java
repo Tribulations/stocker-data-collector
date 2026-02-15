@@ -10,6 +10,22 @@ import java.util.Map;
 
 public class IntradayBarAggregator {
 
+    private static final long FIFTEEN_MINUTES_SECONDS = 15 * 60;
+    private static final long THIRTY_MINUTES_SECONDS = 30 * 60;
+    private static final long ONE_HOUR_SECONDS = 60 * 60;
+
+    public List<Candlestick> aggregate15Minutes(List<Candlestick> candlesticks) {
+        return aggregate(candlesticks, FIFTEEN_MINUTES_SECONDS);
+    }
+
+    public List<Candlestick> aggregate30Minutes(List<Candlestick> candlesticks) {
+        return aggregate(candlesticks, THIRTY_MINUTES_SECONDS);
+    }
+
+    public List<Candlestick> aggregate1Hour(List<Candlestick> candlesticks) {
+        return aggregate(candlesticks, ONE_HOUR_SECONDS);
+    }
+
     public List<Candlestick> aggregate(List<Candlestick> candlesticks, long bucketSeconds) {
         if (candlesticks == null) {
             throw new IllegalArgumentException("Candlesticks list cannot be null");
