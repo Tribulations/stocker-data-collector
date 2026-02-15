@@ -67,7 +67,11 @@ public class Main {
         Long fromEpoch = null;
         Long toEpoch = null;
         int bars = 120;
+        long maxDaysPerRequest = 600;
         long delayMs = 200;
+        Range range = null;
+        boolean barsSet = false;
+        boolean maxDaysSet = false;
 
         if (args.length > 1 && !args[1].startsWith("--")) {
             resourceFile = args[1];
@@ -87,6 +91,12 @@ public class Main {
                 toEpoch = Long.parseLong(arg.substring("--to=".length()));
             } else if (arg.startsWith("--bars=")) {
                 bars = Integer.parseInt(arg.substring("--bars=".length()));
+                barsSet = true;
+            } else if (arg.startsWith("--maxdays=")) {
+                maxDaysPerRequest = Long.parseLong(arg.substring("--maxdays=".length()));
+                maxDaysSet = true;
+            } else if (arg.startsWith("--range=")) {
+                range = parseRange(arg.substring("--range=".length()));
             } else if (arg.startsWith("--delay=")) {
                 delayMs = Long.parseLong(arg.substring("--delay=".length()));
             }
@@ -104,10 +114,43 @@ public class Main {
         intradayService.setDelayInMs(delayMs);
 
         if (fromEpoch != null && toEpoch != null) {
-            intradayService.addIntradayPriceDataToDbChunked(stockList, Interval.FIVE_MINUTES, fromEpoch, toEpoch, bars);
+            if (barsSet && !maxDaysSet) {
+                intradayService.addIntradayPriceDataToDbChunked(stockList, Interval.FIVE_MINUTES, fromEpoch, toEpoch, bars);
+            } else {
+                intradayService.addIntradayPriceDataToDbChunkedMaxDays(stockList, Interval.FIVE_MINUTES, fromEpoch, toEpoch, maxDaysPerRequest);
+            }
+        } else if (range != null) {
+            intradayService.addIntradayPriceDataToDbRange(stockList, Interval.FIVE_MINUTES, range, maxDaysPerRequest);
         } else {
-            intradayService.addIntradayPriceDataToDbChunkedLastDays(stockList, Interval.FIVE_MINUTES, days, bars);
+            if (barsSet && !maxDaysSet) {
+                intradayService.addIntradayPriceDataToDbChunkedLastDays(stockList, Interval.FIVE_MINUTES, days, bars);
+            } else {
+                intradayService.addIntradayPriceDataToDbChunkedLastDaysMaxDays(stockList, Interval.FIVE_MINUTES, days, maxDaysPerRequest);
+            }
         }
+    }
+
+    private static Range parseRange(String value) {
+        if (value == null) {
+            throw new IllegalArgumentException("Range cannot be null");
+        }
+
+        String normalized = value.trim().toLowerCase();
+        return switch (normalized) {
+            case "1d" -> Range.ONE_DAY;
+            case "5d" -> Range.FIVE_DAY;
+            case "1wk" -> Range.ONE_WEEK;
+            case "1mo" -> Range.ONE_MONTH;
+            case "3mo" -> Range.THREE_MONTHS;
+            case "6mo" -> Range.SIX_MONTHS;
+            case "1y" -> Range.ONE_YEAR;
+            case "2y" -> Range.TWO_YEAR;
+            case "5y" -> Range.FIVE_YEARS;
+            case "10y" -> Range.TEN_YEARS;
+            case "ytd" -> Range.YTD;
+            case "max" -> Range.MAX;
+            default -> throw new IllegalArgumentException("Invalid range: " + value);
+        };
     }
 
     private static void runCryptoCollection(DatabaseManager databaseManager) {
