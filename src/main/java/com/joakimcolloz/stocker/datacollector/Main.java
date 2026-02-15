@@ -92,7 +92,8 @@ public class Main {
                 "  --delay=<ms>              Delay between requests (default: 200)\n\n" +
                 "Time selection (choose one):\n" +
                 "  --from=<epochSeconds> --to=<epochSeconds>\n" +
-                "  --range=<range>           One of: 1d,5d,1wk,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max\n" +
+                "  --range=<range>           Canonical: 1d, 5d, 1wk, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max\n" +
+                "                           Aliases: 7d=1wk, 30d=1mo, 90d=3mo, 180d=6mo, 12mo/365d=1y, 24mo=2y\n" +
                 "  --days=<days>             Last N days (default: 120)\n\n" +
                 "Chunking:\n" +
                 "  --maxdays=<days>          Max days per request (default: 600 for 5m)\n" +
@@ -197,14 +198,22 @@ public class Main {
         return switch (normalized) {
             case "1d" -> Range.ONE_DAY;
             case "5d" -> Range.FIVE_DAY;
+            case "7d" -> Range.ONE_WEEK;
             case "1wk" -> Range.ONE_WEEK;
+            case "30d" -> Range.ONE_MONTH;
             case "1mo" -> Range.ONE_MONTH;
             case "3mo" -> Range.THREE_MONTHS;
+            case "90d" -> Range.THREE_MONTHS;
             case "6mo" -> Range.SIX_MONTHS;
+            case "180d" -> Range.SIX_MONTHS;
             case "1y" -> Range.ONE_YEAR;
+            case "12mo", "365d" -> Range.ONE_YEAR;
             case "2y" -> Range.TWO_YEAR;
+            case "24mo" -> Range.TWO_YEAR;
             case "5y" -> Range.FIVE_YEARS;
+            case "60mo" -> Range.FIVE_YEARS;
             case "10y" -> Range.TEN_YEARS;
+            case "120mo" -> Range.TEN_YEARS;
             case "ytd" -> Range.YTD;
             case "max" -> Range.MAX;
             default -> throw new IllegalArgumentException("Invalid range: " + value);
