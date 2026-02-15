@@ -6,7 +6,6 @@ import com.joakimcolloz.stocker.datacollector.data.parsers.CoinbaseCandleParser;
 import com.joakimcolloz.stocker.datacollector.data.parsers.CoinbaseProductParser;
 import com.joakimcolloz.stocker.datacollector.data.validation.CryptoInputValidator;
 import com.joakimcolloz.stocker.datacollector.database.CandlestickDao;
-import com.joakimcolloz.stocker.datacollector.database.DatabaseConfig;
 import com.joakimcolloz.stocker.datacollector.database.DatabaseManager;
 import com.joakimcolloz.stocker.datacollector.model.Candlestick;
 import com.joakimcolloz.stocker.datacollector.model.Granularity;
