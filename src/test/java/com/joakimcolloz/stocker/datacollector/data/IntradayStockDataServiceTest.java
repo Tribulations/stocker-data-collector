@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 class IntradayStockDataServiceTest {
@@ -52,5 +53,30 @@ class IntradayStockDataServiceTest {
 
         verify(dao, times(0)).addRows(eq("BOL.ST"), eq("5m"), anyList());
         verify(dao, times(0)).addRows(eq("ABB.ST"), eq("5m"), anyList());
+    }
+
+    @Test
+    void shouldFetchChunkedByMaxBarsPerRequest() throws Exception {
+        EodhdIntradayFetcher fetcher = mock(EodhdIntradayFetcher.class);
+        EodhdIntradayParser parser = new EodhdIntradayParser();
+        IntradayCandlestickDao dao = mock(IntradayCandlestickDao.class);
+
+        long fromEpoch = 1_000_000L;
+        long toEpoch = fromEpoch + (36_000L * 2) + 123L;
+        String json = "[]";
+
+        when(fetcher.fetchIntraday("BOL.ST", "5m", fromEpoch, fromEpoch + 36_000L)).thenReturn(json);
+        when(fetcher.fetchIntraday("BOL.ST", "5m", fromEpoch + 36_000L, fromEpoch + 72_000L)).thenReturn(json);
+        when(fetcher.fetchIntraday("BOL.ST", "5m", fromEpoch + 72_000L, toEpoch)).thenReturn(json);
+
+        IntradayStockDataService service = new IntradayStockDataService(fetcher, parser, dao, new DataFetcherInputValidator());
+        service.setDelayInMs(0);
+
+        service.addIntradayPriceDataToDbChunked(List.of("BOL"), Interval.FIVE_MINUTES, fromEpoch, toEpoch, 120);
+
+        verify(fetcher, times(1)).fetchIntraday("BOL.ST", "5m", fromEpoch, fromEpoch + 36_000L);
+        verify(fetcher, times(1)).fetchIntraday("BOL.ST", "5m", fromEpoch + 36_000L, fromEpoch + 72_000L);
+        verify(fetcher, times(1)).fetchIntraday("BOL.ST", "5m", fromEpoch + 72_000L, toEpoch);
+        verifyNoMoreInteractions(fetcher);
     }
 }

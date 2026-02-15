@@ -11,6 +11,7 @@ import com.joakimcolloz.stocker.datacollector.model.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.List;
 
 public class IntradayStockDataService {
@@ -81,6 +82,77 @@ public class IntradayStockDataService {
         }
     }
 
+    public void addIntradayPriceDataToDbChunked(List<String> stockSymbols,
+                                                Interval interval,
+                                                long fromEpoch,
+                                                long toEpoch,
+                                                int maxBarsPerRequest) {
+        validator.validateStockSymbolsList(stockSymbols);
+        if (interval == null) {
+            throw new IllegalArgumentException("Interval cannot be null");
+        }
+        if (fromEpoch <= 0) {
+            throw new IllegalArgumentException("fromEpoch must be positive, got: " + fromEpoch);
+        }
+        if (toEpoch <= 0) {
+            throw new IllegalArgumentException("toEpoch must be positive, got: " + toEpoch);
+        }
+        if (fromEpoch >= toEpoch) {
+            throw new IllegalArgumentException("fromEpoch (" + fromEpoch + ") must be before toEpoch (" + toEpoch + ")");
+        }
+        if (maxBarsPerRequest <= 0) {
+            throw new IllegalArgumentException("maxBarsPerRequest must be positive, got: " + maxBarsPerRequest);
+        }
+
+        String intervalString = interval.toString();
+        long intervalSeconds = toSeconds(interval);
+        long chunkSeconds = intervalSeconds * maxBarsPerRequest;
+
+        for (String symbol : stockSymbols) {
+            String fullSymbol = toFullSymbol(symbol);
+
+            long chunkStart = fromEpoch;
+            while (chunkStart < toEpoch) {
+                long chunkEnd = Math.min(chunkStart + chunkSeconds, toEpoch);
+
+                try {
+                    String json = fetcher.fetchIntraday(fullSymbol, intervalString, chunkStart, chunkEnd);
+                    List<Candlestick> candles = parser.parseCandles(json);
+
+                    if (!candles.isEmpty()) {
+                        intradayDao.addRows(fullSymbol, intervalString, candles);
+                    }
+                } catch (DataFetchException e) {
+                    logger.error("Failed to fetch intraday data for {} [{}-{}]: {}",
+                            fullSymbol, chunkStart, chunkEnd, e.getMessage(), e);
+                } catch (Exception e) {
+                    logger.error("Failed to process intraday data for {} [{}-{}]: {}",
+                            fullSymbol, chunkStart, chunkEnd, e.getMessage(), e);
+                }
+
+                chunkStart = chunkEnd;
+                if (chunkStart < toEpoch) {
+                    sleep(delayInMs);
+                }
+            }
+
+            sleep(delayInMs);
+        }
+    }
+
+    public void addIntradayPriceDataToDbChunkedLastDays(List<String> stockSymbols,
+                                                        Interval interval,
+                                                        long days,
+                                                        int maxBarsPerRequest) {
+        if (days <= 0) {
+            throw new IllegalArgumentException("days must be positive, got: " + days);
+        }
+
+        long toEpoch = Instant.now().getEpochSecond();
+        long fromEpoch = Instant.now().minusSeconds(days * 86400).getEpochSecond();
+        addIntradayPriceDataToDbChunked(stockSymbols, interval, fromEpoch, toEpoch, maxBarsPerRequest);
+    }
+
     public void addIntradayPriceDataToDb(List<String> stockSymbols, Interval interval, long fromEpoch, long toEpoch) {
         validator.validateStockSymbolsList(stockSymbols);
         if (interval == null) {
@@ -139,5 +211,15 @@ public class IntradayStockDataService {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    private long toSeconds(Interval interval) {
+        return switch (interval) {
+            case ONE_MINUTE -> 60;
+            case FIVE_MINUTES -> 300;
+            case FIFTEEN_MINUTES -> 900;
+            case ONE_HOUR -> 3600;
+            default -> throw new IllegalArgumentException("Unsupported intraday interval: " + interval);
+        };
     }
 }

@@ -1,6 +1,7 @@
 package com.joakimcolloz.stocker.datacollector;
 
 import com.joakimcolloz.stocker.datacollector.data.CryptoDataService;
+import com.joakimcolloz.stocker.datacollector.data.IntradayStockDataService;
 import com.joakimcolloz.stocker.datacollector.data.StockDataService;
 import com.joakimcolloz.stocker.datacollector.data.exception.DataFetchException;
 import com.joakimcolloz.stocker.datacollector.data.fetchers.FinanceBirdFetcher;
@@ -37,6 +38,8 @@ public class Main {
 
         if (args.length > 0 && "Coinbase".equals(args[0])) {
             runCryptoCollection(databaseManager);
+        } else if (args.length > 0 && "EodhdIntraday".equals(args[0])) {
+            runIntradayStockCollection(args, databaseManager);
         } else {
             runStockCollection(args, databaseManager);
         }
@@ -56,6 +59,55 @@ public class Main {
         }
 
         stockDataService.addPriceDataToDb(stockList, Range.THREE_MONTHS, Interval.ONE_DAY);
+    }
+
+    private static void runIntradayStockCollection(String[] args, DatabaseManager databaseManager) {
+        String resourceFile = "largecap.txt";
+        long days = 120;
+        Long fromEpoch = null;
+        Long toEpoch = null;
+        int bars = 120;
+        long delayMs = 200;
+
+        if (args.length > 1 && !args[1].startsWith("--")) {
+            resourceFile = args[1];
+        }
+
+        for (String arg : args) {
+            if (arg == null) {
+                continue;
+            }
+            if (arg.startsWith("--file=")) {
+                resourceFile = arg.substring("--file=".length());
+            } else if (arg.startsWith("--days=")) {
+                days = Long.parseLong(arg.substring("--days=".length()));
+            } else if (arg.startsWith("--from=")) {
+                fromEpoch = Long.parseLong(arg.substring("--from=".length()));
+            } else if (arg.startsWith("--to=")) {
+                toEpoch = Long.parseLong(arg.substring("--to=".length()));
+            } else if (arg.startsWith("--bars=")) {
+                bars = Integer.parseInt(arg.substring("--bars=".length()));
+            } else if (arg.startsWith("--delay=")) {
+                delayMs = Long.parseLong(arg.substring("--delay=".length()));
+            }
+        }
+
+        ArrayList<String> stockList;
+        try {
+            stockList = StockReader.readStockNamesFromResource(resourceFile);
+        } catch (IOException e) {
+            logger.error("Failed to read stock names from resource: {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+        IntradayStockDataService intradayService = new IntradayStockDataService(databaseManager);
+        intradayService.setDelayInMs(delayMs);
+
+        if (fromEpoch != null && toEpoch != null) {
+            intradayService.addIntradayPriceDataToDbChunked(stockList, Interval.FIVE_MINUTES, fromEpoch, toEpoch, bars);
+        } else {
+            intradayService.addIntradayPriceDataToDbChunkedLastDays(stockList, Interval.FIVE_MINUTES, days, bars);
+        }
     }
 
     private static void runCryptoCollection(DatabaseManager databaseManager) {
