@@ -81,6 +81,10 @@ public class DatabaseManager {
         return new CandlestickDao(this);
     }
 
+    public IntradayCandlestickDao createIntradayCandlestickDao() {
+        return new IntradayCandlestickDao(this);
+    }
+
     /**
      * Get current database version
      */
