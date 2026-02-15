@@ -33,6 +33,15 @@ public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String... args) {
+        if (containsHelpFlag(args)) {
+            if (args.length > 0 && "EodhdIntraday".equals(args[0])) {
+                printEodhdIntradayHelp();
+            } else {
+                printGeneralHelp();
+            }
+            return;
+        }
+
         final DatabaseManager databaseManager = new DatabaseManager(new DatabaseConfig());
         databaseManager.initialize();
 
@@ -43,6 +52,55 @@ public class Main {
         } else {
             runStockCollection(args, databaseManager);
         }
+    }
+
+    private static boolean containsHelpFlag(String[] args) {
+        if (args == null) {
+            return false;
+        }
+        for (String arg : args) {
+            if (arg == null) {
+                continue;
+            }
+            if ("--help".equals(arg) || "-h".equals(arg)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void printGeneralHelp() {
+        System.out.println("Usage:\n" +
+                "  java -jar target/stocker-data-collector-0.12-SNAPSHOT.jar [Mode] [args]\n\n" +
+                "Modes:\n" +
+                "  FinanceBird\n" +
+                "  YahooFinance\n" +
+                "  Coinbase\n" +
+                "  EodhdIntraday\n\n" +
+                "Examples:\n" +
+                "  java -jar target/stocker-data-collector-0.12-SNAPSHOT.jar EodhdIntraday --range=3mo\n" +
+                "  java -jar target/stocker-data-collector-0.12-SNAPSHOT.jar EodhdIntraday --from=1700000000 --to=1700500000\n\n" +
+                "Help:\n" +
+                "  java -jar target/stocker-data-collector-0.12-SNAPSHOT.jar EodhdIntraday --help\n");
+    }
+
+    private static void printEodhdIntradayHelp() {
+        System.out.println("Usage:\n" +
+                "  java -jar target/stocker-data-collector-0.12-SNAPSHOT.jar EodhdIntraday [args]\n\n" +
+                "Args:\n" +
+                "  --file=<resourceFile>     Resource file under src/main/resources (default: largecap.txt)\n" +
+                "  --delay=<ms>              Delay between requests (default: 200)\n\n" +
+                "Time selection (choose one):\n" +
+                "  --from=<epochSeconds> --to=<epochSeconds>\n" +
+                "  --range=<range>           One of: 1d,5d,1wk,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max\n" +
+                "  --days=<days>             Last N days (default: 120)\n\n" +
+                "Chunking:\n" +
+                "  --maxdays=<days>          Max days per request (default: 600 for 5m)\n" +
+                "  --bars=<bars>             Use bars-based chunking (only when --maxdays is NOT set)\n\n" +
+                "Examples:\n" +
+                "  java -jar target/stocker-data-collector-0.12-SNAPSHOT.jar EodhdIntraday --range=3mo\n" +
+                "  java -jar target/stocker-data-collector-0.12-SNAPSHOT.jar EodhdIntraday --file=largecap.txt --days=30 --maxdays=600\n" +
+                "  java -jar target/stocker-data-collector-0.12-SNAPSHOT.jar EodhdIntraday --from=1700000000 --to=1700500000 --maxdays=600\n");
     }
 
     private static void runStockCollection(String[] args, DatabaseManager databaseManager) {
